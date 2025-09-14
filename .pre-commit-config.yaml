@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
+  - repo: local
+    hooks:
+      - id: unit-tests
+        name: Run unit tests
+        entry: go test -v ./internal/...
+        language: system
+        pass_filenames: false
+      - id: acceptance-tests
+        name: Run acceptance tests
+        entry: go test -v ./godogs_test.go
+        language: system
+        pass_filenames: false
