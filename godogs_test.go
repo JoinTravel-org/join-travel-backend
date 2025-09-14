@@ -62,5 +62,5 @@ func TestFeatures(t *testing.T) {
 func InitializeScenario(sc *godog.ScenarioContext) {
 	sc.Step(`^there are (\d+) godogs$`, thereAreGodogs)
 	sc.Step(`^I eat (\d+)$`, iEat)
-  sc.Step(`^there should be (\d+) remaining$`, thereShouldBeRemaining)
+	sc.Step(`^there should be (\d+) remaining$`, thereShouldBeRemaining)
 }
