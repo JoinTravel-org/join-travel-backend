@@ -16,3 +16,11 @@ jobs:
       - name: Run acceptance tests
         run: |
           docker run --rm -v ${{ github.workspace }}:/app -w /app test-image go test -v ./godogs_test.go
+      - name: Run check for format
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/app -w /app test-image |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "Unformatted files detected:"
+            gofmt -l .
+            exit 1
+          fi
