@@ -17,3 +17,7 @@ run-unit-test:
 run-acceptance-test:
 	go test -v godogs_test.go
 .PHONY: run-acceptance-test
+
+format:
+	gofmt -l -w .
+.PHONY: format
