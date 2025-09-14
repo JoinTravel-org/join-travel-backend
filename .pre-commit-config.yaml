@@ -7,11 +7,11 @@ repos:
     hooks:
       - id: unit-tests
         name: Run unit tests
-        entry: go test -v ./internal/...
+        entry: go test -v ./internal/... -cover
         language: system
         pass_filenames: false
       - id: acceptance-tests
         name: Run acceptance tests
-        entry: go test -v ./godogs_test.go
+        entry: go test -v ./godogs_test.go -cover
         language: system
         pass_filenames: false

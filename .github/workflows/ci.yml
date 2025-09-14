@@ -13,9 +13,9 @@ jobs:
         with:
           go-version: '1.24.6'
       - name: Run unit tests
-        run: go test -v ./internal/...
+        run: go test -v ./internal/... -cover
       - name: Run acceptance tests
-        run: go test -v ./godogs_test.go
+        run: go test -v ./godogs_test.go -cover
       - name: Run check for format
         run: |
           if [ -n "$(gofmt -l .)" ]; then
