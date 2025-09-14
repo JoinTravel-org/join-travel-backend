@@ -10,9 +10,9 @@ jobs:
         uses: actions/checkout@v3
       - name: Build test image
         run: docker build -f Dockerfile.test -t test-image .
-      - name: Run tests in ./internals/...
+      - name: Run unit tests
         run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app test-image go test -v ./internals/...
-      - name: Run godogs_test.go
+          docker run --rm -v ${{ github.workspace }}:/app -w /app test-image go test -v ./internal/...
+      - name: Run acceptance tests
         run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app test-image go test -v -run ^Test ./godogs_test.go
+          docker run --rm -v ${{ github.workspace }}:/app -w /app test-image go test -v ./godogs_test.go
