@@ -1,0 +1,18 @@
+name: join-travel-backend
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Build test image
+        run: docker build -f Dockerfile.test -t test-image .
+      - name: Run tests in ./internals/...
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/app -w /app test-image go test -v ./internals/...
+      - name: Run godogs_test.go
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/app -w /app test-image go test -v -run ^Test ./godogs_test.go
