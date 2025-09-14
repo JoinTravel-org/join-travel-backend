@@ -8,17 +8,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Build test image
-        run: docker build -f Dockerfile.test -t test-image .
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.6'
       - name: Run unit tests
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app test-image go test -v ./internal/...
+        run: go test -v ./internal/...
       - name: Run acceptance tests
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app test-image go test -v ./godogs_test.go
+        run: go test -v ./godogs_test.go
       - name: Run check for format
         run: |
-          docker run --rm -v ${{ github.workspace }}:/app -w /app test-image |
           if [ -n "$(gofmt -l .)" ]; then
             echo "Unformatted files detected:"
             gofmt -l .
