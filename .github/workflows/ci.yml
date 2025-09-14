@@ -15,7 +15,7 @@ jobs:
       - name: Run unit tests
         run: go test -v ./internal/... -cover
       - name: Run acceptance tests
-        run: go test -v ./godogs_test.go -cover
+        run: go test -v ./godogs_test.go
       - name: Run check for format
         run: |
           if [ -n "$(gofmt -l .)" ]; then

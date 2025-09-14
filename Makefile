@@ -9,3 +9,11 @@ docker-image:
 docker-run:
 	docker run --rm -it -p $(PORT):$(PORT) $(DOCKER_TAG)
 .PHONY: docker-run
+
+run-unit-test:
+	go test -v ./internal/... -cover
+.PHONY: run-unit-test
+
+run-acceptance-test:
+	go test -v godogs_test.go
+.PHONY: run-acceptance-test
