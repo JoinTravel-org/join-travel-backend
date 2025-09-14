@@ -17,3 +17,7 @@ docker-run:
 docker-run-test:
 	docker run --rm -it -v $(PWD):/app $(DOCKER_TAG_TEST) /bin/bash
 .PHONY: docker-run-test
+
+format:
+	gofmt -l -w .
+.PHONY: format
