@@ -42,6 +42,13 @@ docker run --rm -p <any_port>:8080 join-travel-back:latest
 docker rmi join-travel-back:latest
 ```
 
+## Makefile Commands
+
+The project includes a Makefile to simplify common Docker Compose operations. Ensure Docker and Docker Compose are installed.
+
+- `make up`: Starts the application services using Docker Compose. This command builds the images if they don't exist and runs the containers in the background.
+- `make down`: Stops and removes the running Docker Compose services, cleaning up containers and networks.
+
 ## How to test
 
 Tests should be written in the same package of the tested object, and the package name should be the same but appending `_test`.
