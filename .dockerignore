@@ -1,3 +1,6 @@
 README.md
 .git/
 .gitignore
+.env.example
+.dockerignore
+Makefile
