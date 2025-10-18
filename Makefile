@@ -21,3 +21,11 @@ run-acceptance-test:
 format:
 	gofmt -l -w .
 .PHONY: format
+
+up:
+	docker compose up --build
+.PHONY: up
+
+down:
+	docker compose down
+.PHONY: down
