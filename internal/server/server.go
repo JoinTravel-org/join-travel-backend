@@ -5,6 +5,7 @@ import (
 	"join-travel-backend/internal/router"
 	"join-travel-backend/internal/utils/logger"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +20,9 @@ func NewServer(conf *config.Config) *Server {
 func (s *Server) Start() error {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+
+	// CORS middleware
+	r.Use(cors.Default())
 
 	// Routes
 	router.SetupRouter(r, s.conf)
