@@ -13,7 +13,7 @@ app.use(helmet());
 app.use(morgan("dev"));
 
 // Load routes
-app.use("/api", routes);
+app.use("", routes);
 
 // Global error handler
 app.use(errorHandler);
