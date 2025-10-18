@@ -22,7 +22,12 @@ func (s *Server) Start() error {
 	r := gin.Default()
 
 	// CORS middleware
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		AllowCredentials: false,
+	}))
 
 	// Routes
 	router.SetupRouter(r, s.conf)
