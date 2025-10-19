@@ -1,82 +1,70 @@
 # JoinTravel Backend
 
-Backend for the join travel website.
-
 ## Technologies
 
-- Gin-gonic
-- Go
+- Express
+- Javascript
+- pnpm
 
 ## How to run
 
 ### Dependencies
 
-- Install golang!
-- Intall docker!
-
-### Development
+Install pnpm.
 
 ```bash
-# Run development instance
-go run cmd/main
-
-# Build binary executable
-go build cmd/main
-
-# Format code
-go fmt ./...
+npm install -g pnpm
 ```
 
-### Production
-
-How to use docker to build and run server.
+Install the needed dependencies.
 
 ```bash
-# Build docker image
-docker build -t join-travel-back .
-
-# Run dockerized container
-docker run --rm -p <any_port>:8080 join-travel-back:latest
-
-# Cleanup image
-docker rmi join-travel-back:latest
+pnpm install
 ```
 
-## Makefile Commands
-
-The project includes a Makefile to simplify common Docker Compose operations. Ensure Docker and Docker Compose are installed.
-
-- `make up`: Starts the application services using Docker Compose. This command builds the images if they don't exist and runs the containers in the background.
-- `make down`: Stops and removes the running Docker Compose services, cleaning up containers and networks.
-
-## How to test
-
-Tests should be written in the same package of the tested object, and the package name should be the same but appending `_test`.
+### Execute
 
 ```bash
-# Run all tests in subdirectories and show coverage
-go test ./... -cover
+# Start development environment
+pnpm dev
+
+# Start production environment
+pnpm start
 ```
 
-## Structure
+## Docker
 
-Se tiene la siguiente estructura base, donde los controladores, servicios y repositorios se ponen en sus correspontientes carpetas
-**creado su archivo separado para la interfaz y otro para la implementacion**.
+### Prerequisites
+
+- Docker installed on your system.
+
+### Using Docker Compose and Makefile
+
+Alternatively, you can use Docker Compose for easier management:
 
 ```bash
-.
-├── cmd # Binary entrypoint
-│   └── main.go
-├── config # Server/Global config
-│   └── config.go
-├── Dockerfile
-├── go.mod
-├── go.sum
-├── internal # Server logic packaged by layer
-│   ├── controllers
-│   ├── repositories
-│   ├── router
-│   ├── server
-│   ├── services
-│   └── utils
+# Start the application (builds and runs the container)
+make up
+
+# Stop the application
+make down
+```
+
+### Manual Docker Commands
+
+If you prefer to use Docker commands directly:
+
+```bash
+# Build the image
+docker build -t jointravel-back .
+
+# Run the container
+docker run -d --name jointravel-back-container -p 8080:8080 jointrave-backt
+
+# Stop the container
+docker stop jointravel-back-container
+docker rm jointravel-back-container
+
+# Remove the image
+docker rmi jointravel-back
 ```
