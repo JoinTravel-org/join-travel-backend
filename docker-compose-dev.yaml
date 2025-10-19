@@ -1,0 +1,28 @@
+services:
+  postgres_db:
+    image: postgres:17-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: jointravel_db
+      POSTGRES_USER: jointravel_user
+      POSTGRES_PASSWORD: jointravel_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    container_name: jointravel-back-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${APP_HOST_PORT}:8080"
+    environment:
+      - POSTGRESQL_CONN=postgresql://jointravel_user:jointravel_password@postgres_db:5432/jointravel_db
+    depends_on:
+      - postgres_db
+
+volumes:
+  postgres_data:
