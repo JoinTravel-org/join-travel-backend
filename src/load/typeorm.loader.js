@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { Location } from "../models/location.model.js";
+import User from "../models/user.model.js";
 import config from "../config/index.js";
 
 export const AppDataSource = new DataSource({
@@ -10,8 +11,8 @@ export const AppDataSource = new DataSource({
   username: config.db.user,
   password: config.db.password,
   database: config.db.name,
-  synchronize: false, // true only for dev (auto create tables)
+  synchronize: true, // true only for dev (auto create tables)
   logging: false,
-  entities: [Location],
+  entities: [Location, User],
   migrations: ["./src/migrations/*.js"],
 });
