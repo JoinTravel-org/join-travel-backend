@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: jointravel_db
       POSTGRES_USER: jointravel_user
       POSTGRES_PASSWORD: jointravel_password
+      TZ: UTC
+      PGTZ: UTC
     ports:
       - "5432:5432"
     volumes:
@@ -25,6 +27,7 @@ services:
       - POSTGRES_PASSWORD=jointravel_password
       - POSTGRES_HOST=postgres_db
       - POSTGRES_PORT=5432
+      - TZ=UTC
     depends_on:
       - postgres_db
 

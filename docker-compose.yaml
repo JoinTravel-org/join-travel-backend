@@ -11,3 +11,4 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRESQL_CONN=${POSTGRESQL_CONN}
+      - TZ=UTC

@@ -15,4 +15,5 @@ export const AppDataSource = new DataSource({
   logging: false,
   entities: [Location, User],
   migrations: ["./src/migrations/*.js"],
+  timezone: "UTC", // Usar UTC para consistencia global
 });
