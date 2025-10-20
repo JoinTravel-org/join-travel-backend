@@ -31,7 +31,7 @@ class EmailService {
       const confirmationUrl = `${config.frontendUrl}/confirm-email?token=${token}`;
 
       const mailOptions = {
-        from: `"JoinTravel" <${config.email.from}>`,
+        from: `${config.email.from}`,
         to: email,
         subject: "Confirma tu registro en JoinTravel",
         html: `
