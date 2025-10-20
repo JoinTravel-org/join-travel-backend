@@ -42,7 +42,8 @@ class AuthService {
 
     // 5. Generar token de confirmación
     const confirmationToken = crypto.randomBytes(32).toString("hex");
-    const tokenExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+    // Date.now() retorna timestamp en UTC, la fecha se guarda en UTC en PostgreSQL
+    const tokenExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas desde ahora (UTC)
 
     // 6. Crear usuario
     const user = await userRepository.create({
@@ -93,16 +94,21 @@ class AuthService {
    */
   async confirmEmail(token) {
     const user = await userRepository.findByConfirmationToken(token);
+    console.log(user);
 
     if (!user) {
       const error = new Error("Token de confirmación inválido.");
       error.status = 400;
+      console.log(error);
       throw error;
     }
 
-    if (new Date() > user.emailConfirmationExpires) {
+    // Comparar fecha actual (UTC) con fecha de expiración (UTC)
+    const now = new Date(); // Fecha actual en UTC
+    if (now > user.emailConfirmationExpires) {
       const error = new Error("El token de confirmación ha expirado.");
       error.status = 400;
+      console.log(error);
       throw error;
     }
 

@@ -2,6 +2,7 @@ import { EntitySchema } from "typeorm";
 
 export default new EntitySchema({
   name: "User",
+  tableName: "users",
   columns: {
     id: {
       primary: true,
@@ -26,16 +27,16 @@ export default new EntitySchema({
       nullable: true,
     },
     emailConfirmationExpires: {
-      type: "timestamp",
+      type: "timestamp", // timestamp se almacena en UTC en PostgreSQL
       nullable: true,
     },
     createdAt: {
-      type: "timestamp",
-      createDate: true,
+      type: "timestamp", // timestamp se almacena en UTC en PostgreSQL
+      createDate: true, // Se establece automáticamente al crear
     },
     updatedAt: {
-      type: "timestamp",
-      updateDate: true,
+      type: "timestamp", // timestamp se almacena en UTC en PostgreSQL
+      updateDate: true, // Se actualiza automáticamente al modificar
     },
   },
 });
