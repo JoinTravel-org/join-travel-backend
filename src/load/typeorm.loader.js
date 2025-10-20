@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { Location } from "../entities/Location.js";
+import { Location } from "../models/location.model.js";
 import config from "../config/index.js";
 
 export const AppDataSource = new DataSource({
