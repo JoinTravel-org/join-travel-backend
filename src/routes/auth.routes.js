@@ -1,12 +1,36 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import {
   getAtus,
   register,
   login,
   confirmEmail,
+  refreshToken,
+  logout,
+  getProfile,
 } from "../controllers/auth.controller.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
+
+
+// Rate limiter for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 requests per windowMs
+  message: {
+    success: false,
+    message: "Too many authentication attempts, please try again later."
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Ruta de refresh token
+router.post("/refresh", refreshToken);
+
+// Ruta de logout
+router.post("/logout", logout);
 
 /**
  * @swagger
@@ -29,7 +53,7 @@ const router = Router();
  *                   type: object
  *                   example: { "atus?": "yes, atus" }
  */
-router.get("/", getAtus);
+router.get("/", authenticate, getProfile);
 
 /**
  * @swagger
@@ -85,7 +109,7 @@ router.get("/", getAtus);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/register", register);
+router.post("/register", authLimiter, register);
 
 /**
  * @swagger
@@ -151,7 +175,7 @@ router.post("/register", register);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/login", login);
+router.post("/login", authLimiter, login);
 
 /**
  * @swagger

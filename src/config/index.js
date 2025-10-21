@@ -5,7 +5,7 @@ const config = {
   env: process.env.NODE_ENV || "development",
   port: process.env.PORT || 8080,
   db: {
-    host: process.env.POSTGRES_HOST,
+    host: process.env.POSTGRES_HOST || (process.env.NODE_ENV === 'test' ? 'postgres_db' : 'localhost'),
     port: parseInt(process.env.POSTGRES_PORT, 10) || 5432,
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
@@ -21,8 +21,10 @@ const config = {
   },
   frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
   jwt: {
-    secret: process.env.JWT_SECRET || "default-secret-change-in-production",
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+    secret: process.env.JWT_SECRET || (() => { throw new Error("JWT_SECRET is required"); })(),
+    expiresIn: process.env.JWT_EXPIRES_IN || "15m",
+    refreshSecret: process.env.JWT_REFRESH_SECRET || (() => { throw new Error("JWT_REFRESH_SECRET is required"); })(),
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
   },
 };
 
