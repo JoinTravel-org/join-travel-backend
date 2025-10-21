@@ -2,9 +2,31 @@
 
 ## Overview
 
-The Authentication Service provides endpoints for user account management, registration, and email confirmation.
+The Authentication Service provides secure endpoints for user account management, registration, email confirmation, and JWT-based authentication with refresh tokens, token revocation, and rate limiting.
 
 **Base Path:** `/api/auth`
+
+**Authentication Method:** JWT (JSON Web Tokens) with Bearer token in Authorization header
+
+---
+
+## JWT Authentication
+
+The service uses JWT for stateless authentication with the following features:
+
+- **Access Tokens:** Short-lived tokens (15 minutes) for API access
+- **Refresh Tokens:** Long-lived tokens (7 days) for obtaining new access tokens
+- **Token Revocation:** Secure logout by blacklisting tokens
+- **Rate Limiting:** 10 requests per 15 minutes on auth endpoints
+- **Secure Secrets:** Unique random secrets for access and refresh tokens
+
+### Token Usage
+
+Include the access token in the Authorization header:
+
+```
+Authorization: Bearer <access_token>
+```
 
 ---
 
@@ -12,7 +34,7 @@ The Authentication Service provides endpoints for user account management, regis
 
 ### GET /auth
 
-Test endpoint to verify the authentication service is running.
+Retrieves the authenticated user's profile information.
 
 #### Request
 
@@ -20,7 +42,7 @@ Test endpoint to verify the authentication service is running.
 
 **Method:** `GET`
 
-**Authentication:** Not required
+**Authentication:** Required (Bearer token)
 
 #### Response
 
@@ -29,24 +51,298 @@ Test endpoint to verify the authentication service is running.
 ```json
 {
   "success": true,
-  "data": "Authentication service operational"
+  "data": {
+    "id": "uuid-string",
+    "email": "user@example.com",
+    "role": "user"
+  }
 }
 ```
+
+**Error Responses:**
+
+| Status Code | Error Message                          | Description                    |
+|-------------|----------------------------------------|--------------------------------|
+| 401         | `Access denied. No token provided.`    | Missing Authorization header   |
+| 401         | `Token has been revoked.`              | Token is in revocation list    |
+| 401         | `User not found. Token is invalid.`    | User associated with token not found |
+| 401         | `Token expired. Please login again.`   | Access token has expired       |
+| 401         | `Invalid token.`                       | Token is malformed             |
+| 500         | Internal server error                  | An unexpected error occurred   |
 
 #### Usage Examples
 
 **cURL:**
 
 ```bash
-curl -X GET http://localhost:8080/api/auth
+curl -X GET http://localhost:8080/api/auth \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
 **JavaScript (Fetch):**
 
 ```javascript
-fetch('http://localhost:8080/api/auth')
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+
+fetch('http://localhost:8080/api/auth', {
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+})
   .then(response => response.json())
   .then(data => console.log(data));
+```
+
+---
+
+### POST /auth/login
+
+Authenticates a user and returns JWT access and refresh tokens.
+
+#### Request
+
+**URL:** `/api/auth/login`
+
+**Method:** `POST`
+
+**Content-Type:** `application/json`
+
+**Authentication:** Not required
+
+**Rate Limited:** 10 requests per 15 minutes
+
+**Body Parameters:**
+
+| Parameter | Type   | Required | Description                    |
+|-----------|--------|----------|--------------------------------|
+| email     | string | Yes      | User's email address           |
+| password  | string | Yes      | User's password                |
+
+**Example Request:**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+#### Response
+
+**Success Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Inicio de sesión exitoso.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "uuid-string",
+      "email": "user@example.com",
+      "role": "user"
+    }
+  }
+}
+```
+
+**Error Responses:**
+
+| Status Code | Error Message                              | Description                                    |
+|-------------|--------------------------------------------|------------------------------------------------|
+| 400         | `Email y contraseña son requeridos.`       | Email or password field is missing             |
+| 401         | `Credenciales inválidas.`                  | Invalid email or password                      |
+| 401         | `Por favor confirma tu email antes de iniciar sesión.` | Email not confirmed                            |
+| 429         | `Too many authentication attempts...`      | Rate limit exceeded                            |
+| 500         | Internal server error                      | An unexpected error occurred                   |
+
+#### Usage Examples
+
+**cURL:**
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "SecurePass123!"
+  }'
+```
+
+**JavaScript (Fetch):**
+
+```javascript
+fetch('http://localhost:8080/api/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'user@example.com',
+    password: 'SecurePass123!'
+  })
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // Store tokens securely
+    localStorage.setItem('accessToken', data.data.accessToken);
+    localStorage.setItem('refreshToken', data.data.refreshToken);
+  })
+  .catch(error => console.error('Error:', error));
+```
+
+---
+
+### POST /auth/refresh
+
+Refreshes an access token using a valid refresh token.
+
+#### Request
+
+**URL:** `/api/auth/refresh`
+
+**Method:** `POST`
+
+**Content-Type:** `application/json`
+
+**Authentication:** Not required (uses refresh token in body)
+
+**Body Parameters:**
+
+| Parameter     | Type   | Required | Description                    |
+|---------------|--------|----------|--------------------------------|
+| refreshToken  | string | Yes      | Valid refresh token            |
+
+**Example Request:**
+
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+#### Response
+
+**Success Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Token refrescado exitosamente.",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+**Error Responses:**
+
+| Status Code | Error Message                              | Description                                    |
+|-------------|--------------------------------------------|------------------------------------------------|
+| 400         | `Refresh token es requerido.`              | Refresh token field is missing                 |
+| 401         | `Refresh token inválido.`                  | Token is malformed or invalid                  |
+| 401         | `Refresh token expirado.`                  | Refresh token has expired                      |
+| 500         | Internal server error                      | An unexpected error occurred                   |
+
+#### Usage Examples
+
+**cURL:**
+
+```bash
+curl -X POST http://localhost:8080/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }'
+```
+
+**JavaScript (Fetch):**
+
+```javascript
+const refreshToken = localStorage.getItem('refreshToken');
+
+fetch('http://localhost:8080/api/auth/refresh', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    refreshToken: refreshToken
+  })
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // Update stored tokens
+    localStorage.setItem('accessToken', data.data.accessToken);
+    localStorage.setItem('refreshToken', data.data.refreshToken);
+  })
+  .catch(error => console.error('Error:', error));
+```
+
+---
+
+### POST /auth/logout
+
+Revokes the current access token, effectively logging out the user.
+
+#### Request
+
+**URL:** `/api/auth/logout`
+
+**Method:** `POST`
+
+**Authentication:** Required (Bearer token in header)
+
+#### Response
+
+**Success Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Sesión cerrada exitosamente."
+}
+```
+
+**Error Responses:**
+
+| Status Code | Error Message                          | Description                    |
+|-------------|----------------------------------------|--------------------------------|
+| 401         | `Access denied. No token provided.`    | Missing Authorization header   |
+| 500         | Internal server error                  | An unexpected error occurred   |
+
+#### Usage Examples
+
+**cURL:**
+
+```bash
+curl -X POST http://localhost:8080/api/auth/logout \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+**JavaScript (Fetch):**
+
+```javascript
+const token = localStorage.getItem('accessToken');
+
+fetch('http://localhost:8080/api/auth/logout', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // Clear stored tokens
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  })
+  .catch(error => console.error('Error:', error));
 ```
 
 ---
@@ -344,9 +640,26 @@ print(response.json())
    - Server validates token and confirms email
    - User account is now active
 
-3. **Future: Login** (Not yet implemented)
-   - User can log in with confirmed email and password
-   - Server returns JWT token for authenticated requests
+3. **Login**
+   - User calls `POST /auth/login` with confirmed email and password
+   - Server validates credentials and returns access + refresh JWT tokens
+   - Client stores tokens securely (e.g., localStorage, secure cookies)
+
+4. **API Access**
+   - Client includes access token in Authorization header for protected requests
+   - Server validates token, checks revocation, and grants access
+   - If access token expires, client uses refresh token to get new tokens
+
+5. **Token Refresh**
+   - When access token expires, client calls `POST /auth/refresh` with refresh token
+   - Server validates refresh token and returns new access + refresh tokens
+   - Client updates stored tokens
+
+6. **Logout**
+   - User calls `POST /auth/logout` with current access token
+   - Server adds token to revocation list (blacklist)
+   - Client clears stored tokens
+   - Future requests with revoked token are denied
 
 ---
 
@@ -363,6 +676,15 @@ print(response.json())
 - Confirmation tokens are cryptographically secure random 32-byte strings
 - Tokens expire after 24 hours
 - Tokens are single-use and deleted after confirmation
+
+### JWT Security
+
+- **Token Expiration:** Access tokens expire in 15 minutes, refresh tokens in 7 days
+- **Token Revocation:** Logout adds tokens to a blacklist stored in database
+- **Secure Secrets:** Unique random secrets for access and refresh tokens (256-bit)
+- **Rate Limiting:** 10 authentication attempts per 15 minutes per IP
+- **Token Validation:** Server verifies token signature, expiration, and revocation on each request
+- **Stateless Authentication:** No server-side sessions, tokens contain all necessary user info
 
 ### Data Protection
 
@@ -399,13 +721,28 @@ print(response.json())
 
 ## Rate Limiting
 
-Currently, no rate limiting is implemented. This may be added in future versions.
+Rate limiting is implemented on authentication endpoints (`/register`, `/login`) with the following limits:
+
+- **Window:** 15 minutes
+- **Max Requests:** 10 per IP address
+- **Response:** 429 Too Many Requests with custom message
 
 ---
 
 ## Changelog
 
-### Version 1.0.0 (Current)
+### Version 1.1.0 (Current)
+
+- JWT authentication with access and refresh tokens
+- Login endpoint with token generation
+- Token refresh endpoint
+- Secure logout with token revocation
+- Protected routes with authentication middleware
+- Rate limiting on auth endpoints (10 requests per 15 minutes)
+- Unique random JWT secrets for production security
+- Comprehensive test coverage for all auth features
+
+### Version 1.0.0
 
 - Initial release
 - User registration endpoint

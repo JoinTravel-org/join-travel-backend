@@ -6,8 +6,10 @@ import connectDB from "./load/database.loader.js";
 const server = createServer(app);
 
 const PORT = config.port;
-await connectDB()
 
-server.listen(PORT, () => {
+(async () => {
+  await connectDB();
+  server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-});
+  });
+})();

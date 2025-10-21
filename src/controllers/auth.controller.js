@@ -26,6 +26,7 @@ export const register = async (req, res, next) => {
       success: true,
       message: result.message,
       data: result.user,
+      ...(process.env.NODE_ENV === 'test' && { confirmationToken: result.confirmationToken }),
     });
   } catch (err) {
     logger.error(`Register endpoint failed for email: ${req.body.email}, error: ${err.message}`);
@@ -60,7 +61,8 @@ export const login = async (req, res, next) => {
       success: true,
       message: "Login exitoso.",
       data: {
-        token: result.token,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
       },
     });
   } catch (err) {
@@ -99,6 +101,73 @@ export const getAtus = async (_req, res, next) => {
     res.json({ success: true, data: atus });
   } catch (err) {
     logger.error(`Get Atus endpoint failed, error: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Get user profile
+ * GET /api/auth/
+ */
+export const getProfile = async (req, res) => {
+  res.status(200).json({ success: true, data: req.user });
+};
+
+/**
+ * Logout - revoca el token actual
+ * POST /api/auth/logout
+ * Headers: Authorization: Bearer <token>
+ */
+export const logout = async (req, res, next) => {
+  logger.info(`Logout endpoint called`);
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.substring(7);
+      await authService.revokeToken(token);
+    }
+
+    logger.info(`Logout endpoint completed successfully`);
+    res.status(200).json({
+      success: true,
+      message: "Logout exitoso.",
+    });
+  } catch (err) {
+    logger.error(`Logout endpoint failed, error: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Refresca un access token usando un refresh token
+ * POST /api/auth/refresh
+ * Body: { refreshToken }
+ */
+export const refreshToken = async (req, res, next) => {
+  logger.info(`Refresh token endpoint called`);
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Refresh token es requerido.",
+      });
+    }
+
+    const result = await authService.refreshToken(refreshToken);
+
+    logger.info(`Refresh token endpoint completed successfully`);
+    res.status(200).json({
+      success: true,
+      message: "Token refrescado exitosamente.",
+      data: {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      },
+    });
+  } catch (err) {
+    logger.error(`Refresh token endpoint failed, error: ${err.message}`);
     next(err);
   }
 };
