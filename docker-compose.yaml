@@ -2,7 +2,10 @@ services:
   backend:
     container_name: jointravel-back-container
     image: jointravel-back
-    build: .
+    build:
+      context: .
     ports:
       - "${APP_HOST_PORT}:8080"
     restart: unless-stopped
+    environment:
+      - TZ=UTC
