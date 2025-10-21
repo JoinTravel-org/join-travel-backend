@@ -24,11 +24,21 @@ class EmailService {
    * Envía un correo de confirmación de registro
    * @param {string} email - Email del destinatario
    * @param {string} token - Token de confirmación
+   * @param {string} [profilePicture] - URL o path de la imagen de perfil del remitente
    * @returns {Promise<boolean>} - true si se envió correctamente
    */
   async sendConfirmationEmail(email, token) {
     try {
       const confirmationUrl = `${config.frontendUrl}/confirm-email?token=${token}`;
+
+      // Preparar attachments
+      const attachments = [
+        {
+          filename: 'logo-32x32.png',
+          path: './src/assets/logo-32x32.png',
+          cid: 'logo'
+        }
+      ];
 
       const mailOptions = {
         from: `${config.email.from}`,
@@ -45,19 +55,21 @@ class EmailService {
                         <p>Si no creaste esta cuenta, puedes ignorar este correo.</p>
                         <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
                         <p style="color: #666; font-size: 12px;">JoinTravel - Tu compañero de viajes</p>
+                        <img src="cid:logo" alt="JoinTravel Logo" style="max-width: 32px;">
                     </div>
                 `,
         text: `
                     ¡Bienvenido a JoinTravel!
-                    
+
                     Gracias por registrarte. Para completar tu registro, por favor confirma tu correo electrónico visitando el siguiente enlace:
-                    
+
                     ${confirmationUrl}
-                    
+
                     Este enlace expirará en 24 horas.
-                    
+
                     Si no creaste esta cuenta, puedes ignorar este correo.
                 `,
+        attachments: attachments
       };
 
       await this.transporter.sendMail(mailOptions);
