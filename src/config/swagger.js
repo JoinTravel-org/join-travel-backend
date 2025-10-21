@@ -14,6 +14,14 @@ const options = {
         url: 'http://localhost:3005',
         description: 'Development server',
       },
+      {
+        url: 'https://test.api.jointravel.world',
+        description: 'Test server',
+      },
+      {
+        url: 'https://api.jointravel.world',
+        description: 'Production server',
+      },
     ],
     components: {
       schemas: {
@@ -154,7 +162,7 @@ const options = {
       },
     ],
   },
-  apis: ['./src/routes/*.js', './src/controllers/*.js'], // Paths to files containing OpenAPI definitions
+  apis: ['./src/routes/*.js', './src/controllers/*.js', './src/app.js'], // Paths to files containing OpenAPI definitions
 };
 
 const specs = swaggerJSDoc(options);

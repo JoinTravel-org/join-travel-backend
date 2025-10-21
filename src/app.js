@@ -16,6 +16,28 @@ app.use(morgan("dev"));
 // Swagger documentation
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
 
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check endpoint
+ *     description: Returns the health status of the application
+ *     responses:
+ *       200:
+ *         description: Application is running
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: running
+ */
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'running' });
+});
+
 // Load routes
 app.use("", routes);
 
