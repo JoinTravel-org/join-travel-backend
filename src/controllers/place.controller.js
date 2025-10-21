@@ -9,7 +9,7 @@ import logger from "../config/logger.js";
 export const addPlace = async (req, res, next) => {
   logger.info(`Add place endpoint called with name: ${req.body.name}`);
   try {
-    const { name, address, latitude, longitude } = req.body;
+    const { name, address, latitude, longitude, image } = req.body;
 
     // Validar que se envíen los campos requeridos
     if (!name || !address || latitude === undefined || longitude === undefined) {
@@ -19,7 +19,7 @@ export const addPlace = async (req, res, next) => {
       });
     }
 
-    const result = await placeService.addPlace({ name, address, latitude, longitude });
+    const result = await placeService.addPlace({ name, address, latitude, longitude, image });
 
     logger.info(`Add place endpoint completed successfully for place: ${result.place.id}`);
     res.status(201).json({
@@ -31,6 +31,7 @@ export const addPlace = async (req, res, next) => {
         address: result.place.address,
         latitude: result.place.latitude,
         longitude: result.place.longitude,
+        image: result.place.image,
         createdAt: result.place.createdAt,
       },
     });
@@ -86,6 +87,35 @@ export const checkPlace = async (req, res, next) => {
     });
   } catch (err) {
     logger.error(`Check place endpoint failed for name: ${req.query.name}, error: ${err.message}`);
+    // Si el error tiene detalles (errores de validación)
+    if (err.details) {
+      return res.status(err.status || 400).json({
+        success: false,
+        message: err.message,
+        errors: err.details,
+      });
+    }
+    next(err);
+  }
+};
+
+/**
+ * Obtiene lugares paginados para el feed
+ * GET /api/places?page=<page>&limit=<limit>
+ */
+export const getPlaces = async (req, res, next) => {
+  logger.info(`Get places endpoint called with page: ${req.query.page}, limit: ${req.query.limit}`);
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const places = await placeService.getPlacesForFeed(page, limit);
+
+    logger.info(`Get places endpoint completed successfully, returned ${places.length} places`);
+    res.status(200).json({
+      places,
+    });
+  } catch (err) {
+    logger.error(`Get places endpoint failed: ${err.message}`);
     // Si el error tiene detalles (errores de validación)
     if (err.details) {
       return res.status(err.status || 400).json({

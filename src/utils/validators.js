@@ -71,8 +71,30 @@ export const validateCoordinates = (latitude, longitude) => {
 };
 
 /**
+ * Valida URL de imagen
+ * @param {string} imageUrl - URL de imagen a validar
+ * @returns {object} - { isValid: boolean, errors: string[] }
+ */
+export const validateImageUrl = (imageUrl) => {
+  const errors = [];
+
+  if (imageUrl && typeof imageUrl !== 'string') {
+    errors.push("La URL de imagen debe ser una cadena de texto");
+  } else if (imageUrl && imageUrl.trim().length > 0) {
+    if (!validator.isURL(imageUrl, { protocols: ['http', 'https'], require_protocol: true })) {
+      errors.push("La URL de imagen debe ser una URL válida con protocolo http o https");
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+/**
  * Valida datos de lugar
- * @param {Object} placeData - Datos del lugar { name, address, latitude, longitude }
+ * @param {Object} placeData - Datos del lugar { name, address, latitude, longitude, image? }
  * @returns {object} - { isValid: boolean, errors: string[] }
  */
 export const validatePlaceData = (placeData) => {
@@ -89,6 +111,11 @@ export const validatePlaceData = (placeData) => {
   const coordValidation = validateCoordinates(placeData.latitude, placeData.longitude);
   if (!coordValidation.isValid) {
     errors.push(...coordValidation.errors);
+  }
+
+  const imageValidation = validateImageUrl(placeData.image);
+  if (!imageValidation.isValid) {
+    errors.push(...imageValidation.errors);
   }
 
   return {

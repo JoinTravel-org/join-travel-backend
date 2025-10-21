@@ -29,6 +29,16 @@ export default new EntitySchema({
       scale: 8,
       nullable: false,
     },
+    image: {
+      type: "varchar",
+      nullable: true,
+    },
+    rating: {
+      type: "decimal",
+      precision: 2,
+      scale: 1,
+      nullable: true,
+    },
     createdAt: {
       type: "timestamp",
       createDate: true,

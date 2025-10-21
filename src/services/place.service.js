@@ -8,9 +8,9 @@ class PlaceService {
    * @param {Object} placeData - { name, address, latitude, longitude }
    * @returns {Promise<Object>} - { place, message }
    */
-  async addPlace({ name, address, latitude, longitude }) {
+  async addPlace({ name, address, latitude, longitude, image }) {
     // 1. Validar datos del lugar
-    const validation = validatePlaceData({ name, address, latitude, longitude });
+    const validation = validatePlaceData({ name, address, latitude, longitude, image });
     if (!validation.isValid) {
       const error = new Error("Invalid place data");
       error.status = 400;
@@ -33,6 +33,7 @@ class PlaceService {
         address: address.trim(),
         latitude,
         longitude,
+        image: image ? image.trim() : null,
       });
 
       logger.info(`Place added successfully: ${place.id} - ${place.name}`);
@@ -94,6 +95,41 @@ class PlaceService {
       const error = new Error("Servicio externo no disponible.");
       error.status = 503;
       throw error;
+    }
+  }
+
+  /**
+   * Obtiene lugares paginados para el feed
+   * @param {number} page - Número de página (1-based, default: 1)
+   * @param {number} limit - Número de lugares por página (default: 10)
+   * @returns {Promise<Array>} - Array de lugares con id, name, image, rating
+   */
+  async getPlacesForFeed(page = 1, limit = 10) {
+    try {
+      // Validar parámetros
+      const pageNum = parseInt(page, 10);
+      const limitNum = parseInt(limit, 10);
+
+      if (isNaN(pageNum) || pageNum < 1) {
+        const error = new Error("Invalid page number");
+        error.status = 400;
+        throw error;
+      }
+
+      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+        const error = new Error("Invalid limit (must be between 1 and 100)");
+        error.status = 400;
+        throw error;
+      }
+
+      const places = await placeRepository.findPaginated(pageNum, limitNum);
+
+      logger.info(`Retrieved ${places.length} places for feed (page: ${pageNum}, limit: ${limitNum})`);
+
+      return places;
+    } catch (err) {
+      logger.error(`Error getting places for feed: ${err.message}`);
+      throw err;
     }
   }
 }

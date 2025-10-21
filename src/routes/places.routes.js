@@ -1,11 +1,73 @@
 import { Router } from "express";
-import { addPlace, checkPlace } from "../controllers/place.controller.js";
+import { addPlace, checkPlace, getPlaces } from "../controllers/place.controller.js";
 
 const router = Router();
 
 /**
  * @swagger
  * /api/places:
+ *   get:
+ *     summary: Get paginated list of places for feed display
+ *     description: Retrieves a paginated list of available places for the feed display with infinite scroll support.
+ *     tags: [Places]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: The page number to retrieve
+ *         example: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Number of places per page
+ *         example: 10
+ *     responses:
+ *       200:
+ *         description: Places retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 places:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         description: Unique identifier for the place
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       name:
+ *                         type: string
+ *                         description: Display name of the place
+ *                         example: "Eiffel Tower"
+ *                       image:
+ *                         type: string
+ *                         nullable: true
+ *                         description: URL to the place's image (optional)
+ *                         example: "https://example.com/image.jpg"
+ *                       rating:
+ *                         type: number
+ *                         format: float
+ *                         nullable: true
+ *                         description: Numeric rating value (1-5 scale)
+ *                         example: 4.5
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *   post:
  *     summary: Add a new place from Google Maps
  *     description: Create a new place in the database using data from Google Maps. Checks for duplicates by name and exact coordinates.
@@ -44,6 +106,10 @@ const router = Router();
  *                 example: 2.2945
  *                 minimum: -180
  *                 maximum: 180
+ *               image:
+ *                 type: string
+ *                 description: Image URL from Google Maps (optional)
+ *                 example: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=..."
  *     responses:
  *       201:
  *         description: Place added successfully
@@ -93,6 +159,7 @@ const router = Router();
  *                   type: string
  *                   example: "Servicio externo no disponible."
  */
+router.get("/", getPlaces);
 router.post("/", addPlace);
 
 /**

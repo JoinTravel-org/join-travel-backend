@@ -70,6 +70,22 @@ class PlaceRepository {
     const result = await this.getRepository().delete(id);
     return result.affected > 0;
   }
+
+  /**
+   * Obtiene lugares paginados para el feed
+   * @param {number} page - Número de página (1-based)
+   * @param {number} limit - Número de lugares por página
+   * @returns {Promise<Array>} - Array de lugares
+   */
+  async findPaginated(page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+    return await this.getRepository().find({
+      select: ['id', 'name', 'image', 'rating'],
+      skip: offset,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+  }
 }
 
 export default new PlaceRepository();
