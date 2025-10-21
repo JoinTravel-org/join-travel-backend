@@ -72,19 +72,25 @@ class PlaceRepository {
   }
 
   /**
-   * Obtiene lugares paginados para el feed
+   * Obtiene lugares paginados para el feed con conteo total
    * @param {number} page - Número de página (1-based)
    * @param {number} limit - Número de lugares por página
-   * @returns {Promise<Array>} - Array de lugares
+   * @returns {Promise<Object>} - { places: Array, totalCount: number }
    */
-  async findPaginated(page = 1, limit = 10) {
+  async findPaginatedWithCount(page = 1, limit = 10) {
     const offset = (page - 1) * limit;
-    return await this.getRepository().find({
-      select: ['id', 'name', 'image', 'rating'],
-      skip: offset,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+
+    const [places, totalCount] = await Promise.all([
+      this.getRepository().find({
+        select: ['id', 'name', 'address', 'latitude', 'longitude', 'image', 'rating'],
+        skip: offset,
+        take: limit,
+        order: { createdAt: 'DESC' },
+      }),
+      this.getRepository().count()
+    ]);
+
+    return { places, totalCount };
   }
 }
 

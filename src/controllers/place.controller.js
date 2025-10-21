@@ -106,13 +106,14 @@ export const checkPlace = async (req, res, next) => {
 export const getPlaces = async (req, res, next) => {
   logger.info(`Get places endpoint called with page: ${req.query.page}, limit: ${req.query.limit}`);
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 20 } = req.query;
 
-    const places = await placeService.getPlacesForFeed(page, limit);
+    const result = await placeService.getPlacesForFeed(page, limit);
 
-    logger.info(`Get places endpoint completed successfully, returned ${places.length} places`);
+    logger.info(`Get places endpoint completed successfully, returned ${result.places.length} places out of ${result.totalCount} total`);
     res.status(200).json({
-      places,
+      places: result.places,
+      totalCount: result.totalCount,
     });
   } catch (err) {
     logger.error(`Get places endpoint failed: ${err.message}`);

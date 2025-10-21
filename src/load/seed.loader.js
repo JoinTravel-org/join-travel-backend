@@ -4,6 +4,206 @@ import logger from "../config/logger.js";
 
 const seedPlaces = [
   {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
+    name: "Lugar",
+    address: "Lugar",
+    latitude: -34.60115200,
+    longitude: -58.38332780,
+    image: "",
+    rating: null
+  },
+  {
     name: "El Ateneo Grand Splendid",
     address: "Av. Sta. Fe 1860, C1123 Cdad. Autónoma de Buenos Aires, Argentina",
     latitude: -34.59598330,
@@ -66,7 +266,7 @@ const seedPlaces = [
     longitude: -58.38332780,
     image: "https://maps.googleapis.com/maps/api/place/js/PhotoService.GetPhoto?1sAciIO2f5hBk6gVe8NKGod1FGXvNAw9XsvX8JD3DouUvOeK5AX-1VxJLSWpmHeL7Wxjhs-xHywIA4wy_KxmmPR8LjKfTKlb_pXd-CxceLBB7bqqWwSdLwnFFPD6CWhd13UbKTNGjTH8379ydoUL2cW5E9iXZUVcbhScbHrhmPH8TXaMDXLcY2Ehx2PJXvuMcGV3l1_IPRMSx7Gncc0Ka8XBqkg8fSyOe_0G2tiYkcxFTX1PHOIOl00pP3-Z8IiKPAQgHlywhpxMQCm7DHGvB_d45graQ7gQS2wA6ZFWLfXHUBnljyZDh1kVxOZ2ak1cA7red0QTHavNzl3Y_9ue0zgDZ0EzKxrHB-gjW6x7Krn5WnmpgNIcOFQBhGro8v5BuFlnHEo1Ds4IVTpElbTjBCR1p7qGv4wUo1x4pGhbhKDL9blm3OVds-&3u2000&5m1&2e1&callback=none&r_url=http%3A%2F%2Flocalhost%3A3003%2Fadd-place&key=AIzaSyAYAirOIe_jSpPQlE3irymvRNC2YBnqfoo&token=83836",
     rating: null
-  }
+  },
 ];
 
 export default async function seedDatabase() {

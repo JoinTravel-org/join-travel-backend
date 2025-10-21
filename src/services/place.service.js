@@ -99,12 +99,12 @@ class PlaceService {
   }
 
   /**
-   * Obtiene lugares paginados para el feed
+   * Obtiene lugares paginados para el feed con conteo total
    * @param {number} page - Número de página (1-based, default: 1)
-   * @param {number} limit - Número de lugares por página (default: 10)
-   * @returns {Promise<Array>} - Array de lugares con id, name, image, rating
+   * @param {number} limit - Número de lugares por página (default: 20)
+   * @returns {Promise<Object>} - { places: Array, totalCount: number }
    */
-  async getPlacesForFeed(page = 1, limit = 10) {
+  async getPlacesForFeed(page = 1, limit = 20) {
     try {
       // Validar parámetros
       const pageNum = parseInt(page, 10);
@@ -122,11 +122,11 @@ class PlaceService {
         throw error;
       }
 
-      const places = await placeRepository.findPaginated(pageNum, limitNum);
+      const result = await placeRepository.findPaginatedWithCount(pageNum, limitNum);
 
-      logger.info(`Retrieved ${places.length} places for feed (page: ${pageNum}, limit: ${limitNum})`);
+      logger.info(`Retrieved ${result.places.length} places for feed (page: ${pageNum}, limit: ${limitNum}, total: ${result.totalCount})`);
 
-      return places;
+      return result;
     } catch (err) {
       logger.error(`Error getting places for feed: ${err.message}`);
       throw err;

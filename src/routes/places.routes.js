@@ -62,6 +62,10 @@ const router = Router();
  *                         nullable: true
  *                         description: Numeric rating value (1-5 scale)
  *                         example: 4.5
+ *                 totalCount:
+ *                   type: integer
+ *                   description: Total number of places across all pages
+ *                   example: 150
  *       400:
  *         description: Validation error
  *         content:
