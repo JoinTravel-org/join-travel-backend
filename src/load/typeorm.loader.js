@@ -3,6 +3,7 @@ import { DataSource } from "typeorm";
 import { Location } from "../models/location.model.js";
 import User from "../models/user.model.js";
 import RevokedToken from "../models/revokedToken.model.js";
+import Place from "../models/place.model.js";
 import config from "../config/index.js";
 
 export const AppDataSource = new DataSource({
@@ -14,7 +15,11 @@ export const AppDataSource = new DataSource({
   database: config.db.name,
   synchronize: true, // true only for dev (auto create tables)
   logging: false,
-  entities: [Location, User, RevokedToken],
+  entities: [Location, User, RevokedToken, Place],
   migrations: ["./src/migrations/*.js"],
   timezone: "UTC", // Usar UTC para consistencia global
+  // Create database if it doesn't exist
+  extra: {
+    connectionLimit: 10,
+  },
 });
