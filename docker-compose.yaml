@@ -5,10 +5,8 @@ services:
     build:
       context: .
       args:
-        - POSTGRESQL_CONN=${POSTGRESQL_CONN}
     ports:
       - "${APP_HOST_PORT}:8080"
     restart: unless-stopped
     environment:
-      - POSTGRESQL_CONN=${POSTGRESQL_CONN}
       - TZ=UTC
