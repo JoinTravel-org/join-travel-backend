@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getAtus,
   register,
+  login,
   confirmEmail,
 } from "../controllers/auth.controller.js";
 
@@ -12,6 +13,8 @@ router.get("/", getAtus);
 
 // Ruta de registro
 router.post("/register", register);
+
+router.post("/login", login);
 
 // Ruta de confirmación de email
 router.get("/confirm-email/:token", confirmEmail);

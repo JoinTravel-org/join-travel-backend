@@ -87,6 +87,36 @@ class AuthService {
     };
   }
 
+  async login({ email, password }) {
+    // 1. Verificar que el usuario exista
+    const user = await userRepository.findByEmail(email);
+    if (!user) {
+      const error = new Error("Credenciales inválidas.");
+      error.status = 401;
+      throw error;
+    }
+
+    // 2. Verificar que el email esté confirmado
+    if (!user.isEmailConfirmed) {
+      const error = new Error("El email no ha sido confirmado.");
+      error.status = 403;
+      throw error;
+    }
+
+    // 3. Verificar la contraseña
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      const error = new Error("Credenciales inválidas.");
+      error.status = 401;
+      throw error;
+    }
+
+    // 4. Generar token JWT (aquí simplemente retornamos un token simulado)
+    const token = crypto.randomBytes(16).toString("hex"); // Simulación
+
+    return { token };
+  }
+
   /**
    * Confirma el email de un usuario
    * @param {string} token - Token de confirmación

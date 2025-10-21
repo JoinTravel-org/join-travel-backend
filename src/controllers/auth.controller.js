@@ -37,6 +37,30 @@ export const register = async (req, res, next) => {
   }
 };
 
+export const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validar que se envíen los campos requeridos
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email y contraseña son requeridos.",
+      });
+    }
+
+    const result = await authService.login({ email, password });
+    res.status(200).json({
+      success: true,
+      message: "Login exitoso.",
+      data: {
+        token: result.token,
+      },
+    });
+  } catch (err) {
+    next(err);  
+  }
+};
 /**
  * Confirma el email de un usuario
  * GET /api/auth/confirm-email/:token
@@ -55,6 +79,7 @@ export const confirmEmail = async (req, res, next) => {
     next(err);
   }
 };
+
 
 export const getAtus = async (_req, res, next) => {
   try {
