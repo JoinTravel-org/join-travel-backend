@@ -3,15 +3,11 @@ import User from "../models/user.model.js";
 
 class UserRepository {
   constructor() {
-    this.repository = null;
   }
 
   // Inicializa el repositorio cuando TypeORM esté listo
   getRepository() {
-    if (!this.repository) {
-      this.repository = AppDataSource.getRepository(User);
-    }
-    return this.repository;
+    return AppDataSource.getRepository(User);
   }
 
   /**
@@ -71,4 +67,4 @@ class UserRepository {
   }
 }
 
-export default new UserRepository();
+export default UserRepository;
