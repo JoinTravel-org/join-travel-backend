@@ -28,6 +28,7 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.27",
+    "typeorm-extension": "^3.7.1",
     "validator": "^13.15.15",
     "winston": "^3.18.3"
   },

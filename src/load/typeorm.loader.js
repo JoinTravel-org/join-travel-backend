@@ -17,4 +17,8 @@ export const AppDataSource = new DataSource({
   entities: [Location, User, Place],
   migrations: ["./src/migrations/*.js"],
   timezone: "UTC", // Usar UTC para consistencia global
+  // Create database if it doesn't exist
+  extra: {
+    connectionLimit: 10,
+  },
 });

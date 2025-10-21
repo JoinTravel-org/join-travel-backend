@@ -14,7 +14,7 @@ app.use(helmet());
 app.use(morgan("dev"));
 
 // Swagger documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Load routes
 app.use("", routes);

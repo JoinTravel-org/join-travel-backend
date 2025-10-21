@@ -37,7 +37,7 @@ pnpm start
 Once the server is running, you can access the Swagger API documentation at:
 
 ```
-http://localhost:3005/api-docs
+http://localhost:3005/docs
 ```
 
 The documentation provides interactive API testing, detailed endpoint descriptions, request/response schemas, and examples for all available endpoints.

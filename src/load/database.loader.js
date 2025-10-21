@@ -1,10 +1,26 @@
 import { AppDataSource } from "./typeorm.loader.js";
+import { createDatabase } from "typeorm-extension";
 
 export default async function connectDB(maxRetries = 5, retryDelay = 2000) {
   let retries = 0;
 
   while (retries < maxRetries) {
     try {
+      // First, try to create the database if it doesn't exist
+      await createDatabase({
+        ifNotExist: true,
+        options: {
+          type: "postgres",
+          host: process.env.POSTGRES_HOST,
+          port: parseInt(process.env.POSTGRES_PORT, 10) || 5432,
+          username: process.env.POSTGRES_USER,
+          password: process.env.POSTGRES_PASSWORD,
+          database: "postgres", // Connect to default postgres database first
+        },
+        initialDatabase: process.env.POSTGRES_DB,
+      });
+
+      // Now connect to the actual database
       await AppDataSource.initialize();
       console.log("Database connected successfully");
       return;
