@@ -4,7 +4,6 @@ services:
     image: jointravel-back
     build:
       context: .
-      args:
     ports:
       - "${APP_HOST_PORT}:8080"
     restart: unless-stopped
