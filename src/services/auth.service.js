@@ -124,7 +124,6 @@ class AuthService {
    */
   async confirmEmail(token) {
     const user = await userRepository.findByConfirmationToken(token);
-    console.log(user);
 
     if (!user) {
       const error = new Error("Token de confirmación inválido.");
