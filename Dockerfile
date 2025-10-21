@@ -5,12 +5,6 @@ FROM node:22-alpine AS deps
 
 WORKDIR /usr/src/app
 
-# Accept build argument for VITE_BACKEND_URL
-ARG POSTGRESQL_CONN
-
-# Set the environment variable for Vite
-ENV POSTGRESQL_CONN=$POSTGRESQL_CONN
-
 COPY package.json pnpm-lock.yaml* ./
 
 RUN corepack enable && corepack prepare pnpm@latest --activate

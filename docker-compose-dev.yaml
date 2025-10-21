@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: jointravel_db
       POSTGRES_USER: jointravel_user
       POSTGRES_PASSWORD: jointravel_password
+      TZ: UTC
+      PGTZ: UTC
     ports:
       - "5432:5432"
     volumes:
@@ -20,7 +22,12 @@ services:
     ports:
       - "${APP_HOST_PORT}:8080"
     environment:
-      - POSTGRESQL_CONN=postgresql://jointravel_user:jointravel_password@postgres_db:5432/jointravel_db
+      - POSTGRES_DB=jointravel_db
+      - POSTGRES_USER=jointravel_user
+      - POSTGRES_PASSWORD=jointravel_password
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_PORT=5432
+      - TZ=UTC
     depends_on:
       - postgres_db
 
