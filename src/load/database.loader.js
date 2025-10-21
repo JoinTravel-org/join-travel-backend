@@ -1,5 +1,6 @@
 import { AppDataSource } from "./typeorm.loader.js";
 import { createDatabase } from "typeorm-extension";
+import seedDatabase from "./seed.loader.js";
 
 export default async function connectDB(maxRetries = 5, retryDelay = 2000) {
   let retries = 0;
@@ -23,6 +24,10 @@ export default async function connectDB(maxRetries = 5, retryDelay = 2000) {
       // Now connect to the actual database
       await AppDataSource.initialize();
       console.log("Database connected successfully");
+
+      // Seed the database with initial data
+      await seedDatabase();
+
       return;
     } catch (err) {
       retries++;
