@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { addPlace, checkPlace, getPlaces } from "../controllers/place.controller.js";
+import {
+  addPlace,
+  checkPlace,
+  getPlaces,
+  getPlaceById,
+} from "../controllers/place.controller.js";
 
 const router = Router();
 
@@ -244,4 +249,57 @@ router.post("/", addPlace);
  */
 router.get("/check", checkPlace);
 
+/**
+ * @swagger
+ * /api/places/{id}:
+ *   get:
+ *     summary: Get a place by ID
+ *     description: Retrieves detailed information about a specific place using its ID.
+ *     tags: [Places]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Unique identifier of the place
+ *         example: "123e4567-e89b-12d3-a456-426614174000"
+ *     responses:
+ *       200:
+ *         description: Place retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Place'
+ *       404:
+ *         description: Place not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Lugar no encontrado."
+ *       400:
+ *         description: Invalid ID format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get("/:id", getPlaceById);
+
 export default router;
+
+
+
