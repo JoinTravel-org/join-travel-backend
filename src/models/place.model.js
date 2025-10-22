@@ -47,5 +47,13 @@ export default new EntitySchema({
       type: "timestamp",
       updateDate: true,
     },
+    description:{
+      type: "text",
+      nullable: true,
+    },
+    city: {
+      type: "varchar",
+      nullable: true,
+    },
   },
 });

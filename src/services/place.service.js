@@ -101,6 +101,7 @@ class PlaceService {
             address: place.address,
             latitude: place.latitude,
             longitude: place.longitude,
+            rating: place.rating,
           },
         };
       } else {
@@ -188,6 +189,9 @@ class PlaceService {
         latitude: place.latitude,
         longitude: place.longitude,
         image: place.image,
+        rating: place.rating,
+        description: place.description,
+        city: place.city,
         createdAt: place.createdAt,
       };
     } catch (err) {
