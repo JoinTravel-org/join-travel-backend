@@ -9,6 +9,22 @@ class PlaceService {
    * @returns {Promise<Object>} - { place, message }
    */
   async addPlace({ name, address, latitude, longitude, image }) {
+    
+    
+    
+    
+    // 2. Verificar si el lugar ya existe (por nombre y coordenadas exactas)
+    const existingPlace = await placeRepository.findByNameAndCoordinates(
+      name,
+      latitude,
+      longitude
+    );
+    if (existingPlace) {
+      const error = new Error("Este lugar ya está registrado.");
+      error.status = 409;
+      throw error;
+    }
+    
     // 1. Validar datos del lugar
     const validation = validatePlaceData({
       name,
@@ -24,17 +40,7 @@ class PlaceService {
       throw error;
     }
 
-    // 2. Verificar si el lugar ya existe (por nombre y coordenadas exactas)
-    const existingPlace = await placeRepository.findByNameAndCoordinates(
-      name,
-      latitude,
-      longitude
-    );
-    if (existingPlace) {
-      const error = new Error("Este lugar ya está registrado.");
-      error.status = 409;
-      throw error;
-    }
+
 
     // 3. Crear el lugar
     try {
