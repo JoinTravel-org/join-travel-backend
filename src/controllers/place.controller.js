@@ -128,3 +128,48 @@ export const getPlaces = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * Obtiene un lugar por su ID
+ * GET /api/places/:id
+ */
+export const getPlaceById = async (req, res, next) => {
+  logger.info(`Get place by ID endpoint called with id: ${req.params.id}`);
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID del lugar es requerido.",
+      });
+    }
+
+    const place = await placeService.getPlaceById(id);
+
+    if (!place) {
+      return res.status(404).json({
+        success: false,
+        message: "Lugar no encontrado.",
+      });
+    }
+
+    logger.info(`Get place by ID endpoint completed successfully for id: ${id}`);
+    res.status(200).json({
+      success: true,
+      data: place
+    });
+  } catch (err) {
+    logger.error(`Get place by ID endpoint failed for id: ${req.params.id}, error: ${err.message}`);
+    if (err.details) {
+      return res.status(err.status || 400).json({
+        success: false,
+        message: err.message,
+        errors: err.details,
+      });
+    }
+    next(err);
+  }
+};
+
+
