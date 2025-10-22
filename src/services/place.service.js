@@ -9,8 +9,30 @@ class PlaceService {
    * @returns {Promise<Object>} - { place, message }
    */
   async addPlace({ name, address, latitude, longitude, image }) {
+    
+    
+    
+    
+    // 2. Verificar si el lugar ya existe (por nombre y coordenadas exactas)
+    const existingPlace = await placeRepository.findByNameAndCoordinates(
+      name,
+      latitude,
+      longitude
+    );
+    if (existingPlace) {
+      const error = new Error("Este lugar ya está registrado.");
+      error.status = 409;
+      throw error;
+    }
+    
     // 1. Validar datos del lugar
-    const validation = validatePlaceData({ name, address, latitude, longitude, image });
+    const validation = validatePlaceData({
+      name,
+      address,
+      latitude,
+      longitude,
+      image,
+    });
     if (!validation.isValid) {
       const error = new Error("Invalid place data");
       error.status = 400;
@@ -18,13 +40,7 @@ class PlaceService {
       throw error;
     }
 
-    // 2. Verificar si el lugar ya existe (por nombre y coordenadas exactas)
-    const existingPlace = await placeRepository.findByNameAndCoordinates(name, latitude, longitude);
-    if (existingPlace) {
-      const error = new Error("Este lugar ya está registrado.");
-      error.status = 409;
-      throw error;
-    }
+
 
     // 3. Crear el lugar
     try {
@@ -61,7 +77,12 @@ class PlaceService {
    */
   async checkPlaceExistence(name, latitude, longitude) {
     // 1. Validar coordenadas
-    const coordValidation = validatePlaceData({ name, address: "dummy", latitude, longitude });
+    const coordValidation = validatePlaceData({
+      name,
+      address: "dummy",
+      latitude,
+      longitude,
+    });
     if (!coordValidation.isValid) {
       const error = new Error("Invalid coordinates");
       error.status = 400;
@@ -71,7 +92,11 @@ class PlaceService {
 
     try {
       // 2. Buscar lugar por nombre y coordenadas exactas
-      const place = await placeRepository.findByNameAndCoordinates(name, latitude, longitude);
+      const place = await placeRepository.findByNameAndCoordinates(
+        name,
+        latitude,
+        longitude
+      );
 
       if (place) {
         return {
@@ -82,6 +107,7 @@ class PlaceService {
             address: place.address,
             latitude: place.latitude,
             longitude: place.longitude,
+            rating: place.rating,
           },
         };
       } else {
@@ -122,13 +148,60 @@ class PlaceService {
         throw error;
       }
 
-      const result = await placeRepository.findPaginatedWithCount(pageNum, limitNum);
+      const result = await placeRepository.findPaginatedWithCount(
+        pageNum,
+        limitNum
+      );
 
-      logger.info(`Retrieved ${result.places.length} places for feed (page: ${pageNum}, limit: ${limitNum}, total: ${result.totalCount})`);
+      logger.info(
+        `Retrieved ${result.places.length} places for feed (page: ${pageNum}, limit: ${limitNum}, total: ${result.totalCount})`
+      );
 
       return result;
     } catch (err) {
       logger.error(`Error getting places for feed: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * Obtiene un lugar por su ID
+   * @param {string} id - ID del lugar a buscar
+   * @returns {Promise<Object>} - Lugar encontrado
+   * @throws {Error} - Si el lugar no existe o hay un error en la búsqueda
+   */
+  async getPlaceById(id) {
+    try {
+      if (!id) {
+        const error = new Error("ID is required");
+        error.status = 400;
+        throw error;
+      }
+
+      const place = await placeRepository.findById(id);
+
+      if (!place) {
+        const error = new Error("Place not found");
+        error.status = 404;
+        throw error;
+      }
+
+      logger.info(`Retrieved place by ID: ${id}`);
+
+      return {
+        id: place.id,
+        name: place.name,
+        address: place.address,
+        latitude: place.latitude,
+        longitude: place.longitude,
+        image: place.image,
+        rating: place.rating,
+        description: place.description,
+        city: place.city,
+        createdAt: place.createdAt,
+      };
+    } catch (err) {
+      logger.error(`Error getting place by ID ${id}: ${err.message}`);
       throw err;
     }
   }
