@@ -4,7 +4,9 @@ import {
   checkPlace,
   getPlaces,
   getPlaceById,
+  updatePlaceDescription,
 } from "../controllers/place.controller.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -298,6 +300,134 @@ router.get("/check", checkPlace);
  *               $ref: '#/components/schemas/Error'
  */
 router.get("/:id", getPlaceById);
+
+/**
+ * @swagger
+ * /api/places/{id}/description:
+ *   put:
+ *     summary: Update place description
+ *     description: Updates the description of an existing place. Requires authentication.
+ *     tags: [Places]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Unique identifier of the place
+ *         example: "123e4567-e89b-12d3-a456-426614174000"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - description
+ *             properties:
+ *               description:
+ *                 type: string
+ *                 minLength: 30
+ *                 maxLength: 1000
+ *                 description: New description for the place
+ *                 example: "This is a beautiful historical monument located in the heart of the city. It features stunning architecture and offers panoramic views of the surrounding area."
+ *     responses:
+ *       200:
+ *         description: Description updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Description updated successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "123e4567-e89b-12d3-a456-426614174000"
+ *                     name:
+ *                       type: string
+ *                       example: "Eiffel Tower"
+ *                     description:
+ *                       type: string
+ *                       example: "This is a beautiful historical monument..."
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2023-10-24T21:26:10.748Z"
+ *       400:
+ *         description: Invalid description
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid description"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["La descripción debe tener al menos 30 caracteres"]
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Access denied. No token provided."
+ *       404:
+ *         description: Place not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Place not found"
+ *                 error:
+ *                   type: string
+ *                   example: "Place with given ID not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Server error"
+ *                 error:
+ *                   type: string
+ *                   example: "Detailed error information"
+ */
+router.put("/:id/description", authenticate, updatePlaceDescription);
 
 export default router;
 

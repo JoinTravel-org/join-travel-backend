@@ -181,7 +181,7 @@ const seedPlaces = [
     image: "",
     rating: null,
     city: "Buenos Aires",
-    description: "Sample place for seeding.",
+    description: "Lorem ipsum description",
   },
   {
     name: "Lugar",
