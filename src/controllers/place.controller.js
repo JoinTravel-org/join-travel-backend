@@ -1,5 +1,6 @@
 import placeService from "../services/place.service.js";
 import logger from "../config/logger.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 /**
  * Agrega un nuevo lugar
@@ -128,6 +129,57 @@ export const getPlaces = async (req, res, next) => {
     next(err);
   }
 };
+/**
+ * Actualiza la descripción de un lugar
+ * PUT /api/places/:id/description
+ */
+export const updatePlaceDescription = async (req, res, next) => {
+  logger.info(`Update place description endpoint called with id: ${req.params.id}`);
+  try {
+    const { id } = req.params;
+    const { description } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID del lugar es requerido.",
+      });
+    }
+
+    if (!description) {
+      return res.status(400).json({
+        success: false,
+        message: "La descripción es requerida.",
+      });
+    }
+
+    const result = await placeService.updateDescription(id, description);
+
+    logger.info(`Update place description endpoint completed successfully for id: ${id}, description length: ${description.length} characters`);
+    res.status(200).json({
+      success: true,
+      message: "Description updated successfully",
+      data: result,
+    });
+  } catch (err) {
+    logger.error(`Update place description endpoint failed for id: ${req.params.id}, description length: ${req.body?.description?.length || 0} characters, error: ${err.message}`);
+    if (err.details) {
+      return res.status(err.status || 400).json({
+        success: false,
+        message: err.message,
+        error: err.details,
+      });
+    }
+    if (err.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "Place not found",
+        error: "Place with given ID not found",
+      });
+    }
+    next(err);
+  }
+};
 
 /**
  * Obtiene un lugar por su ID
@@ -171,5 +223,6 @@ export const getPlaceById = async (req, res, next) => {
     next(err);
   }
 };
+
 
 

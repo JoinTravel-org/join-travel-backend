@@ -93,6 +93,33 @@ export const validateImageUrl = (imageUrl) => {
 };
 
 /**
+ * Valida descripción de lugar
+ * @param {string} description - Descripción a validar
+ * @returns {object} - { isValid: boolean, errors: string[] }
+ */
+export const validateDescription = (description) => {
+  const errors = [];
+
+  if (!description || typeof description !== 'string') {
+    errors.push("La descripción es requerida");
+  } else {
+    const trimmed = description.trim();
+    if (trimmed.length === 0) {
+      errors.push("La descripción no puede estar vacía");
+    } else if (trimmed.length < 30) {
+      errors.push("La descripción debe tener al menos 30 caracteres");
+    } else if (trimmed.length > 1000) {
+      errors.push("La descripción no puede exceder los 1000 caracteres");
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+/**
  * Valida datos de lugar
  * @param {Object} placeData - Datos del lugar { name, address, latitude, longitude, image? }
  * @returns {object} - { isValid: boolean, errors: string[] }
