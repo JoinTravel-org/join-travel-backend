@@ -25,7 +25,11 @@ class ReviewService {
     }
 
     // Validar contenido
-    if (!content || typeof content !== "string" || content.trim().length === 0) {
+    if (
+      !content ||
+      typeof content !== "string" ||
+      content.trim().length === 0
+    ) {
       throw {
         status: 400,
         message: "El contenido de la reseña es requerido.",
@@ -60,7 +64,10 @@ class ReviewService {
     }
 
     // Verificar si el usuario ya reseñó este lugar
-    const existingReview = await reviewRepository.findByPlaceIdAndUserId(placeId, userId);
+    const existingReview = await reviewRepository.findByPlaceIdAndUserId(
+      placeId,
+      userId
+    );
     if (existingReview) {
       throw {
         status: 409,
@@ -78,7 +85,9 @@ class ReviewService {
         userId,
       });
 
-      logger.info(`Review created successfully: ${newReview.id} for place ${placeId} by user ${userId}`);
+      logger.info(
+        `Review created successfully: ${newReview.id} for place ${placeId} by user ${userId}`
+      );
 
       return {
         success: true,
@@ -125,7 +134,9 @@ class ReviewService {
         updatedAt: review.updatedAt,
       }));
 
-      logger.info(`Retrieved ${formattedReviews.length} reviews for place ${placeId}`);
+      logger.info(
+        `Retrieved ${formattedReviews.length} reviews for place ${placeId}`
+      );
 
       return {
         success: true,
@@ -135,8 +146,10 @@ class ReviewService {
       if (error.status) {
         throw error;
       }
-      
-      logger.error(`Error retrieving reviews for place ${placeId}: ${error.message}`);
+
+      logger.error(
+        `Error retrieving reviews for place ${placeId}: ${error.message}`
+      );
       throw {
         status: 500,
         message: "Error al obtener las reseñas.",
@@ -161,8 +174,10 @@ class ReviewService {
       }
 
       const stats = await reviewRepository.getReviewStats(placeId);
-      
-      logger.info(`Retrieved review stats for place ${placeId}: ${stats.totalReviews} reviews, ${stats.averageRating} avg rating`);
+
+      logger.info(
+        `Retrieved review stats for place ${placeId}: ${stats.totalReviews} reviews, ${stats.averageRating} avg rating`
+      );
 
       return {
         success: true,
@@ -175,8 +190,10 @@ class ReviewService {
       if (error.status) {
         throw error;
       }
-      
-      logger.error(`Error retrieving review stats for place ${placeId}: ${error.message}`);
+
+      logger.error(
+        `Error retrieving review stats for place ${placeId}: ${error.message}`
+      );
       throw {
         status: 500,
         message: "Error al obtener las estadísticas de reseñas.",

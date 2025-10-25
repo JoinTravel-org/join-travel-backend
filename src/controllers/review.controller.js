@@ -12,7 +12,9 @@ export const createReview = async (req, res, next) => {
   const { rating, content } = req.body;
   const userId = req.user?.id;
 
-  logger.info(`Create review endpoint called for place: ${placeId} by user: ${userId}`);
+  logger.info(
+    `Create review endpoint called for place: ${placeId} by user: ${userId}`
+  );
 
   try {
     // Verificar que el usuario esté autenticado
@@ -29,8 +31,8 @@ export const createReview = async (req, res, next) => {
         success: false,
         message: "Calificación y contenido son requeridos.",
         details: [
-          ...((!rating) ? ["rating: es requerido"] : []),
-          ...((!content) ? ["content: es requerido"] : []),
+          ...(!rating ? ["rating: es requerido"] : []),
+          ...(!content ? ["content: es requerido"] : []),
         ],
       });
     }
@@ -42,7 +44,9 @@ export const createReview = async (req, res, next) => {
       userId,
     });
 
-    logger.info(`Create review endpoint completed successfully for review: ${result.data.id}`);
+    logger.info(
+      `Create review endpoint completed successfully for review: ${result.data.id}`
+    );
     res.status(201).json({
       success: true,
       message: result.message,
@@ -57,8 +61,10 @@ export const createReview = async (req, res, next) => {
       },
     });
   } catch (err) {
-    logger.error(`Create review endpoint failed for place: ${placeId}, user: ${userId}, error: ${err.message}`);
-    
+    logger.error(
+      `Create review endpoint failed for place: ${placeId}, user: ${userId}, error: ${err.message}`
+    );
+
     // Si el error tiene detalles (errores de validación)
     if (err.details) {
       return res.status(err.status || 400).json({
@@ -67,7 +73,7 @@ export const createReview = async (req, res, next) => {
         details: err.details,
       });
     }
-    
+
     // Si es un error conocido con status
     if (err.status) {
       return res.status(err.status).json({
@@ -92,14 +98,18 @@ export const getReviewsByPlace = async (req, res, next) => {
   try {
     const result = await reviewService.getReviewsByPlaceId(placeId);
 
-    logger.info(`Get reviews endpoint completed successfully for place: ${placeId}, returned ${result.data.length} reviews`);
+    logger.info(
+      `Get reviews endpoint completed successfully for place: ${placeId}, returned ${result.data.length} reviews`
+    );
     res.status(200).json({
       success: true,
       data: result.data,
     });
   } catch (err) {
-    logger.error(`Get reviews endpoint failed for place: ${placeId}, error: ${err.message}`);
-    
+    logger.error(
+      `Get reviews endpoint failed for place: ${placeId}, error: ${err.message}`
+    );
+
     // Si es un error conocido con status
     if (err.status) {
       return res.status(err.status).json({
@@ -124,11 +134,15 @@ export const getReviewStats = async (req, res, next) => {
   try {
     const result = await reviewService.getReviewStats(placeId);
 
-    logger.info(`Get review stats endpoint completed successfully for place: ${placeId}`);
+    logger.info(
+      `Get review stats endpoint completed successfully for place: ${placeId}`
+    );
     res.status(200).json(result.data);
   } catch (err) {
-    logger.error(`Get review stats endpoint failed for place: ${placeId}, error: ${err.message}`);
-    
+    logger.error(
+      `Get review stats endpoint failed for place: ${placeId}, error: ${err.message}`
+    );
+
     // Si es un error conocido con status
     if (err.status) {
       return res.status(err.status).json({

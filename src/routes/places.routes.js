@@ -594,6 +594,3 @@ router.get("/:placeId/reviews", getReviewsByPlace);
 router.get("/:placeId/reviews/stats", getReviewStats);
 
 export default router;
-
-
-
