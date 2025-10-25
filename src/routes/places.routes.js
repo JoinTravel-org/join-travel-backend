@@ -6,6 +6,11 @@ import {
   getPlaceById,
   updatePlaceDescription,
 } from "../controllers/place.controller.js";
+import {
+  createReview,
+  getReviewsByPlace,
+  getReviewStats,
+} from "../controllers/review.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -428,6 +433,165 @@ router.get("/:id", getPlaceById);
  *                   example: "Detailed error information"
  */
 router.put("/:id/description", authenticate, updatePlaceDescription);
+
+/**
+ * @swagger
+ * /api/places/{placeId}/reviews:
+ *   post:
+ *     summary: Create a new review for a place
+ *     description: Creates a new review for a specific place. Requires user authentication.
+ *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: placeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the place to review
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rating
+ *               - content
+ *             properties:
+ *               rating:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 5
+ *                 description: Rating from 1 to 5 stars
+ *                 example: 4
+ *               content:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 1000
+ *                 description: Review content (minimum 10 characters)
+ *                 example: "Great place to visit with family"
+ *     responses:
+ *       201:
+ *         description: Review created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Reseña creada exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "uuid"
+ *                     rating:
+ *                       type: integer
+ *                       example: 4
+ *                     content:
+ *                       type: string
+ *                       example: "Great place to visit"
+ *                     placeId:
+ *                       type: string
+ *                       example: "uuid"
+ *                     userId:
+ *                       type: string
+ *                       example: "uuid"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Place not found
+ *       409:
+ *         description: User already reviewed this place
+ *   get:
+ *     summary: Get all reviews for a place
+ *     description: Retrieves all reviews for a specific place
+ *     tags: [Reviews]
+ *     parameters:
+ *       - in: path
+ *         name: placeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the place
+ *     responses:
+ *       200:
+ *         description: Reviews retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       rating:
+ *                         type: integer
+ *                       content:
+ *                         type: string
+ *                       userEmail:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *       404:
+ *         description: Place not found
+ */
+router.post("/:placeId/reviews", authenticate, createReview);
+router.get("/:placeId/reviews", getReviewsByPlace);
+
+/**
+ * @swagger
+ * /api/places/{placeId}/reviews/stats:
+ *   get:
+ *     summary: Get review statistics for a place
+ *     description: Get total number of reviews and average rating for a place
+ *     tags: [Reviews]
+ *     parameters:
+ *       - in: path
+ *         name: placeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the place
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalReviews:
+ *                   type: integer
+ *                   example: 25
+ *                 averageRating:
+ *                   type: number
+ *                   format: float
+ *                   example: 4.2
+ *       404:
+ *         description: Place not found
+ */
+router.get("/:placeId/reviews/stats", getReviewStats);
 
 export default router;
 
