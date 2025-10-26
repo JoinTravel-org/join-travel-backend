@@ -453,7 +453,7 @@ router.put("/:id/description", authenticate, updatePlaceDescription);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
@@ -462,16 +462,21 @@ router.put("/:id/description", authenticate, updatePlaceDescription);
  *             properties:
  *               rating:
  *                 type: integer
- *                 minimum: 1
- *                 maximum: 5
- *                 description: Rating from 1 to 5 stars
- *                 example: 4
+ *                 description: Rating value (1-5 stars)
+ *                 example: "5"
  *               content:
  *                 type: string
  *                 minLength: 10
  *                 maxLength: 1000
  *                 description: Review content (minimum 10 characters)
  *                 example: "Great place to visit with family"
+ *               media:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Media files to upload (JPEG, PNG, GIF, WEBP, MP4, MOV) - maximum 10 files, 50MB each
+ *                 maxItems: 10
  *     responses:
  *       201:
  *         description: Review created successfully
@@ -504,6 +509,32 @@ router.put("/:id/description", authenticate, updatePlaceDescription);
  *                     userId:
  *                       type: string
  *                       example: "uuid"
+ *                     media:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             example: "uuid"
+ *                           filename:
+ *                             type: string
+ *                             example: "abc123.jpg"
+ *                           originalFilename:
+ *                             type: string
+ *                             example: "photo1.jpg"
+ *                           fileSize:
+ *                             type: integer
+ *                             example: 2048576
+ *                           mimeType:
+ *                             type: string
+ *                             example: "image/jpeg"
+ *                           url:
+ *                             type: string
+ *                             example: "http://localhost:3000/uploads/reviews/abc123.jpg"
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
  *                     createdAt:
  *                       type: string
  *                       format: date-time
@@ -550,6 +581,26 @@ router.put("/:id/description", authenticate, updatePlaceDescription);
  *                         type: string
  *                       userEmail:
  *                         type: string
+ *                       media:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: string
+ *                             filename:
+ *                               type: string
+ *                             originalFilename:
+ *                               type: string
+ *                             fileSize:
+ *                               type: integer
+ *                             mimeType:
+ *                               type: string
+ *                             url:
+ *                               type: string
+ *                             createdAt:
+ *                               type: string
+ *                               format: date-time
  *                       createdAt:
  *                         type: string
  *                         format: date-time

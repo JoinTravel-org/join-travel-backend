@@ -1,6 +1,10 @@
 import reviewRepository from "../repository/review.repository.js";
+import reviewMediaRepository from "../repository/reviewMedia.repository.js";
 import placeRepository from "../repository/place.repository.js";
+import { validateUploadedFiles, getFileUrl, deleteFile } from "../utils/fileUpload.js";
 import logger from "../config/logger.js";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
 
 class ReviewService {
   /**
@@ -10,13 +14,14 @@ class ReviewService {
    * @param {string} reviewData.content - Contenido de la reseña
    * @param {string} reviewData.placeId - ID del lugar
    * @param {string} reviewData.userId - ID del usuario
+   * @param {Array} reviewData.files - Archivos multimedia (opcional)
    * @returns {Promise<Object>} - Objeto con success, message y data
    */
   async createReview(reviewData) {
-    const { rating, content, placeId, userId } = reviewData;
-
+    const { rating, content, placeId, userId, files } = reviewData;
+    let parsedRating = parseInt(rating);
     // Validar rating
-    if (!rating || rating < 1 || rating > 5 || !Number.isInteger(rating)) {
+    if (!parsedRating || parsedRating < 1 || parsedRating > 5 || !Number.isInteger(parsedRating)) {
       throw {
         status: 400,
         message: "La calificación debe ser un número entero entre 1 y 5.",
@@ -54,6 +59,7 @@ class ReviewService {
     }
 
     // Verificar que el lugar existe
+    logger.info(`Checking if place exists: ${placeId}`);
     const place = await placeRepository.findById(placeId);
     if (!place) {
       throw {
@@ -62,6 +68,7 @@ class ReviewService {
         details: ["placeId: lugar no encontrado"],
       };
     }
+    logger.info(`Place found: ${place.id}`);
 
     // Verificar si el usuario ya reseñó este lugar
     const existingReview = await reviewRepository.findByPlaceIdAndUserId(
@@ -76,26 +83,69 @@ class ReviewService {
       };
     }
 
+    // Validar archivos multimedia si se proporcionaron
+    if (files && files.length > 0) {
+      const validation = validateUploadedFiles(files);
+      if (!validation.isValid) {
+        throw {
+          status: 400,
+          message: "Errores en los archivos multimedia.",
+          details: validation.errors,
+        };
+      }
+    }
+
     try {
       // Crear la reseña
       const newReview = await reviewRepository.create({
-        rating,
+        rating: parsedRating,
         content: content.trim(),
         placeId,
         userId,
       });
 
+      // Procesar archivos multimedia si existen
+      let mediaRecords = [];
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const mediaData = {
+            reviewId: newReview.id,
+            filename: file.filename || `${uuidv4()}${path.extname(file.originalname)}`,
+            originalFilename: file.originalname,
+            fileSize: file.size,
+            mimeType: file.mimetype,
+            fileData: file.buffer, // Raw file bytes
+          };
+
+          const mediaRecord = await reviewMediaRepository.create(mediaData);
+          mediaRecords.push({
+            id: mediaRecord.id,
+            filename: mediaRecord.filename,
+            originalFilename: mediaRecord.originalFilename,
+            fileSize: mediaRecord.fileSize,
+            mimeType: mediaRecord.mimeType,
+            url: getFileUrl(mediaRecord.filename),
+            createdAt: mediaRecord.createdAt,
+          });
+        }
+      }
+
       logger.info(
-        `Review created successfully: ${newReview.id} for place ${placeId} by user ${userId}`
+        `Review created successfully: ${newReview.id} for place ${placeId} by user ${userId} with ${mediaRecords.length} media files`
       );
 
       return {
         success: true,
         message: "Reseña creada exitosamente",
-        data: newReview,
+        data: {
+          ...newReview,
+          media: mediaRecords,
+        },
       };
     } catch (error) {
-      logger.error(`Error creating review: ${error.message}`);
+      // No need to delete files since they're stored in memory/database now
+
+      logger.error(`Error creating review: ${error.message}, stack: ${error.stack}`);
       throw {
         status: 500,
         message: "Error al guardar la reseña.",
@@ -122,17 +172,34 @@ class ReviewService {
 
       const reviews = await reviewRepository.findByPlaceId(placeId);
 
-      // Formatear las reseñas para incluir el email del usuario
-      const formattedReviews = reviews.map((review) => ({
-        id: review.id,
-        rating: review.rating,
-        content: review.content,
-        placeId: review.placeId,
-        userId: review.userId,
-        userEmail: review.user?.email || "Usuario anónimo",
-        createdAt: review.createdAt,
-        updatedAt: review.updatedAt,
-      }));
+      // Formatear las reseñas para incluir el email del usuario y media
+      const formattedReviews = await Promise.all(
+        reviews.map(async (review) => {
+          // Obtener media de la reseña
+          const media = await reviewMediaRepository.findByReviewId(review.id);
+          const formattedMedia = media.map((m) => ({
+            id: m.id,
+            filename: m.filename,
+            originalFilename: m.originalFilename,
+            fileSize: m.fileSize,
+            mimeType: m.mimeType,
+            url: `/api/media/${m.id}`, // URL to serve file from database
+            createdAt: m.createdAt,
+          }));
+
+          return {
+            id: review.id,
+            rating: review.rating,
+            content: review.content,
+            placeId: review.placeId,
+            userId: review.userId,
+            userEmail: review.user?.email || "Usuario anónimo",
+            media: formattedMedia,
+            createdAt: review.createdAt,
+            updatedAt: review.updatedAt,
+          };
+        })
+      );
 
       logger.info(
         `Retrieved ${formattedReviews.length} reviews for place ${placeId}`
