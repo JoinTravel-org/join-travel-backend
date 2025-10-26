@@ -147,6 +147,63 @@ const options = {
             },
           },
         },
+        ChatMessage: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'Unique identifier for the message (includes -user or -ai suffix)',
+            },
+            type: {
+              type: 'string',
+              enum: ['user', 'ai'],
+              description: 'Type of message: user or ai',
+            },
+            content: {
+              type: 'string',
+              description: 'Message content',
+            },
+            conversationId: {
+              type: 'string',
+              format: 'uuid',
+              nullable: true,
+              description: 'Conversation ID (optional)',
+            },
+            timestamp: {
+              type: 'number',
+              description: 'Client-side timestamp',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Server-side creation timestamp',
+            },
+          },
+        },
+        Conversation: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              format: 'uuid',
+              description: 'Unique identifier for the conversation',
+            },
+            userId: {
+              type: 'string',
+              format: 'uuid',
+              description: 'User ID who owns the conversation',
+            },
+            title: {
+              type: 'string',
+              description: 'Conversation title',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Creation timestamp',
+            },
+          },
+        },
       },
       securitySchemes: {
         bearerAuth: {

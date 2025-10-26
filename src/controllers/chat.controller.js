@@ -144,7 +144,36 @@ export const createConversation = async (req, res, next) => {
       conversation: result,
     });
   } catch (err) {
-    logger.error(`Create conversation endpoint failed for user: ${req.body.userId}, error: ${err.message}`);
+    logger.error(`Create conversation endpoint failed for user: ${req.user.id}, error: ${err.message}`);
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+        ...(err.details && { errors: err.details }),
+      });
+    }
+    next(err);
+  }
+};
+
+/**
+ * Delete current conversation
+ * DELETE /api/chat/conversations/current
+ */
+export const deleteCurrentConversation = async (req, res, next) => {
+  logger.info(`Delete current conversation endpoint called for user: ${req.user.id}`);
+  try {
+    const userId = req.user.id;
+
+    const result = await chatService.deleteCurrentConversation(userId);
+
+    logger.info(`Delete current conversation endpoint completed successfully for user: ${userId}`);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (err) {
+    logger.error(`Delete current conversation endpoint failed for user: ${req.user.id}, error: ${err.message}`);
     if (err.status) {
       return res.status(err.status).json({
         success: false,

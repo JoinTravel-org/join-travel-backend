@@ -49,6 +49,30 @@ class ConversationRepository {
       { updatedAt: new Date() }
     );
   }
+
+  /**
+   * Delete conversation by ID
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<boolean>} True if deleted, false if not found
+   */
+  async deleteById(conversationId) {
+    const result = await this.repository.delete({ id: conversationId });
+    return result.affected > 0;
+  }
+
+  /**
+   * Find the most recent conversation for a user
+   * @param {string} userId - User ID
+   * @returns {Promise<Object|null>} Most recent conversation or null
+   */
+  async findMostRecentByUserId(userId) {
+    const conversations = await this.repository.find({
+      where: { userId },
+      order: { updatedAt: "DESC" },
+      take: 1,
+    });
+    return conversations[0] || null;
+  }
 }
 
 export default new ConversationRepository();

@@ -51,25 +51,41 @@ Please provide a helpful, accurate response based on the reviews and general tra
   }
 
   /**
-   * Send a message and get AI response
-   * @param {Object} messageData - Message data
-   * @param {string} messageData.userId - User ID
-   * @param {string} messageData.message - User message
-   * @param {string} messageData.conversationId - Conversation ID (optional)
-   * @param {number} messageData.timestamp - Timestamp
-   * @returns {Promise<Object>} Message with AI response
-   */
+    * Send a message and get AI response
+    * @param {Object} messageData - Message data
+    * @param {string} messageData.userId - User ID
+    * @param {string} messageData.message - User message
+    * @param {string} messageData.conversationId - Conversation ID (optional)
+    * @param {number} messageData.timestamp - Timestamp
+    * @returns {Promise<Object>} Message with AI response
+    */
   async sendMessage(messageData) {
     const { userId, message, conversationId, timestamp } = messageData;
 
     try {
+      // Load conversation history for context
+      let conversationHistory = "";
+      if (conversationId) {
+        const previousMessages = await chatMessageRepository.findByUserId(
+          userId,
+          10, // Get last 10 messages for context
+          0,
+          conversationId
+        );
+        // Reverse to get chronological order (oldest first)
+        const chronologicalMessages = previousMessages.reverse();
+        conversationHistory = chronologicalMessages
+          .map(msg => `User: ${msg.message}\nAssistant: ${msg.response}`)
+          .join('\n\n');
+      }
+
       // Load reviews context
       const reviewsContext = await this.loadReviewsContext();
 
-      // Generate AI response
+      // Generate AI response with conversation history
       const response = await this.chain.invoke({
         reviews_context: reviewsContext,
-        question: message,
+        question: conversationHistory ? `${conversationHistory}\n\nCurrent question: ${message}` : message,
       });
 
       // Create chat message record
@@ -93,6 +109,7 @@ Please provide a helpful, accurate response based on the reviews and general tra
         response: chatMessage.response,
         conversationId: chatMessage.conversationId,
         timestamp: chatMessage.timestamp,
+        createdAt: chatMessage.createdAt,
       };
     } catch (error) {
       logger.error(`Error sending message: ${error.message}`);
@@ -124,8 +141,31 @@ Please provide a helpful, accurate response based on the reviews and general tra
       const total = await chatMessageRepository.countByUserId(userId, conversationId);
       const hasMore = offset + messages.length < total;
 
+      // Transform messages to interleave user and AI messages by date
+      const interleavedMessages = [];
+      messages.forEach(msg => {
+        // Add user message
+        interleavedMessages.push({
+          id: `${msg.id}-user`,
+          type: 'user',
+          content: msg.message,
+          conversationId: msg.conversationId,
+          timestamp: msg.timestamp,
+          createdAt: msg.createdAt,
+        });
+        // Add AI response
+        interleavedMessages.push({
+          id: `${msg.id}-ai`,
+          type: 'ai',
+          content: msg.response,
+          conversationId: msg.conversationId,
+          timestamp: msg.timestamp,
+          createdAt: msg.createdAt,
+        });
+      });
+
       return {
-        messages,
+        messages: interleavedMessages,
         total,
         hasMore,
       };
@@ -203,6 +243,52 @@ Please provide a helpful, accurate response based on the reviews and general tra
       throw {
         status: 500,
         message: "Error creating conversation",
+        details: [error.message],
+      };
+    }
+  }
+
+  /**
+   * Delete the current conversation for a user
+   * @param {string} userId - User ID
+   * @returns {Promise<Object>} Deletion result
+   */
+  async deleteCurrentConversation(userId) {
+    try {
+      // Find the most recent conversation for the user
+      const currentConversation = await conversationRepository.findMostRecentByUserId(userId);
+
+      if (!currentConversation) {
+        throw {
+          status: 404,
+          message: "No active conversation found for this user",
+        };
+      }
+
+      // Delete all messages in the conversation
+      await chatMessageRepository.deleteByConversationId(currentConversation.id);
+
+      // Delete the conversation itself
+      const deleted = await conversationRepository.deleteById(currentConversation.id);
+
+      if (!deleted) {
+        throw {
+          status: 500,
+          message: "Failed to delete conversation",
+        };
+      }
+
+      return {
+        message: "Conversation deleted successfully",
+      };
+    } catch (error) {
+      logger.error(`Error deleting current conversation: ${error.message}`);
+      if (error.status) {
+        throw error;
+      }
+      throw {
+        status: 500,
+        message: "Error deleting conversation",
         details: [error.message],
       };
     }

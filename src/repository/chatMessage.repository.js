@@ -31,7 +31,7 @@ class ChatMessageRepository {
 
     return await this.repository.find({
       where,
-      order: { timestamp: "DESC" },
+      order: { createdAt: "DESC" },
       take: limit,
       skip: offset,
       relations: ["conversation"],
@@ -61,7 +61,7 @@ class ChatMessageRepository {
   async findLastByConversationId(conversationId) {
     const messages = await this.repository.find({
       where: { conversationId },
-      order: { timestamp: "DESC" },
+      order: { createdAt: "DESC" },
       take: 1,
     });
     return messages[0] || null;
@@ -76,6 +76,16 @@ class ChatMessageRepository {
     return await this.repository.count({
       where: { conversationId },
     });
+  }
+
+  /**
+   * Delete all messages by conversation ID
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<number>} Number of messages deleted
+   */
+  async deleteByConversationId(conversationId) {
+    const result = await this.repository.delete({ conversationId });
+    return result.affected || 0;
   }
 }
 

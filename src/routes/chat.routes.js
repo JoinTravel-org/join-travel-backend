@@ -5,6 +5,7 @@ import {
   getChatHistory,
   getConversations,
   createConversation,
+  deleteCurrentConversation,
 } from "../controllers/chat.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -237,5 +238,48 @@ router.get("/conversations/:userId", getConversations);
  *               $ref: '#/components/schemas/Error'
  */
 router.post("/conversations", createConversation);
+
+/**
+ * @swagger
+ * /api/chat/conversations/current:
+ *   delete:
+ *     summary: Delete the current conversation for the authenticated user
+ *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Conversation deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Conversation deleted successfully"
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: No active conversation found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.delete("/conversations/current", deleteCurrentConversation);
 
 export default router;
