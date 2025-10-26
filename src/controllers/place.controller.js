@@ -5,12 +5,12 @@ import { authenticate } from "../middleware/auth.middleware.js";
 /**
  * Agrega un nuevo lugar
  * POST /api/places
- * Body: { name, address, latitude, longitude }
+ * Body: { name, address, latitude, longitude, image?, description?, city? }
  */
 export const addPlace = async (req, res, next) => {
   logger.info(`Add place endpoint called with name: ${req.body.name}`);
   try {
-    const { name, address, latitude, longitude, image } = req.body;
+    const { name, address, latitude, longitude, image, description, city } = req.body;
 
     // Validar que se envíen los campos requeridos
     if (!name || !address || latitude === undefined || longitude === undefined) {
@@ -20,7 +20,7 @@ export const addPlace = async (req, res, next) => {
       });
     }
 
-    const result = await placeService.addPlace({ name, address, latitude, longitude, image });
+    const result = await placeService.addPlace({ name, address, latitude, longitude, image, description, city });
 
     logger.info(`Add place endpoint completed successfully for place: ${result.place.id}`);
     res.status(201).json({
@@ -33,6 +33,8 @@ export const addPlace = async (req, res, next) => {
         latitude: result.place.latitude,
         longitude: result.place.longitude,
         image: result.place.image,
+        description: result.place.description,
+        city: result.place.city,
         createdAt: result.place.createdAt,
       },
     });
