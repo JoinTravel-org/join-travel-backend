@@ -9,22 +9,21 @@ class PlaceService {
    * @returns {Promise<Object>} - { place, message }
    */
   async addPlace({ name, address, latitude, longitude, image, description, city }) {
-    
-    
-    
-    
-    // 2. Verificar si el lugar ya existe (por nombre y coordenadas exactas)
-    const existingPlace = await placeRepository.findByNameAndCoordinates(
+
+
+
+
+
+    // 2. Verificar si el lugar ya existe (por nombre y dirección exactas)
+    const existingPlace = await placeRepository.findByNameAndAddress(
       name,
-      latitude,
-      longitude
+      address
     );
     if (existingPlace) {
       const error = new Error("Este lugar ya está registrado.");
       error.status = 409;
       throw error;
     }
-    
     // 1. Validar datos del lugar
     const validation = validatePlaceData({
       name,
@@ -79,27 +78,26 @@ class PlaceService {
    * @param {number} longitude - Longitud
    * @returns {Promise<Object>} - { exists: boolean, place?: Object }
    */
-  async checkPlaceExistence(name, latitude, longitude) {
-    // 1. Validar coordenadas
-    const coordValidation = validatePlaceData({
+  async checkPlaceExistence(name, address) {
+    // 1. Validar datos básicos
+    const validation = validatePlaceData({
       name,
-      address: "dummy",
-      latitude,
-      longitude,
+      address,
+      latitude: 0, // dummy values for validation
+      longitude: 0,
     });
-    if (!coordValidation.isValid) {
-      const error = new Error("Invalid coordinates");
+    if (!validation.isValid) {
+      const error = new Error("Invalid place data");
       error.status = 400;
-      error.details = coordValidation.errors;
+      error.details = validation.errors;
       throw error;
     }
 
     try {
-      // 2. Buscar lugar por nombre y coordenadas exactas
-      const place = await placeRepository.findByNameAndCoordinates(
+      // 2. Buscar lugar por nombre y dirección exactas
+      const place = await placeRepository.findByNameAndAddress(
         name,
-        latitude,
-        longitude
+        address
       );
 
       if (place) {

@@ -110,3 +110,5 @@ coverage/
 
 # ESLint cache
 .eslintcache
+
+.kilocodeignore

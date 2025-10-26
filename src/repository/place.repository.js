@@ -32,6 +32,21 @@ class PlaceRepository {
   }
 
   /**
+   * Busca un lugar por nombre y dirección exactas
+   * @param {string} name - Nombre del lugar
+   * @param {string} address - Dirección del lugar
+   * @returns {Promise<Place|null>} - Lugar encontrado o null
+   */
+  async findByNameAndAddress(name, address) {
+    return await this.getRepository().findOne({
+      where: {
+        name,
+        address,
+      },
+    });
+  }
+
+  /**
    * Busca un lugar por ID
    * @param {string} id - ID del lugar
    * @returns {Promise<Place|null>} - Lugar encontrado o null

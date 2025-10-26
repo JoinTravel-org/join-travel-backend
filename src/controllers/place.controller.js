@@ -59,28 +59,17 @@ export const addPlace = async (req, res, next) => {
 export const checkPlace = async (req, res, next) => {
   logger.info(`Check place endpoint called with name: ${req.query.name}`);
   try {
-    const { name, latitude, longitude } = req.query;
+    const { name, address } = req.query;
 
     // Validar parámetros requeridos
-    if (!name || !latitude || !longitude) {
+    if (!name || !address) {
       return res.status(400).json({
         success: false,
-        message: "Nombre, latitud y longitud son requeridos como parámetros de consulta.",
+        message: "Nombre y dirección son requeridos como parámetros de consulta.",
       });
     }
 
-    // Convertir strings a números
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
-
-    if (isNaN(lat) || isNaN(lng)) {
-      return res.status(400).json({
-        success: false,
-        message: "Latitud y longitud deben ser números válidos.",
-      });
-    }
-
-    const result = await placeService.checkPlaceExistence(name, lat, lng);
+    const result = await placeService.checkPlaceExistence(name, address);
 
     logger.info(`Check place endpoint completed successfully for name: ${name}`);
     res.status(200).json({
