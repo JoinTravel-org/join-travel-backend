@@ -121,7 +121,7 @@ export const validateDescription = (description) => {
 
 /**
  * Valida datos de lugar
- * @param {Object} placeData - Datos del lugar { name, address, latitude, longitude, image? }
+ * @param {Object} placeData - Datos del lugar { name, address, latitude, longitude, image?, description?, city? }
  * @returns {object} - { isValid: boolean, errors: string[] }
  */
 export const validatePlaceData = (placeData) => {
@@ -143,6 +143,17 @@ export const validatePlaceData = (placeData) => {
   const imageValidation = validateImageUrl(placeData.image);
   if (!imageValidation.isValid) {
     errors.push(...imageValidation.errors);
+  }
+
+  if (placeData.description !== undefined) {
+    const descValidation = validateDescription(placeData.description);
+    if (!descValidation.isValid) {
+      errors.push(...descValidation.errors);
+    }
+  }
+
+  if (placeData.city !== undefined && (typeof placeData.city !== 'string' || placeData.city.trim().length === 0)) {
+    errors.push("La ciudad debe ser una cadena de texto no vacía");
   }
 
   return {

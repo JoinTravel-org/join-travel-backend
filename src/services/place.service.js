@@ -5,10 +5,10 @@ import logger from "../config/logger.js";
 class PlaceService {
   /**
    * Agrega un nuevo lugar
-   * @param {Object} placeData - { name, address, latitude, longitude }
+   * @param {Object} placeData - { name, address, latitude, longitude, image?, description?, city? }
    * @returns {Promise<Object>} - { place, message }
    */
-  async addPlace({ name, address, latitude, longitude, image }) {
+  async addPlace({ name, address, latitude, longitude, image, description, city }) {
     
     
     
@@ -32,6 +32,8 @@ class PlaceService {
       latitude,
       longitude,
       image,
+      description,
+      city,
     });
     if (!validation.isValid) {
       const error = new Error("Invalid place data");
@@ -50,6 +52,8 @@ class PlaceService {
         latitude,
         longitude,
         image: image ? image.trim() : null,
+        description: description ? description.trim() : null,
+        city: city ? city.trim() : null,
       });
 
       logger.info(`Place added successfully: ${place.id} - ${place.name}`);
