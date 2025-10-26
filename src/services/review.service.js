@@ -229,6 +229,7 @@ class ReviewService {
         userEmail: review.user?.email || "Usuario anónimo",
         createdAt: review.createdAt,
         updatedAt: review.updatedAt,
+        placeName: review.place?.name || "Lugar desconocido",
       }));
 
       logger.info(
