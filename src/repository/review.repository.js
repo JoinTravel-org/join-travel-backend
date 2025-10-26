@@ -90,6 +90,32 @@ class ReviewRepository {
       },
     });
   }
+
+  /**
+   * Encuentra todas las reseñas con paginación
+   * @param {number} offset - Número de reseñas a saltar
+   * @param {number} limit - Número de reseñas a retornar
+   * @returns {Promise<Review[]>} Array de reseñas
+   */
+  async findAll(offset = 0, limit = 20) {
+    return await this.getRepository()
+      .createQueryBuilder("review")
+      .leftJoinAndSelect("review.user", "user")
+      .orderBy("review.createdAt", "DESC")
+      .skip(offset)
+      .take(limit)
+      .getMany();
+  }
+
+  /**
+   * Cuenta el total de reseñas
+   * @returns {Promise<number>} Total de reseñas
+   */
+  async count() {
+    return await this.getRepository().count();
+  }
 }
+
+
 
 export default new ReviewRepository();
