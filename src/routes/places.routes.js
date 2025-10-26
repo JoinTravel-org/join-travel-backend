@@ -10,6 +10,7 @@ import {
   createReview,
   getReviewsByPlace,
   getReviewStats,
+  getAllReviews,
 } from "../controllers/review.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -255,6 +256,108 @@ router.post("/", addPlace);
  *                   example: "Servicio externo no disponible."
  */
 router.get("/check", checkPlace);
+
+/**
+ * @swagger
+ * /api/places/reviews:
+ *   get:
+ *     summary: Get all reviews with pagination
+ *     description: Retrieves a paginated list of all reviews across all places
+ *     tags: [Reviews]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: The page number to retrieve
+ *         example: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 20
+ *         description: Number of reviews per page
+ *         example: 20
+ *     responses:
+ *       200:
+ *         description: Reviews retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       rating:
+ *                         type: integer
+ *                         minimum: 1
+ *                         maximum: 5
+ *                         example: 4
+ *                       content:
+ *                         type: string
+ *                         example: "Great place to visit!"
+ *                       placeId:
+ *                         type: string
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       userId:
+ *                         type: string
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       userEmail:
+ *                         type: string
+ *                         example: "user@example.com"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-10-22T04:39:40.043Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-10-22T04:39:40.043Z"
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       example: 100
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 5
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error al obtener las reseñas."
+ */
+router.get("/reviews", getAllReviews);
 
 /**
  * @swagger
@@ -643,5 +746,8 @@ router.get("/:placeId/reviews", getReviewsByPlace);
  *         description: Place not found
  */
 router.get("/:placeId/reviews/stats", getReviewStats);
+
+
+
 
 export default router;

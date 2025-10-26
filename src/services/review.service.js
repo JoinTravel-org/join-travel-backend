@@ -267,6 +267,61 @@ class ReviewService {
       };
     }
   }
+  /**
+   * Obtiene todas las reseñas con paginación
+   * @param {number} page - Número de página (1-based, default: 1)
+   * @param {number} limit - Número de reseñas por página (default: 20)
+   * @returns {Promise<Object>} - Objeto con success, data (array de reseñas) y metadata de paginación
+   */
+  async getAllReviews(page = 1, limit = 20) {
+    try {
+      // Validar parámetros de paginación
+      page = Math.max(1, parseInt(page));
+      limit = Math.min(100, Math.max(1, parseInt(limit)));
+
+      const offset = (page - 1) * limit;
+
+      const [reviews, total] = await Promise.all([
+        reviewRepository.findAll(offset, limit),
+        reviewRepository.count(),
+      ]);
+
+      // Formatear las reseñas para incluir el email del usuario
+      const formattedReviews = reviews.map((review) => ({
+        id: review.id,
+        rating: review.rating,
+        content: review.content,
+        placeId: review.placeId,
+        userId: review.userId,
+        userEmail: review.user?.email || "Usuario anónimo",
+        createdAt: review.createdAt,
+        updatedAt: review.updatedAt,
+        placeName: review.place?.name || "Lugar desconocido",
+      }));
+
+      logger.info(
+        `Retrieved ${formattedReviews.length} reviews (page ${page}, limit ${limit})`
+      );
+
+      return {
+        success: true,
+        data: formattedReviews,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      logger.error(`Error retrieving all reviews: ${error.message}`);
+      throw {
+        status: 500,
+        message: "Error al obtener las reseñas.",
+        details: error.message,
+      };
+    }
+  }
 }
 
 export default new ReviewService();

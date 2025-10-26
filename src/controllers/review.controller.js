@@ -179,3 +179,40 @@ export const getReviewStats = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * Obtiene todas las reseñas con paginación
+ * GET /api/reviews
+ */
+export const getAllReviews = async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+
+  logger.info(`Get all reviews endpoint called with page: ${page}, limit: ${limit}`);
+
+  try {
+    const result = await reviewService.getAllReviews(page, limit);
+
+    logger.info(
+      `Get all reviews endpoint completed successfully. Retrieved ${result.data.length} reviews`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result.data,
+      pagination: result.pagination
+    });
+  } catch (err) {
+    logger.error(`Get all reviews endpoint failed: ${err.message}`);
+
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+        details: err.details
+      });
+    }
+
+    next(err);
+  }
+};
