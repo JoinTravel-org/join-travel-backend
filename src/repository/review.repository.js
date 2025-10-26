@@ -101,6 +101,21 @@ class ReviewRepository {
     return await this.getRepository()
       .createQueryBuilder("review")
       .leftJoinAndSelect("review.user", "user")
+      .leftJoinAndSelect("review.place", "place") // Add join with place
+      .select([
+        "review.id",
+        "review.rating",
+        "review.content",
+        "review.placeId",
+        "review.userId",
+        "review.createdAt",
+        "review.updatedAt",
+        "user.email",
+        "place.id",
+        "place.name",
+        "place.image",
+        "place.city",
+      ])
       .orderBy("review.createdAt", "DESC")
       .skip(offset)
       .take(limit)
@@ -115,7 +130,5 @@ class ReviewRepository {
     return await this.getRepository().count();
   }
 }
-
-
 
 export default new ReviewRepository();
