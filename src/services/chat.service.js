@@ -122,13 +122,13 @@ Please provide a helpful, accurate response based on the reviews and general tra
   }
 
   /**
-   * Get chat history for a user
-   * @param {string} userId - User ID
-   * @param {number} limit - Number of messages to retrieve
-   * @param {number} offset - Pagination offset
-   * @param {string} conversationId - Filter by conversation (optional)
-   * @returns {Promise<Object>} Chat history
-   */
+    * Get chat history for a user
+    * @param {string} userId - User ID
+    * @param {number} limit - Number of messages to retrieve
+    * @param {number} offset - Pagination offset
+    * @param {string} conversationId - Filter by conversation (optional)
+    * @returns {Promise<Object>} Chat history
+    */
   async getChatHistory(userId, limit = 50, offset = 0, conversationId = null) {
     try {
       const messages = await chatMessageRepository.findByUserId(
@@ -141,31 +141,8 @@ Please provide a helpful, accurate response based on the reviews and general tra
       const total = await chatMessageRepository.countByUserId(userId, conversationId);
       const hasMore = offset + messages.length < total;
 
-      // Transform messages to interleave user and AI messages by date
-      const interleavedMessages = [];
-      messages.forEach(msg => {
-        // Add user message
-        interleavedMessages.push({
-          id: `${msg.id}-user`,
-          type: 'user',
-          content: msg.message,
-          conversationId: msg.conversationId,
-          timestamp: msg.timestamp,
-          createdAt: msg.createdAt,
-        });
-        // Add AI response
-        interleavedMessages.push({
-          id: `${msg.id}-ai`,
-          type: 'ai',
-          content: msg.response,
-          conversationId: msg.conversationId,
-          timestamp: msg.timestamp,
-          createdAt: msg.createdAt,
-        });
-      });
-
       return {
-        messages: interleavedMessages,
+        messages,
         total,
         hasMore,
       };
@@ -249,10 +226,10 @@ Please provide a helpful, accurate response based on the reviews and general tra
   }
 
   /**
-   * Delete the current conversation for a user
-   * @param {string} userId - User ID
-   * @returns {Promise<Object>} Deletion result
-   */
+    * Delete the current conversation for a user
+    * @param {string} userId - User ID
+    * @returns {Promise<Object>} Deletion result
+    */
   async deleteCurrentConversation(userId) {
     try {
       // Find the most recent conversation for the user
@@ -289,6 +266,34 @@ Please provide a helpful, accurate response based on the reviews and general tra
       throw {
         status: 500,
         message: "Error deleting conversation",
+        details: [error.message],
+      };
+    }
+  }
+
+  /**
+    * Delete all chat history for a user
+    * @param {string} userId - User ID
+    * @returns {Promise<Object>} Deletion result
+    */
+  async deleteAllChatHistory(userId) {
+    try {
+      // Delete all messages for the user
+      const deletedMessages = await chatMessageRepository.deleteByUserId(userId);
+
+      // Delete all conversations for the user
+      const deletedConversations = await conversationRepository.deleteByUserId(userId);
+
+      return {
+        message: "All chat history deleted successfully",
+        deletedMessages: deletedMessages,
+        deletedConversations: deletedConversations,
+      };
+    } catch (error) {
+      logger.error(`Error deleting all chat history: ${error.message}`);
+      throw {
+        status: 500,
+        message: "Error deleting chat history",
         details: [error.message],
       };
     }

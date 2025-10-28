@@ -61,10 +61,10 @@ class ConversationRepository {
   }
 
   /**
-   * Find the most recent conversation for a user
-   * @param {string} userId - User ID
-   * @returns {Promise<Object|null>} Most recent conversation or null
-   */
+    * Find the most recent conversation for a user
+    * @param {string} userId - User ID
+    * @returns {Promise<Object|null>} Most recent conversation or null
+    */
   async findMostRecentByUserId(userId) {
     const conversations = await this.repository.find({
       where: { userId },
@@ -72,6 +72,16 @@ class ConversationRepository {
       take: 1,
     });
     return conversations[0] || null;
+  }
+
+  /**
+    * Delete all conversations by user ID
+    * @param {string} userId - User ID
+    * @returns {Promise<number>} Number of conversations deleted
+    */
+  async deleteByUserId(userId) {
+    const result = await this.repository.delete({ userId });
+    return result.affected || 0;
   }
 }
 

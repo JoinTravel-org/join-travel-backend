@@ -184,3 +184,32 @@ export const deleteCurrentConversation = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * Delete all chat history for the authenticated user
+ * DELETE /api/chat/messages
+ */
+export const deleteAllChatHistory = async (req, res, next) => {
+  logger.info(`Delete all chat history endpoint called for user: ${req.user.id}`);
+  try {
+    const userId = req.user.id;
+
+    const result = await chatService.deleteAllChatHistory(userId);
+
+    logger.info(`Delete all chat history endpoint completed successfully for user: ${userId}`);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (err) {
+    logger.error(`Delete all chat history endpoint failed for user: ${req.user.id}, error: ${err.message}`);
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+        ...(err.details && { errors: err.details }),
+      });
+    }
+    next(err);
+  }
+};

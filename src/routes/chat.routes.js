@@ -6,6 +6,7 @@ import {
   getConversations,
   createConversation,
   deleteCurrentConversation,
+  deleteAllChatHistory,
 } from "../controllers/chat.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -86,21 +87,13 @@ router.post("/messages", chatLimiter, sendMessage);
 
 /**
  * @swagger
- * /api/chat/messages/{userId}:
+ * /api/chat/messages/me:
  *   get:
- *     summary: Get chat history for a user
+ *     summary: Get chat history for the authenticated user
  *     tags: [Chat]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: User ID
- *         example: "123e4567-e89b-12d3-a456-426614174000"
  *       - in: query
  *         name: limit
  *         schema:
@@ -150,7 +143,7 @@ router.post("/messages", chatLimiter, sendMessage);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get("/messages/:userId", getChatHistory);
+router.get("/messages/me", getChatHistory);
 
 /**
  * @swagger
@@ -281,5 +274,42 @@ router.post("/conversations", createConversation);
  *               $ref: '#/components/schemas/Error'
  */
 router.delete("/conversations/current", deleteCurrentConversation);
+
+/**
+ * @swagger
+ * /api/chat/messages:
+ *   delete:
+ *     summary: Delete all chat history for the authenticated user
+ *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Chat history deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "All chat history deleted successfully"
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.delete("/messages", deleteAllChatHistory);
 
 export default router;

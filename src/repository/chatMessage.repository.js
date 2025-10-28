@@ -79,12 +79,22 @@ class ChatMessageRepository {
   }
 
   /**
-   * Delete all messages by conversation ID
-   * @param {string} conversationId - Conversation ID
-   * @returns {Promise<number>} Number of messages deleted
-   */
+    * Delete all messages by conversation ID
+    * @param {string} conversationId - Conversation ID
+    * @returns {Promise<number>} Number of messages deleted
+    */
   async deleteByConversationId(conversationId) {
     const result = await this.repository.delete({ conversationId });
+    return result.affected || 0;
+  }
+
+  /**
+    * Delete all messages by user ID
+    * @param {string} userId - User ID
+    * @returns {Promise<number>} Number of messages deleted
+    */
+  async deleteByUserId(userId) {
+    const result = await this.repository.delete({ userId });
     return result.affected || 0;
   }
 }
