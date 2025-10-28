@@ -24,6 +24,10 @@ export const getMediaFile = async (req, res, next) => {
     res.setHeader('Content-Type', mediaRecord.mimeType);
     res.setHeader('Content-Length', mediaRecord.fileSize);
     res.setHeader('Content-Disposition', `inline; filename="${mediaRecord.originalFilename}"`);
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     logger.info(
       `Serving media file: ${id}, size: ${mediaRecord.fileSize}, type: ${mediaRecord.mimeType}`
