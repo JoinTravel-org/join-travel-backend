@@ -17,6 +17,7 @@
   "dependencies": {
     "@langchain/core": "^0.3.0",
     "@langchain/google-genai": "^0.1.0",
+    "@langchain/xai": "^1.0.0",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.4.1",
     "cors": "^2.8.5",

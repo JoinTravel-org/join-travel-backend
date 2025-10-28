@@ -1,35 +1,57 @@
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { PromptTemplate } from "@langchain/core/prompts";
-import { RunnableSequence } from "@langchain/core/runnables";
+import { ChatXAI } from "@langchain/xai";
+import { SystemMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 import conversationRepository from "../repository/conversation.repository.js";
 import chatMessageRepository from "../repository/chatMessage.repository.js";
 import reviewRepository from "../repository/review.repository.js";
+import placeRepository from "../repository/place.repository.js";
+import UserRepository from "../repository/user.repository.js";
 import logger from "../config/logger.js";
 
 class ChatService {
   constructor() {
-    this.model = new ChatGoogleGenerativeAI({
-      modelName: "gemini-2.5-flash",
-      apiKey: process.env.GOOGLE_AI_API_KEY,
+    this.model = new ChatXAI({
+      model: "grok-code-fast-1",
+      apiKey: process.env.XAI_API_KEY,
       temperature: 0.7,
-      maxOutputTokens: 1000,
+      maxTokens: 1000,
     });
 
-    this.promptTemplate = PromptTemplate.fromTemplate(`
-You are a helpful AI assistant for JoinTravel, a travel platform. You have access to user reviews and ratings for various places.
+    this.systemPrompt = `Eres un asistente virtual útil y amable para JoinTravel, una plataforma de viajes que ayuda a los usuarios a descubrir lugares turísticos y conocer las opiniones de otros viajeros.  
+Tienes acceso a información detallada sobre los lugares disponibles y a reseñas y valoraciones de usuarios.
 
-Context from reviews:
+Usuario: {user_email}
+
+Lugares:
+{places_context}
+
+Reseñas:
 {reviews_context}
 
-User question: {question}
+Instrucciones:
+- Ofrece una respuesta clara, útil y precisa basada en la información de los lugares, las reseñas y tu conocimiento general sobre viajes.  
+- Si la pregunta se refiere a un lugar específico, utiliza la información disponible y las opiniones relevantes para enriquecer tu respuesta.  
+- Mantén un tono conversacional, cercano y positivo, como si fueras un guía turístico experto y amigable.  
+- Cuando sea apropiado, sugiere actividades, recomendaciones gastronómicas, eventos o consejos prácticos relacionados con el destino.  
+- Si falta información, reconoce la limitación de forma natural y ofrece alternativas o formas de obtener más detalles.
+- Manten los mensajes de respuesta cortos, entre 50 y 100 palabras.`;
+  }
 
-Please provide a helpful, accurate response based on the reviews and general travel knowledge. If the question is about specific places, reference the reviews when relevant. Keep your response conversational and friendly.
-`);
+  /**
+   * Load all places context for the AI
+   * @returns {Promise<string>} Formatted places context
+   */
+  async loadPlacesContext() {
+    try {
+      const { places } = await placeRepository.findPaginatedWithCount(1, 100); // Get up to 100 places to avoid token limits
+      const context = places.map(place =>
+        `Place: ${place.name}\nAddress: ${place.address}\nCity: ${place.city || 'Unknown City'}\nDescription: ${place.description || 'No description available'}\nRating: ${place.rating || 'Not rated'}\n---`
+      ).join('\n\n');
 
-    this.chain = RunnableSequence.from([
-      this.promptTemplate,
-      this.model,
-    ]);
+      return context;
+    } catch (error) {
+      logger.error(`Error loading places context: ${error.message}`);
+      return "No places available at the moment.";
+    }
   }
 
   /**
@@ -38,7 +60,7 @@ Please provide a helpful, accurate response based on the reviews and general tra
    */
   async loadReviewsContext() {
     try {
-      const reviews = await reviewRepository.findAll(0, 1000); // Get up to 1000 reviews
+      const reviews = await reviewRepository.findAll(0, 100); // Get up to 100 reviews to avoid token limits
       const context = reviews.map(review =>
         `Place: ${review.place?.name || 'Unknown Place'}\nRating: ${review.rating}/5\nReview: ${review.content}\nUser: ${review.user?.email || 'Anonymous'}\n---`
       ).join('\n\n');
@@ -63,37 +85,91 @@ Please provide a helpful, accurate response based on the reviews and general tra
     const { userId, message, conversationId, timestamp } = messageData;
 
     try {
+      // Load user info
+      const userRepository = new UserRepository();
+      const user = await userRepository.findById(userId);
+      const userEmail = user ? user.email : 'Unknown User';
+
+      // Load places and reviews context
+      const placesContext = await this.loadPlacesContext();
+      const reviewsContext = await this.loadReviewsContext();
+
+      // Build messages array
+      const messages = [
+        new SystemMessage(this.systemPrompt.replace('{user_email}', userEmail).replace('{places_context}', placesContext).replace('{reviews_context}', reviewsContext)),
+      ];
+
       // Load conversation history for context
-      let conversationHistory = "";
       if (conversationId) {
         const previousMessages = await chatMessageRepository.findByUserId(
           userId,
-          10, // Get last 10 messages for context
+          10, // Get last 10 messages for context to reduce token usage
           0,
           conversationId
         );
         // Reverse to get chronological order (oldest first)
         const chronologicalMessages = previousMessages.reverse();
-        conversationHistory = chronologicalMessages
-          .map(msg => `User: ${msg.message}\nAssistant: ${msg.response}`)
-          .join('\n\n');
+
+        logger.info(`Loading ${chronologicalMessages.length} previous messages for conversation ${conversationId}`);
+
+        // Add conversation history as HumanMessage and AIMessage pairs
+        chronologicalMessages.forEach((msg, index) => {
+          logger.info(`Adding message ${index}: HumanMessage - ${msg.message.substring(0, 50)}...`);
+          messages.push(new HumanMessage(msg.message));
+          if (msg.response) {
+            logger.info(`Adding message ${index}: AIMessage - ${msg.response.substring(0, 50)}...`);
+            messages.push(new AIMessage(msg.response));
+          } else {
+            logger.warn(`Message ${msg.id} has no response, skipping AIMessage`);
+          }
+        });
       }
 
-      // Load reviews context
-      const reviewsContext = await this.loadReviewsContext();
+      // Add current user message
+      messages.push(new HumanMessage(message));
 
-      // Generate AI response with conversation history
-      const response = await this.chain.invoke({
-        reviews_context: reviewsContext,
-        question: conversationHistory ? `${conversationHistory}\n\nCurrent question: ${message}` : message,
+      // Log messages being sent to AI
+      logger.info(`Sending ${messages.length} messages to AI model`);
+      messages.forEach((msg, index) => {
+        logger.info(`Message ${index}: ${msg.constructor.name} - ${msg.content ? msg.content.substring(0, 50) : 'No content'}...`);
       });
+
+      // Generate AI response
+      let response;
+      try {
+        logger.info('Invoking AI model...');
+        response = await this.model.invoke(messages);
+        logger.info(`AI Response type: ${typeof response}`);
+        logger.info(`AI Response keys: ${response ? Object.keys(response).join(', ') : 'No response object'}`);
+        logger.info(`AI Response content type: ${response && response.content ? typeof response.content : 'No content property'}`);
+        logger.info(`AI Response content length: ${response && response.content ? response.content.length : 'No content'}`);
+        logger.info(`AI Response generated successfully: ${response && response.content ? response.content.substring(0, 100) : 'No content'}...`);
+      } catch (aiError) {
+        logger.error(`AI model error: ${aiError.message}`);
+        logger.error(`AI model error stack: ${aiError.stack}`);
+        throw new Error(`AI service failed: ${aiError.message}`);
+      }
+
+      // Ensure response has content
+      if (!response) {
+        logger.error('AI response is null or undefined');
+        throw new Error('AI service returned null response');
+      }
+      if (!response.content) {
+        logger.error(`AI response has no content property. Response: ${JSON.stringify(response)}`);
+        throw new Error('AI service returned response without content');
+      }
+      if (typeof response.content !== 'string') {
+        logger.error(`AI response content is not a string. Type: ${typeof response.content}, Value: ${response.content}`);
+        throw new Error('AI service returned non-string content');
+      }
 
       // Create chat message record
       const chatMessage = await chatMessageRepository.create({
         userId,
         conversationId,
         message,
-        response: response.content,
+        response: response.content || 'Sorry, I could not generate a response at this time.',
         timestamp,
       });
 
