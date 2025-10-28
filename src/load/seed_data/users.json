@@ -1,11 +1,11 @@
 [
   {
-    "email": "user1@example.com",
+    "email": "walter@gmail.com",
     "password": "password123",
     "isEmailConfirmed": true
   },
   {
-    "email": "user2@example.com",
+    "email": "damian@yahoo.com.ar",
     "password": "password456",
     "isEmailConfirmed": true
   }
