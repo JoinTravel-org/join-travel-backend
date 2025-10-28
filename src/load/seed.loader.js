@@ -90,16 +90,46 @@ export default async function seedDatabase() {
         if (media && media.length > 0) {
           for (const mediaData of media) {
             try {
-              // Convert base64 string to Buffer if it's a string
+              // Check if filePath exists and try to read actual file, otherwise use placeholder
               let fileData = mediaData.fileData;
-              if (typeof fileData === 'string') {
-                fileData = Buffer.from(fileData, 'base64');
+              if (mediaData.filePath) {
+                try {
+                  const fullPath = path.join(process.cwd(), mediaData.filePath);
+                  if (fs.existsSync(fullPath)) {
+                    fileData = fs.readFileSync(fullPath);
+                    logger.info(`Loaded actual file: ${mediaData.filePath}`);
+                  } else {
+                    logger.warn(`File not found: ${mediaData.filePath}, using placeholder`);
+                    if (typeof fileData === 'string' && fileData.startsWith('PLACEHOLDER_')) {
+                      fileData = Buffer.from(fileData, 'utf8');
+                    } else {
+                      fileData = Buffer.from(fileData, 'base64');
+                    }
+                  }
+                } catch (fileError) {
+                  logger.error(`Error reading file ${mediaData.filePath}:`, fileError.message);
+                  if (typeof fileData === 'string' && fileData.startsWith('PLACEHOLDER_')) {
+                    fileData = Buffer.from(fileData, 'utf8');
+                  } else {
+                    fileData = Buffer.from(fileData, 'base64');
+                  }
+                }
+              } else if (typeof fileData === 'string') {
+                if (fileData.startsWith('PLACEHOLDER_')) {
+                  fileData = Buffer.from(fileData, 'utf8');
+                } else {
+                  fileData = Buffer.from(fileData, 'base64');
+                }
               }
 
               const mediaRecord = await reviewMediaRepository.create({
-                ...mediaData,
                 reviewId: review.id,
-                fileData: fileData
+                filename: mediaData.filename,
+                originalFilename: mediaData.originalFilename,
+                fileSize: mediaData.fileSize,
+                mimeType: mediaData.mimeType,
+                fileData: fileData,
+                filePath: null // Don't store filePath in database, only raw binary data
               });
               logger.info(`Seeded media ${mediaRecord.filename} for review ${review.id}`);
             } catch (mediaError) {
