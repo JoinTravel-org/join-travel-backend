@@ -155,5 +155,222 @@
     "placeId": 18,
     "userId": 2,
     "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Visité el Obelisco en una tarde soleada. Es el corazón de Buenos Aires y siempre hay algo happening alrededor. ¡Altamente recomendado!",
+    "placeId": 1,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Obelisco es impresionante de noche con todas las luces. Un lugar perfecto para una caminata nocturna por la ciudad.",
+    "placeId": 1,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Como porteño, el Obelisco es parte de mi identidad. Siempre vengo aquí cuando extraño Buenos Aires.",
+    "placeId": 1,
+    "userId": 5,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Obelisco es un ícono, pero a veces está muy concurrido. Aun así, vale la pena visitarlo al menos una vez.",
+    "placeId": 1,
+    "userId": 6,
+    "media": []
+  },
+  {
+    "rating": 3,
+    "content": "La Plaza de Mayo es histórica pero necesita mejor mantenimiento. Los fines de semana hay mucha actividad cultural.",
+    "placeId": 2,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Plaza de Mayo es el centro político de Argentina. Las manifestaciones aquí son parte de la historia viva del país.",
+    "placeId": 2,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "¡La Boca es pura pasión! Los colores, el tango, la comida... es la esencia de Buenos Aires. Volvería mil veces.",
+    "placeId": 3,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "La Boca tiene mucho encanto, pero hay que tener cuidado con los carteristas. Aun así, Caminito es mágico.",
+    "placeId": 3,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Palermo es mi barrio favorito. Los parques, los bares, la vida nocturna... ¡perfecto para jóvenes!",
+    "placeId": 4,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Palermo tiene los mejores restaurantes de Buenos Aires. La variedad gastronómica es increíble.",
+    "placeId": 4,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Puerto Madero es elegante y moderno. Los restaurantes junto al río son románticos y la comida es exquisita.",
+    "placeId": 5,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Puerto Madero es ideal para una cena especial. Los precios son elevados pero vale la pena por la vista.",
+    "placeId": 5,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "San Telmo es bohemio y artístico. Los anticuarios y la feria dominical son imperdibles.",
+    "placeId": 6,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Caminito es pura magia porteña. Los artistas callejeros y los colores hacen que te sientas en otro mundo.",
+    "placeId": 7,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Caminito es turístico pero mantiene su esencia. Perfecto para fotos y souvenirs.",
+    "placeId": 7,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Museo Nacional de Bellas Artes es un tesoro cultural. Las obras de Quinquela Martín son espectaculares.",
+    "placeId": 8,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El museo tiene una colección impresionante, pero algunas salas necesitan mejor iluminación.",
+    "placeId": 8,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "La Recoleta es misteriosa y hermosa. Los mausoleos son obras de arte y la historia es fascinante.",
+    "placeId": 9,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Cementerio de la Recoleta es único en el mundo. Una visita obligada para los amantes de la historia.",
+    "placeId": 9,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Ateneo es un sueño hecho realidad. Leer en un antiguo teatro es una experiencia mágica.",
+    "placeId": 10,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Ateneo es caro pero vale cada peso. La arquitectura es impresionante.",
+    "placeId": 10,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Barrio Chino es perfecto para comida asiática auténtica. Los precios son muy accesibles.",
+    "placeId": 11,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "La Bombonera transmite pasión. Aunque no soy hincha de Boca, respeto la energía del lugar.",
+    "placeId": 12,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Rosedal es romántico y tranquilo. Perfecto para un picnic o una caminata relajante.",
+    "placeId": 13,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "La Casa Rosada es aún más imponente de cerca. La historia política cobra vida en este edificio.",
+    "placeId": 14,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Jardín Japonés es un oasis de paz. Los koi y los cerezos crean una atmósfera zen perfecta.",
+    "placeId": 15,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Teatro Colón es majestuoso. La acústica es perfecta y la arquitectura es una obra de arte.",
+    "placeId": 16,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Las Cataratas del Iguazú son un espectáculo natural incomparable. El poder del agua es sobrecogedor.",
+    "placeId": 17,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Glaciar Perito Moreno es impresionante. La caminata por los senderos vale completamente la pena.",
+    "placeId": 18,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Las Cataratas son mejores de lo que imaginaba. El circuito inferior es especialmente impresionante.",
+    "placeId": 17,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Glaciar es una maravilla, pero hace mucho frío. Lleven abrigo aunque sea verano.",
+    "placeId": 18,
+    "userId": 4,
+    "media": []
   }
 ]

@@ -8,5 +8,25 @@
     "email": "damian@yahoo.com.ar",
     "password": "password456",
     "isEmailConfirmed": true
+  },
+  {
+    "email": "sebas@hotmail.com",
+    "password": "sebas2025",
+    "isEmailConfirmed": true
+  },
+  {
+    "email": "juan@outlook.com",
+    "password": "juan2025",
+    "isEmailConfirmed": true
+  },
+  {
+    "email": "kim@gmail.com",
+    "password": "kim2025",
+    "isEmailConfirmed": true
+  },
+  {
+    "email": "silvia@arnet.com.ar",
+    "password": "silvias2025",
+    "isEmailConfirmed": true
   }
 ]
