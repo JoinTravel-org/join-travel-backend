@@ -1,30 +1,29 @@
 import placeRepository from "../repository/place.repository.js";
-import { validatePlaceData } from "../utils/validators.js";
+import { validatePlaceData, validateDescription } from "../utils/validators.js";
 import logger from "../config/logger.js";
 
 class PlaceService {
   /**
    * Agrega un nuevo lugar
-   * @param {Object} placeData - { name, address, latitude, longitude }
+   * @param {Object} placeData - { name, address, latitude, longitude, image?, description?, city? }
    * @returns {Promise<Object>} - { place, message }
    */
-  async addPlace({ name, address, latitude, longitude, image }) {
-    
-    
-    
-    
-    // 2. Verificar si el lugar ya existe (por nombre y coordenadas exactas)
-    const existingPlace = await placeRepository.findByNameAndCoordinates(
+  async addPlace({ name, address, latitude, longitude, image, description, city }) {
+
+
+
+
+
+    // 2. Verificar si el lugar ya existe (por nombre y dirección exactas)
+    const existingPlace = await placeRepository.findByNameAndAddress(
       name,
-      latitude,
-      longitude
+      address
     );
     if (existingPlace) {
       const error = new Error("Este lugar ya está registrado.");
       error.status = 409;
       throw error;
     }
-    
     // 1. Validar datos del lugar
     const validation = validatePlaceData({
       name,
@@ -32,6 +31,8 @@ class PlaceService {
       latitude,
       longitude,
       image,
+      description,
+      city,
     });
     if (!validation.isValid) {
       const error = new Error("Invalid place data");
@@ -50,6 +51,8 @@ class PlaceService {
         latitude,
         longitude,
         image: image ? image.trim() : null,
+        description: description ? description.trim() : null,
+        city: city ? city.trim() : null,
       });
 
       logger.info(`Place added successfully: ${place.id} - ${place.name}`);
@@ -75,27 +78,26 @@ class PlaceService {
    * @param {number} longitude - Longitud
    * @returns {Promise<Object>} - { exists: boolean, place?: Object }
    */
-  async checkPlaceExistence(name, latitude, longitude) {
-    // 1. Validar coordenadas
-    const coordValidation = validatePlaceData({
+  async checkPlaceExistence(name, address) {
+    // 1. Validar datos básicos
+    const validation = validatePlaceData({
       name,
-      address: "dummy",
-      latitude,
-      longitude,
+      address,
+      latitude: 0, // dummy values for validation
+      longitude: 0,
     });
-    if (!coordValidation.isValid) {
-      const error = new Error("Invalid coordinates");
+    if (!validation.isValid) {
+      const error = new Error("Invalid place data");
       error.status = 400;
-      error.details = coordValidation.errors;
+      error.details = validation.errors;
       throw error;
     }
 
     try {
-      // 2. Buscar lugar por nombre y coordenadas exactas
-      const place = await placeRepository.findByNameAndCoordinates(
+      // 2. Buscar lugar por nombre y dirección exactas
+      const place = await placeRepository.findByNameAndAddress(
         name,
-        latitude,
-        longitude
+        address
       );
 
       if (place) {
@@ -165,11 +167,62 @@ class PlaceService {
   }
 
   /**
-   * Obtiene un lugar por su ID
-   * @param {string} id - ID del lugar a buscar
-   * @returns {Promise<Object>} - Lugar encontrado
-   * @throws {Error} - Si el lugar no existe o hay un error en la búsqueda
-   */
+    * Actualiza la descripción de un lugar
+    * @param {string} id - ID del lugar a actualizar
+    * @param {string} description - Nueva descripción
+    * @returns {Promise<Object>} - Lugar actualizado
+    * @throws {Error} - Si el lugar no existe, validación falla o hay error en la actualización
+    */
+  async updateDescription(id, description) {
+    try {
+      if (!id) {
+        const error = new Error("ID is required");
+        error.status = 400;
+        throw error;
+      }
+
+      // Validar descripción
+      const validation = validateDescription(description);
+      if (!validation.isValid) {
+        const error = new Error("Invalid description");
+        error.status = 400;
+        error.details = validation.errors;
+        throw error;
+      }
+
+      // Verificar que el lugar existe
+      const existingPlace = await placeRepository.findById(id);
+      if (!existingPlace) {
+        const error = new Error("Place not found");
+        error.status = 404;
+        throw error;
+      }
+
+      // Actualizar descripción
+      const updatedPlace = await placeRepository.update(id, {
+        description: description.trim(),
+      });
+
+      logger.info(`Updated description for place ID: ${id}`);
+
+      return {
+        id: updatedPlace.id,
+        name: updatedPlace.name,
+        description: updatedPlace.description,
+        updatedAt: updatedPlace.updatedAt,
+      };
+    } catch (err) {
+      logger.error(`Error updating description for place ID ${id}: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+    * Obtiene un lugar por su ID
+    * @param {string} id - ID del lugar a buscar
+    * @returns {Promise<Object>} - Lugar encontrado
+    * @throws {Error} - Si el lugar no existe o hay un error en la búsqueda
+    */
   async getPlaceById(id) {
     try {
       if (!id) {

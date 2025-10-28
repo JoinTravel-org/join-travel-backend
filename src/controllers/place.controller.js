@@ -1,15 +1,16 @@
 import placeService from "../services/place.service.js";
 import logger from "../config/logger.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 /**
  * Agrega un nuevo lugar
  * POST /api/places
- * Body: { name, address, latitude, longitude }
+ * Body: { name, address, latitude, longitude, image?, description?, city? }
  */
 export const addPlace = async (req, res, next) => {
   logger.info(`Add place endpoint called with name: ${req.body.name}`);
   try {
-    const { name, address, latitude, longitude, image } = req.body;
+    const { name, address, latitude, longitude, image, description, city } = req.body;
 
     // Validar que se envíen los campos requeridos
     if (!name || !address || latitude === undefined || longitude === undefined) {
@@ -19,7 +20,7 @@ export const addPlace = async (req, res, next) => {
       });
     }
 
-    const result = await placeService.addPlace({ name, address, latitude, longitude, image });
+    const result = await placeService.addPlace({ name, address, latitude, longitude, image, description, city });
 
     logger.info(`Add place endpoint completed successfully for place: ${result.place.id}`);
     res.status(201).json({
@@ -32,6 +33,8 @@ export const addPlace = async (req, res, next) => {
         latitude: result.place.latitude,
         longitude: result.place.longitude,
         image: result.place.image,
+        description: result.place.description,
+        city: result.place.city,
         createdAt: result.place.createdAt,
       },
     });
@@ -56,28 +59,17 @@ export const addPlace = async (req, res, next) => {
 export const checkPlace = async (req, res, next) => {
   logger.info(`Check place endpoint called with name: ${req.query.name}`);
   try {
-    const { name, latitude, longitude } = req.query;
+    const { name, address } = req.query;
 
     // Validar parámetros requeridos
-    if (!name || !latitude || !longitude) {
+    if (!name || !address) {
       return res.status(400).json({
         success: false,
-        message: "Nombre, latitud y longitud son requeridos como parámetros de consulta.",
+        message: "Nombre y dirección son requeridos como parámetros de consulta.",
       });
     }
 
-    // Convertir strings a números
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
-
-    if (isNaN(lat) || isNaN(lng)) {
-      return res.status(400).json({
-        success: false,
-        message: "Latitud y longitud deben ser números válidos.",
-      });
-    }
-
-    const result = await placeService.checkPlaceExistence(name, lat, lng);
+    const result = await placeService.checkPlaceExistence(name, address);
 
     logger.info(`Check place endpoint completed successfully for name: ${name}`);
     res.status(200).json({
@@ -128,6 +120,57 @@ export const getPlaces = async (req, res, next) => {
     next(err);
   }
 };
+/**
+ * Actualiza la descripción de un lugar
+ * PUT /api/places/:id/description
+ */
+export const updatePlaceDescription = async (req, res, next) => {
+  logger.info(`Update place description endpoint called with id: ${req.params.id}`);
+  try {
+    const { id } = req.params;
+    const { description } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID del lugar es requerido.",
+      });
+    }
+
+    if (!description) {
+      return res.status(400).json({
+        success: false,
+        message: "La descripción es requerida.",
+      });
+    }
+
+    const result = await placeService.updateDescription(id, description);
+
+    logger.info(`Update place description endpoint completed successfully for id: ${id}, description length: ${description.length} characters`);
+    res.status(200).json({
+      success: true,
+      message: "Description updated successfully",
+      data: result,
+    });
+  } catch (err) {
+    logger.error(`Update place description endpoint failed for id: ${req.params.id}, description length: ${req.body?.description?.length || 0} characters, error: ${err.message}`);
+    if (err.details) {
+      return res.status(err.status || 400).json({
+        success: false,
+        message: err.message,
+        error: err.details,
+      });
+    }
+    if (err.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "Place not found",
+        error: "Place with given ID not found",
+      });
+    }
+    next(err);
+  }
+};
 
 /**
  * Obtiene un lugar por su ID
@@ -171,5 +214,6 @@ export const getPlaceById = async (req, res, next) => {
     next(err);
   }
 };
+
 
 
