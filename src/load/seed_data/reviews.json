@@ -1,0 +1,159 @@
+[
+  {
+    "rating": 5,
+    "content": "¡Lugar increíble! El Obelisco es un símbolo icónico de Buenos Aires. Perfecto para fotos y un excelente punto de partida para explorar la ciudad.",
+    "placeId": 1,
+    "userId": 1,
+    "media": [
+      {
+        "filename": "obelisco1.jpg",
+        "originalFilename": "obelisco_photo.jpg",
+        "fileSize": 2048576,
+        "mimeType": "image/jpeg",
+        "fileData": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+      }
+    ]
+  },
+  {
+    "rating": 4,
+    "content": "Plaza histórica hermosa con mucha historia. La Casa Rosada se ve impresionante desde aquí. Un poco concurrida los fines de semana.",
+    "placeId": 2,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "¡La Boca es vibrante y llena de cultura! Los edificios coloridos son increíbles y los shows de tango son fantásticos. No te pierdas la calle Caminito.",
+    "placeId": 3,
+    "userId": 1,
+    "media": [
+      {
+        "filename": "laboca1.jpg",
+        "originalFilename": "la_boca_colors.jpg",
+        "fileSize": 1536000,
+        "mimeType": "image/jpeg",
+        "fileData": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+      },
+      {
+        "filename": "laboca2.jpg",
+        "originalFilename": "tango_show.jpg",
+        "fileSize": 2048000,
+        "mimeType": "image/jpeg",
+        "fileData": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+      }
+    ]
+  },
+  {
+    "rating": 4,
+    "content": "Palermo es un gran barrio para foodies y amantes de la naturaleza. Los parques son hermosos y hay restaurantes increíbles por todas partes.",
+    "placeId": 4,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "¡Puerto Madero es impresionante! La arquitectura moderna mezclada con los viejos muelles crea una atmósfera única. Excelente para caminar y cenar.",
+    "placeId": 5,
+    "userId": 1,
+    "media": [
+      {
+        "filename": "puertomadero1.jpg",
+        "originalFilename": "puerto_madero_sunset.jpg",
+        "fileSize": 2560000,
+        "mimeType": "image/jpeg",
+        "fileData": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+      }
+    ]
+  },
+  {
+    "rating": 4,
+    "content": "San Telmo es encantador con su arquitectura colonial y mercados de antigüedades. Los domingos son perfectos para pasear y disfrutar de la música callejera.",
+    "placeId": 6,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Caminito es mágico, especialmente al atardecer cuando los artistas callejeros salen. La combinación de colores y cultura es única en Buenos Aires.",
+    "placeId": 7,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Museo Nacional de Bellas Artes tiene una colección impresionante. Pasé horas admirando las obras de artistas argentinos y europeos.",
+    "placeId": 8,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Cementerio de la Recoleta es fascinante. Los mausoleos son obras de arte arquitectónico y la historia detrás de cada uno es increíble.",
+    "placeId": 9,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Ateneo Grand Splendid es un sueño para los amantes de los libros. La arquitectura del antiguo teatro es impresionante y el ambiente es mágico.",
+    "placeId": 10,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Barrio Chino ofrece una experiencia culinaria increíble. Los restaurantes son auténticos y los precios muy accesibles. Perfecto para probar dim sum.",
+    "placeId": 11,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "La Bombonera es una experiencia única. La pasión de los hinchas de Boca Juniors hace que cada partido sea inolvidable, incluso desde afuera.",
+    "placeId": 12,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Rosedal es perfecto para un picnic romántico o una caminata relajante. Las rosas están siempre hermosas y el lago añade serenidad al lugar.",
+    "placeId": 13,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "La Casa Rosada es aún más impresionante de cerca. La historia política de Argentina cobra vida cuando ves el balcón desde donde hablaron los presidentes.",
+    "placeId": 14,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Jardín Japonés es un oasis de tranquilidad en medio del bullicio de Palermo. Los koi y los cerezos hacen que te sientas en otro mundo.",
+    "placeId": 15,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Teatro Colón es majestuoso. La arquitectura y la acústica son de otro nivel. Una visita guiada vale completamente la pena.",
+    "placeId": 16,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Las Cataratas del Iguazú superan cualquier expectativa. El poder del agua y la vegetación circundante crean un espectáculo natural incomparable.",
+    "placeId": 17,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Glaciar Perito Moreno es una maravilla de la naturaleza. Ver cómo se rompe el hielo es una experiencia que nunca olvidaré.",
+    "placeId": 18,
+    "userId": 2,
+    "media": []
+  }
+]

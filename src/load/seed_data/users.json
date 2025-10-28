@@ -1,0 +1,12 @@
+[
+  {
+    "email": "user1@example.com",
+    "password": "password123",
+    "isEmailConfirmed": true
+  },
+  {
+    "email": "user2@example.com",
+    "password": "password456",
+    "isEmailConfirmed": true
+  }
+]

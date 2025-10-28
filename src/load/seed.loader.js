@@ -20,11 +20,12 @@ export default async function seedDatabase() {
     }
 
     logger.info("Seeding database with users, places, reviews, and media...");
-    const seedData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data.json"), "utf8"));
+    const usersData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/users.json"), "utf8"));
+    const placesData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/places.json"), "utf8"));
+    const reviewsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/reviews.json"), "utf8"));
 
     // Seed users first
-    logger.info(`Found ${seedData["users"]?.length || 0} users in seed data`);
-    const usersData = seedData["users"] || [];
+    logger.info(`Found ${usersData.length} users in seed data`);
     const createdUsers = [];
     const userRepo = new UserRepository();
     for (const userData of usersData) {
@@ -50,7 +51,6 @@ export default async function seedDatabase() {
     logger.info(`Created users IDs: ${createdUsers.map(u => u.id).join(', ')}`);
 
     // Seed places
-    const placesData = seedData["places"] || [];
     const createdPlaces = [];
     for (const placeData of placesData) {
       try {
@@ -66,7 +66,6 @@ export default async function seedDatabase() {
     logger.info(`Total places created: ${createdPlaces.length}`);
 
     // Seed reviews and media
-    const reviewsData = seedData["reviews"] || [];
     for (const reviewData of reviewsData) {
       try {
         const { media, placeId: placeIndex, userId: userIndex, ...reviewFields } = reviewData;
