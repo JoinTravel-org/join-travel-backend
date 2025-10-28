@@ -8,6 +8,9 @@ import { swaggerUi, specs } from "./config/swagger.js";
 
 const app = express();
 
+// Trust proxy for rate limiting behind reverse proxy/load balancer
+app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
