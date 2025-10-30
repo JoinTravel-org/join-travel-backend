@@ -12,15 +12,22 @@ export const getUserStats = async (req, res, next) => {
   logger.info(`Get user stats endpoint called for user: ${userId} by user: ${requestingUserId}`);
 
   try {
-    // Check if user is requesting their own stats or is admin
-    if (userId !== requestingUserId) {
+    // Allow access if:
+    // 1. userId matches the authenticated user ID, OR
+    // 2. userId is "temp-id" (frontend placeholder), OR
+    // 3. user is admin
+    const effectiveUserId = (userId === 'temp-id') ? requestingUserId : userId;
+    const isOwner = effectiveUserId === requestingUserId;
+    const isAdmin = req.user?.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: "No tienes permiso para ver las estadísticas de este usuario.",
       });
     }
 
-    const stats = await gamificationService.getUserStats(userId);
+    const stats = await gamificationService.getUserStats(effectiveUserId);
 
     logger.info(`Get user stats endpoint completed successfully for user: ${userId}`);
     res.status(200).json({
@@ -53,8 +60,15 @@ export const awardPoints = async (req, res, next) => {
   logger.info(`Award points endpoint called for user: ${userId} by user: ${requestingUserId}, action: ${action}`);
 
   try {
-    // Check if user is updating their own points or is admin
-    if (userId !== requestingUserId) {
+    // Allow access if:
+    // 1. userId matches the authenticated user ID, OR
+    // 2. userId is "temp-id" (frontend placeholder), OR
+    // 3. user is admin
+    const effectiveUserId = (userId === 'temp-id') ? requestingUserId : userId;
+    const isOwner = effectiveUserId === requestingUserId;
+    const isAdmin = req.user?.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: "No tienes permiso para actualizar los puntos de este usuario.",
@@ -80,7 +94,7 @@ export const awardPoints = async (req, res, next) => {
       });
     }
 
-    const result = await gamificationService.awardPoints(userId, action, metadata || {});
+    const result = await gamificationService.awardPoints(effectiveUserId, action, metadata || {});
 
     logger.info(`Award points endpoint completed successfully for user: ${userId}, action: ${action}`);
     res.status(200).json({

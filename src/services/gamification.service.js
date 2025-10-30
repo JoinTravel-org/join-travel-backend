@@ -107,6 +107,7 @@ class GamificationService {
        if (pointsToAward === 0) {
          throw { status: 400, message: "Tipo de acción inválido" };
        }
+       logger.info(`Awarding ${pointsToAward} points to user ${userId} for action: ${actionType}`);
 
        // Record the action
        const userActionData = {
@@ -117,7 +118,9 @@ class GamificationService {
        };
        try {
          await queryRunner.manager.save("UserAction", userActionData);
+         logger.info(`Action ${actionType} recorded for user ${userId}`);
        } catch (saveError) {
+         logger.error(`Failed to record action ${actionType} for user ${userId}:`, saveError);
          // Continue with transaction even if action logging fails
        }
 
@@ -130,30 +133,50 @@ class GamificationService {
 
        // Check for level progression
        try {
-         const newLevel = await this.calculateNewLevel(newPoints);
+         const newLevel = await this.calculateNewLevel(userId);
          let levelUpNotification = null;
 
-         if (newLevel && newLevel.levelNumber > user.level) {
+         if (newLevel && newLevel.levelNumber !== user.level) {
+           logger.info(`User ${userId} level change from ${user.level} to ${newLevel.levelNumber}: ${newLevel.name}`);
            await queryRunner.manager.update("User", userId, {
              level: newLevel.levelNumber,
              levelName: newLevel.name
            });
 
-           levelUpNotification = {
-             newLevel: newLevel.levelNumber,
-             levelName: newLevel.name,
-             message: `¡Felicidades! Has alcanzado el Nivel ${newLevel.levelNumber}: ${newLevel.name}.`
-           };
+           if (newLevel.levelNumber > user.level) {
+             levelUpNotification = {
+               newLevel: newLevel.levelNumber,
+               levelName: newLevel.name,
+               message: `¡Felicidades! Has alcanzado el Nivel ${newLevel.levelNumber}: ${newLevel.name}.`
+             };
+           }
+         } else {
+           logger.info(`User ${userId} level check - current: ${user.level}, calculated: ${newLevel?.levelNumber}`);
          }
        } catch (levelError) {
+         logger.error(`Level calculation failed for user ${userId}:`, levelError);
          // Continue with the transaction even if level calculation fails
        }
 
-       // Check for new badges
+       await queryRunner.commitTransaction();
+
+       // Force level recalculation after transaction to ensure consistency
+       try {
+         const finalLevel = await this.calculateNewLevel(userId);
+         if (finalLevel && finalLevel.levelNumber !== user.level) {
+           logger.info(`Post-transaction level correction for user ${userId}: ${user.level} -> ${finalLevel.levelNumber}`);
+           await this.userRepository.update(userId, {
+             level: finalLevel.levelNumber,
+             levelName: finalLevel.name
+           });
+         }
+       } catch (postCommitError) {
+         logger.error(`Post-commit level correction failed for user ${userId}:`, postCommitError);
+       }
+
+       // Check for new badges after transaction commit
        const newBadges = await this.checkAndAwardBadges(queryRunner, userId, actionType, metadata);
        const badgeNotifications = newBadges.map(badge => badge.name);
-
-       await queryRunner.commitTransaction();
 
        // Get updated stats
        const updatedStats = await this.getUserStats(userId);
@@ -184,31 +207,109 @@ class GamificationService {
    }
 
   /**
-   * Calculate new level based on points
-   * @param {number} points - Total points
+   * Calculate new level based on points and specific conditions
+   * @param {string} userId - User ID
    * @returns {Promise<Object>} Level data
    */
-  async calculateNewLevel(points) {
+  async calculateNewLevel(userId) {
     const levels = await this.levelRepository.find({
-      order: { levelNumber: 'DESC' }
+      order: { levelNumber: 'ASC' }
     });
 
     if (levels.length === 0) {
       throw new Error("No levels configured in database. Please run database seeding.");
     }
 
+    // Find the highest level the user qualifies for
+    let highestQualifiedLevel = null;
+
     for (const level of levels) {
-      if (points >= level.minPoints) {
-        return level;
+      const qualifies = await this.checkLevelCriteria(userId, level.levelNumber);
+      if (qualifies) {
+        highestQualifiedLevel = level;
+        logger.debug(`User ${userId} qualifies for level ${level.levelNumber}: ${level.name}`);
+      } else {
+        logger.debug(`User ${userId} does not qualify for level ${level.levelNumber}: ${level.name}`);
       }
     }
 
-    // Default to level 1 if no level found
+    if (highestQualifiedLevel) {
+      logger.info(`User ${userId} highest qualified level: ${highestQualifiedLevel.levelNumber} - ${highestQualifiedLevel.name}`);
+      return highestQualifiedLevel;
+    }
+
+    // Default to level 1 if no level qualifies
     const defaultLevel = await this.levelRepository.findOne({ where: { levelNumber: 1 } });
     if (!defaultLevel) {
       throw new Error("Level 1 not found in database. Please run database seeding.");
     }
+    logger.info(`User ${userId} defaults to level 1: ${defaultLevel.name}`);
     return defaultLevel;
+  }
+
+  /**
+   * Check if user meets level criteria
+   * @param {string} userId - User ID
+   * @param {number} levelNumber - Level number to check
+   * @returns {Promise<boolean>} Whether user qualifies
+   */
+  async checkLevelCriteria(userId, levelNumber) {
+    switch (levelNumber) {
+      case 1:
+        // Level 1: Registrarse y completar perfil (has profile_completed action)
+        const profileCompleted = await this.userActionRepository.count({
+          where: { userId, actionType: 'profile_completed' }
+        });
+        logger.debug(`User ${userId} profile completed actions: ${profileCompleted}`);
+        return profileCompleted > 0;
+
+      case 2:
+        // Level 2: Tener al menos 3 reseñas (at least 3 review_created actions)
+        // AND must have completed profile (level 1 requirement)
+        const profileCompleted2 = await this.userActionRepository.count({
+          where: { userId, actionType: 'profile_completed' }
+        });
+        const reviewCount = await this.userActionRepository.count({
+          where: { userId, actionType: 'review_created' }
+        });
+        logger.info(`User ${userId} level 2 check - profile: ${profileCompleted2}, reviews: ${reviewCount}`);
+        const qualifiesForLevel2 = profileCompleted2 > 0 && reviewCount >= 3;
+        logger.info(`User ${userId} qualifies for level 2: ${qualifiesForLevel2}`);
+        return qualifiesForLevel2;
+
+      case 3:
+        // Level 3: Obtener al menos 10 likes (at least 10 vote_received actions)
+        // AND must qualify for level 2 (profile completed + 3 reviews)
+        const profileCompleted3 = await this.userActionRepository.count({
+          where: { userId, actionType: 'profile_completed' }
+        });
+        const reviewCount3 = await this.userActionRepository.count({
+          where: { userId, actionType: 'review_created' }
+        });
+        const likeCount = await this.userActionRepository.count({
+          where: { userId, actionType: 'vote_received' }
+        });
+        logger.debug(`User ${userId} level 3 check - profile: ${profileCompleted3}, reviews: ${reviewCount3}, likes: ${likeCount}`);
+        return profileCompleted3 > 0 && reviewCount3 >= 3 && likeCount >= 10;
+
+      case 4:
+        // Level 4: Alcanzar 25 reseñas y 50 likes
+        // AND must qualify for level 3 (all previous requirements)
+        const profileCompleted4 = await this.userActionRepository.count({
+          where: { userId, actionType: 'profile_completed' }
+        });
+        const reviewCount4 = await this.userActionRepository.count({
+          where: { userId, actionType: 'review_created' }
+        });
+        const likeCount4 = await this.userActionRepository.count({
+          where: { userId, actionType: 'vote_received' }
+        });
+        logger.debug(`User ${userId} level 4 check - profile: ${profileCompleted4}, reviews: ${reviewCount4}, likes: ${likeCount4}`);
+        return profileCompleted4 > 0 && reviewCount4 >= 25 && likeCount4 >= 50;
+
+      default:
+        return false;
+    }
   }
 
   /**
@@ -309,6 +410,7 @@ class GamificationService {
 
     const newBadge = {
       name: badge.name,
+      description: badge.description,
       earned_at: new Date().toISOString()
     };
 
@@ -357,8 +459,8 @@ class GamificationService {
 
       const totalPoints = parseInt(totalPointsResult.total) || 0;
 
-      // Calculate new level
-      const newLevel = await this.calculateNewLevel(totalPoints);
+      // Calculate new level based on actions, not just points
+      const newLevel = await this.calculateNewLevel(userId);
 
       // Update user
       await queryRunner.manager.update("User", userId, {

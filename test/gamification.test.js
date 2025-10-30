@@ -174,6 +174,48 @@ describe("Gamification Service", () => {
     it("should throw error for invalid action", async () => {
       await expect(gamificationService.awardPoints(testUser.id, "invalid_action")).rejects.toThrow();
     });
+
+    it("should level up user when conditions are met", async () => {
+      const userRepository = AppDataSource.getRepository("User");
+
+      // Start with level 1 (default)
+      let updatedUser = await userRepository.findOne({ where: { id: testUser.id } });
+      expect(updatedUser.level).toBe(1);
+      expect(updatedUser.levelName).toBe("Explorador");
+
+      // Add profile_completed action (should stay at level 1)
+      await gamificationService.awardPoints(testUser.id, "profile_completed");
+      updatedUser = await userRepository.findOne({ where: { id: testUser.id } });
+      expect(updatedUser.level).toBe(1);
+      expect(updatedUser.levelName).toBe("Explorador");
+
+      // Add 2 reviews (should still be level 1 - needs 3 reviews for level 2)
+      await gamificationService.awardPoints(testUser.id, "review_created", { review_id: "test-review-1" });
+      await gamificationService.awardPoints(testUser.id, "review_created", { review_id: "test-review-2" });
+      updatedUser = await userRepository.findOne({ where: { id: testUser.id } });
+      expect(updatedUser.level).toBe(1);
+      expect(updatedUser.levelName).toBe("Explorador");
+
+      // Add 1 more review to reach level 2 (now has profile + 3 reviews)
+      await gamificationService.awardPoints(testUser.id, "review_created", { review_id: "test-review-3" });
+      updatedUser = await userRepository.findOne({ where: { id: testUser.id } });
+      expect(updatedUser.level).toBe(2);
+      expect(updatedUser.levelName).toBe("Viajero Activo");
+
+      // Add 9 more votes (should still be level 2 - needs 10 votes for level 3)
+      for (let i = 0; i < 9; i++) {
+        await gamificationService.awardPoints(testUser.id, "vote_received", { review_id: "test-review" });
+      }
+      updatedUser = await userRepository.findOne({ where: { id: testUser.id } });
+      expect(updatedUser.level).toBe(2);
+      expect(updatedUser.levelName).toBe("Viajero Activo");
+
+      // Add 1 more vote to reach level 3 (now has profile + 3 reviews + 10 votes)
+      await gamificationService.awardPoints(testUser.id, "vote_received", { review_id: "test-review" });
+      updatedUser = await userRepository.findOne({ where: { id: testUser.id } });
+      expect(updatedUser.level).toBe(3);
+      expect(updatedUser.levelName).toBe("Guía Experto");
+    });
   });
 
   describe("getUserStats", () => {

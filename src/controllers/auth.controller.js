@@ -44,6 +44,7 @@ export const login = async (req, res, next) => {
 
     const result = await authService.login({ email, password });
     logger.info(`Login endpoint completed successfully for email: ${req.body.email}`);
+
     res.status(200).json({
       success: true,
       message: "Login exitoso.",
@@ -54,7 +55,7 @@ export const login = async (req, res, next) => {
     });
   } catch (err) {
     logger.error(`Login endpoint failed for email: ${req.body.email}, error: ${err.message}`);
-    next(err);  
+    next(err);
   }
 };
 /**
