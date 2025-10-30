@@ -1,6 +1,9 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import User from "../models/user.model.js";
+import UserAction from "../models/userActions.model.js";
+import Level from "../models/levels.model.js";
+import Badge from "../models/badges.model.js";
 import RevokedToken from "../models/revokedToken.model.js";
 import Place from "../models/place.model.js";
 import Itinerary, { ItineraryItemSchema } from "../models/itinerary.model.js";
@@ -17,9 +20,9 @@ export const AppDataSource = new DataSource({
   username: config.db.user,
   password: config.db.password,
   database: config.db.name,
-  synchronize: true, // true only for dev (auto create tables)
+  synchronize: false, // Disabled to prevent table drops
   logging: false,
-  entities: [ User, RevokedToken, Place, Itinerary, ItineraryItemSchema, Review, ReviewMedia, Conversation, ChatMessage],
+  entities: [ User, UserAction, Level, Badge, RevokedToken, Place, Itinerary, ItineraryItemSchema, Review, ReviewMedia, Conversation, ChatMessage],
   migrations: ["./src/migrations/*.js"],
   timezone: "UTC", // Usar UTC para consistencia global
   // Create database if it doesn't exist

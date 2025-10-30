@@ -8,18 +8,65 @@ import fs from "fs";
 import path from "path";
 import bcrypt from "bcrypt";
 
+// Gamification seed data
+const LEVELS_DATA = [
+  { levelNumber: 1, name: 'Explorador', minPoints: 0, description: 'Registrarse y completar el perfil', rewards: { badge: 'Explorador' } },
+  { levelNumber: 2, name: 'Viajero Activo', minPoints: 30, description: 'Tener al menos 3 reseñas publicadas', rewards: { badge: 'Viajero Activo', unlock_feature: 'advanced_search' } },
+  { levelNumber: 3, name: 'Guía Experto', minPoints: 100, description: 'Obtener al menos 10 likes en sus aportes', rewards: { badge: 'Guía Experto', unlock_feature: 'expert_badge_display' } },
+  { levelNumber: 4, name: 'Maestro Viajero', minPoints: 250, description: 'Alcanzar 25 reseñas y 50 likes', rewards: { badge: 'Maestro Viajero', unlock_feature: 'priority_support' } },
+];
+
+const BADGES_DATA = [
+  { name: 'Primera Reseña', description: 'Crear tu primera reseña', criteria: { action_type: 'review_created', count: 1 } },
+  { name: 'Viajero Activo', description: 'Alcanzar nivel 2', criteria: { level: 2 } },
+  { name: 'Guía Experto', description: 'Alcanzar nivel 3', criteria: { level: 3 } },
+  { name: 'Maestro Viajero', description: 'Alcanzar nivel 4', criteria: { level: 4 } },
+  { name: 'Super Like', description: 'Recibir 10 likes en una sola reseña', criteria: { action_type: 'vote_received', per_review: 10 } },
+];
+
 export default async function seedDatabase() {
   try {
+    logger.info("Seeding database with gamification data, users, places, reviews, and media...");
+
+    // Seed levels and badges first (always, regardless of places)
+    logger.info("Seeding levels...");
+    for (const levelData of LEVELS_DATA) {
+      try {
+        const existingLevel = await AppDataSource.getRepository("Level").findOne({ where: { levelNumber: levelData.levelNumber } });
+        if (!existingLevel) {
+          await AppDataSource.getRepository("Level").save(levelData);
+          logger.info(`Seeded level: ${levelData.name}`);
+        } else {
+          logger.info(`Level ${levelData.name} already exists, skipping`);
+        }
+      } catch (error) {
+        logger.error(`Failed to seed level ${levelData.name}:`, error.message);
+      }
+    }
+
+    logger.info("Seeding badges...");
+    for (const badgeData of BADGES_DATA) {
+      try {
+        const existingBadge = await AppDataSource.getRepository("Badge").findOne({ where: { name: badgeData.name } });
+        if (!existingBadge) {
+          await AppDataSource.getRepository("Badge").save(badgeData);
+          logger.info(`Seeded badge: ${badgeData.name}`);
+        } else {
+          logger.info(`Badge ${badgeData.name} already exists, skipping`);
+        }
+      } catch (error) {
+        logger.error(`Failed to seed badge ${badgeData.name}:`, error.message);
+      }
+    }
+
     // Check if places already exist
     const existingPlaces = await placeRepository.getRepository().count();
     if (existingPlaces > 0) {
       logger.info(
-        `Database already has ${existingPlaces} places, skipping seed`
+        `Database already has ${existingPlaces} places, skipping user/place/review seeding`
       );
       return;
     }
-
-    logger.info("Seeding database with users, places, reviews, and media...");
     const usersData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/users.json"), "utf8"));
     const placesData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/places.json"), "utf8"));
     const reviewsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/reviews.json"), "utf8"));
