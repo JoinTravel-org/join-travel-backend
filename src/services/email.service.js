@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import config from "../config/index.js";
+import { ExternalServiceError } from "../utils/customErrors.js";
 
 class EmailService {
   constructor() {
@@ -72,10 +73,19 @@ class EmailService {
         attachments: attachments
       };
 
-      await this.transporter.sendMail(mailOptions);
+      // Add timeout to email sending (30 seconds)
+      const emailPromise = this.transporter.sendMail(mailOptions);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new ExternalServiceError("Email service timeout")), 30000)
+      );
+
+      await Promise.race([emailPromise, timeoutPromise]);
       return true;
     } catch (error) {
-      throw new Error("Error al enviar el correo de confirmación");
+      if (error instanceof ExternalServiceError) {
+        throw error;
+      }
+      throw new ExternalServiceError("Error al enviar el correo de confirmación");
     }
   }
 }

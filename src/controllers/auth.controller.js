@@ -1,5 +1,6 @@
 import authService from "../services/auth.service.js";
 import logger from "../config/logger.js";
+import { ValidationError, AuthenticationError } from "../utils/customErrors.js";
 
 /**
  * Registra un nuevo usuario
@@ -13,10 +14,7 @@ export const register = async (req, res, next) => {
 
     // Validar que se envíen los campos requeridos
     if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Email y contraseña son requeridos.",
-      });
+      throw new ValidationError("Email y contraseña son requeridos.");
     }
 
     const result = await authService.register({ email, password });
@@ -30,14 +28,6 @@ export const register = async (req, res, next) => {
     });
   } catch (err) {
     logger.error(`Register endpoint failed for email: ${req.body.email}, error: ${err.message}`);
-    // Si el error tiene detalles (como errores de validación de contraseña)
-    if (err.details) {
-      return res.status(err.status || 400).json({
-        success: false,
-        message: err.message,
-        errors: err.details,
-      });
-    }
     next(err);
   }
 };
@@ -49,14 +39,12 @@ export const login = async (req, res, next) => {
 
     // Validar que se envíen los campos requeridos
     if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Email y contraseña son requeridos.",
-      });
+      throw new ValidationError("Email y contraseña son requeridos.");
     }
 
     const result = await authService.login({ email, password });
     logger.info(`Login endpoint completed successfully for email: ${req.body.email}`);
+
     res.status(200).json({
       success: true,
       message: "Login exitoso.",
@@ -67,7 +55,7 @@ export const login = async (req, res, next) => {
     });
   } catch (err) {
     logger.error(`Login endpoint failed for email: ${req.body.email}, error: ${err.message}`);
-    next(err);  
+    next(err);
   }
 };
 /**
@@ -149,10 +137,7 @@ export const refreshToken = async (req, res, next) => {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      return res.status(400).json({
-        success: false,
-        message: "Refresh token es requerido.",
-      });
+      throw new ValidationError("Refresh token es requerido.");
     }
 
     const result = await authService.refreshToken(refreshToken);

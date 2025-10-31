@@ -2,6 +2,7 @@ import reviewRepository from "../repository/review.repository.js";
 import reviewMediaRepository from "../repository/reviewMedia.repository.js";
 import placeRepository from "../repository/place.repository.js";
 import { validateUploadedFiles, getFileUrl, deleteFile } from "../utils/fileUpload.js";
+import gamificationService from "./gamification.service.js";
 import logger from "../config/logger.js";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
@@ -96,18 +97,24 @@ class ReviewService {
     }
 
     try {
+      logger.info(`Starting review creation process for user ${userId}, place ${placeId}`);
+
       // Crear la reseña
+      logger.info(`Creating review record in database...`);
       const newReview = await reviewRepository.create({
         rating: parsedRating,
         content: content.trim(),
         placeId,
         userId,
       });
+      logger.info(`Review record created with ID: ${newReview.id}`);
 
       // Procesar archivos multimedia si existen
       let mediaRecords = [];
       if (files && files.length > 0) {
+        logger.info(`Processing ${files.length} media files...`);
         for (const file of files) {
+          logger.info(`Processing media file: ${file.originalname}`);
           const mediaData = {
             reviewId: newReview.id,
             filename: file.filename || `${uuidv4()}${path.extname(file.originalname)}`,
@@ -118,6 +125,7 @@ class ReviewService {
           };
 
           const mediaRecord = await reviewMediaRepository.create(mediaData);
+          logger.info(`Media record created with ID: ${mediaRecord.id}`);
           mediaRecords.push({
             id: mediaRecord.id,
             filename: mediaRecord.filename,
@@ -128,12 +136,21 @@ class ReviewService {
             createdAt: mediaRecord.createdAt,
           });
         }
+        logger.info(`All ${mediaRecords.length} media files processed successfully`);
       }
 
       logger.info(
         `Review created successfully: ${newReview.id} for place ${placeId} by user ${userId} with ${mediaRecords.length} media files`
       );
 
+      // Award points for creating a review
+      try {
+        await gamificationService.awardPoints(userId, 'review_created', { review_id: newReview.id });
+      } catch (gamificationError) {
+        // Don't fail the review creation if gamification fails
+      }
+
+      logger.info(`Review creation process completed successfully`);
       return {
         success: true,
         message: "Reseña creada exitosamente",
@@ -145,7 +162,21 @@ class ReviewService {
     } catch (error) {
       // No need to delete files since they're stored in memory/database now
 
-      logger.error(`Error creating review: ${error.message}, stack: ${error.stack}`);
+      logger.error(`Error creating review: ${error.message}`);
+      logger.error(`Error stack: ${error.stack}`);
+      logger.error(`Error details:`, error);
+
+      // Log specific database error details if available
+      if (error.code) {
+        logger.error(`Database error code: ${error.code}`);
+      }
+      if (error.detail) {
+        logger.error(`Database error detail: ${error.detail}`);
+      }
+      if (error.constraint) {
+        logger.error(`Database constraint violation: ${error.constraint}`);
+      }
+
       throw {
         status: 500,
         message: "Error al guardar la reseña.",
