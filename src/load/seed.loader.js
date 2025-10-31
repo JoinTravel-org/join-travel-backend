@@ -17,11 +17,13 @@ const LEVELS_DATA = [
 ];
 
 const BADGES_DATA = [
-  { name: 'Primera Reseña', description: 'Crear tu primera reseña', criteria: { action_type: 'review_created', count: 1 } },
-  { name: 'Viajero Activo', description: 'Alcanzar nivel 2', criteria: { level: 2 } },
-  { name: 'Guía Experto', description: 'Alcanzar nivel 3', criteria: { level: 3 } },
-  { name: 'Maestro Viajero', description: 'Alcanzar nivel 4', criteria: { level: 4 } },
-  { name: 'Super Like', description: 'Recibir 10 likes en una sola reseña', criteria: { action_type: 'vote_received', per_review: 10 } },
+  { name: '🌍 Primera Reseña', description: 'Crear tu primera reseña', criteria: { action_type: 'review_created', count: 1 }, iconUrl: '🌍' },
+  { name: '📸 Fotógrafo', description: 'Subir una foto o video en cualquier reseña', criteria: { action_type: 'media_upload', count: 1 }, iconUrl: '📸' },
+  { name: '⭐ Popular', description: 'Recibir al menos 5 likes en reseñas propias', criteria: { action_type: 'vote_received', count: 5 }, iconUrl: '⭐' },
+  { name: 'Viajero Activo', description: 'Alcanzar nivel 2', criteria: { level: 2 }, iconUrl: '🏆' },
+  { name: 'Guía Experto', description: 'Alcanzar nivel 3', criteria: { level: 3 }, iconUrl: '🎯' },
+  { name: 'Maestro Viajero', description: 'Alcanzar nivel 4', criteria: { level: 4 }, iconUrl: '👑' },
+  { name: 'Super Like', description: 'Recibir 10 likes en una sola reseña', criteria: { action_type: 'vote_received', per_review: 10 }, iconUrl: '🔥' },
 ];
 
 export default async function seedDatabase() {

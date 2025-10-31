@@ -16,6 +16,7 @@ class GamificationService {
       'vote_received': 1,
       'profile_completed': 5,
       'comment_posted': 2,
+      'media_upload': 5, // Bonus points for uploading media
     };
     return pointRules[actionType] || 0;
   }
@@ -175,7 +176,22 @@ class GamificationService {
        }
 
        // Check for new badges after transaction commit
-       const newBadges = await this.checkAndAwardBadges(queryRunner, userId, actionType, metadata);
+       let newBadges = [];
+       try {
+         // Create a new queryRunner for badge operations since the previous one was committed
+         const badgeQueryRunner = AppDataSource.createQueryRunner();
+         await badgeQueryRunner.connect();
+         await badgeQueryRunner.startTransaction();
+
+         newBadges = await this.checkAndAwardBadges(badgeQueryRunner, userId, actionType, metadata);
+         await badgeQueryRunner.commitTransaction();
+         await badgeQueryRunner.release();
+
+         logger.info(`Badge check completed for user ${userId}: ${newBadges.length} new badges awarded`);
+       } catch (badgeError) {
+         logger.error(`Badge check failed for user ${userId}:`, badgeError);
+         // Continue with the transaction even if badge check fails
+       }
        const badgeNotifications = newBadges.map(badge => badge.name);
 
        // Get updated stats
@@ -194,6 +210,7 @@ class GamificationService {
            ...levelUpNotification,
            newBadges: badgeNotifications
          };
+         logger.info(`Notification prepared for user ${userId}: levelUp=${!!levelUpNotification}, badges=${badgeNotifications.length}`);
        }
 
        return response;
@@ -314,7 +331,7 @@ class GamificationService {
 
   /**
    * Check and award badges based on criteria
-   * @param {QueryRunner} queryRunner - Database transaction runner
+   * @param {QueryRunner} queryRunner - Database transaction runner (optional)
    * @param {string} userId - User ID
    * @param {string} actionType - Action type
    * @param {Object} metadata - Action metadata
@@ -350,7 +367,7 @@ class GamificationService {
       where: { id: userId },
       select: ['badges']
     });
-    return user.badges.some(badge => badge.name === badgeName);
+    return user && user.badges ? user.badges.some(badge => badge.name === badgeName) : false;
   }
 
   /**
@@ -393,6 +410,31 @@ class GamificationService {
       }
     }
 
+    // Specific badge criteria based on user story requirements
+    if (badge.name === '🌍 Primera Reseña') {
+      // Check if user has no previous reviews
+      const reviewCount = await queryRunner.manager.count("Review", {
+        where: { userId }
+      });
+      return reviewCount === 1; // Just created their first review
+    }
+
+    if (badge.name === '📸 Fotógrafo') {
+      // Check if user has uploaded any media
+      const mediaCount = await queryRunner.manager.count("ReviewMedia", {
+        where: { review: { userId } }
+      });
+      return mediaCount > 0;
+    }
+
+    if (badge.name === '⭐ Popular') {
+      // Check if user has received at least 5 likes on their reviews
+      const likeCount = await queryRunner.manager.count("UserAction", {
+        where: { actionType: 'vote_received', userId }
+      });
+      return likeCount >= 5;
+    }
+
     return false;
   }
 
@@ -414,7 +456,7 @@ class GamificationService {
       earned_at: new Date().toISOString()
     };
 
-    const updatedBadges = [...(user.badges || []), newBadge];
+    const updatedBadges = [...(user && user.badges ? user.badges : []), newBadge];
 
     await queryRunner.manager.update("User", userId, {
       badges: updatedBadges

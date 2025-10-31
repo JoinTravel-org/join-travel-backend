@@ -147,7 +147,18 @@ class ReviewService {
       try {
         await gamificationService.awardPoints(userId, 'review_created', { review_id: newReview.id });
       } catch (gamificationError) {
+        logger.error(`Failed to award points for review creation: ${gamificationError.message}`);
         // Don't fail the review creation if gamification fails
+      }
+
+      // Check for media upload badge if files were uploaded
+      if (files && files.length > 0) {
+        try {
+          await gamificationService.awardPoints(userId, 'media_upload', { review_id: newReview.id });
+        } catch (gamificationError) {
+          logger.error(`Failed to award points for media upload: ${gamificationError.message}`);
+          // Don't fail the review creation if gamification fails
+        }
       }
 
       logger.info(`Review creation process completed successfully`);
