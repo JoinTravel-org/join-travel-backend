@@ -1,5 +1,6 @@
 import { AppDataSource } from "../load/typeorm.loader.js";
 import logger from "../config/logger.js";
+import emailService from "./email.service.js";
 
 class GamificationService {
   constructor() {
@@ -17,6 +18,7 @@ class GamificationService {
       'profile_completed': 5,
       'comment_posted': 2,
       'media_upload': 5, // Bonus points for uploading media
+      'place_added': 15, // Points for adding a new place
     };
     return pointRules[actionType] || 0;
   }
@@ -80,17 +82,31 @@ class GamificationService {
     * @param {string} userId - User ID
     * @param {string} actionType - Action type
     * @param {Object} metadata - Additional metadata
+    * @param {boolean} useTransaction - Whether to use a transaction (default: true)
     * @returns {Promise<Object>} Updated stats and notifications
     */
-   async awardPoints(userId, actionType, metadata = {}) {
+   async awardPoints(userId, actionType, metadata = {}, useTransaction = true) {
      // Check if AppDataSource is initialized
      if (!AppDataSource.isInitialized) {
        throw new Error("Database connection not established");
      }
 
-     const queryRunner = AppDataSource.createQueryRunner();
-     await queryRunner.connect();
-     await queryRunner.startTransaction();
+     let queryRunner;
+     let shouldManageTransaction = useTransaction;
+
+     if (useTransaction) {
+       queryRunner = AppDataSource.createQueryRunner();
+       await queryRunner.connect();
+       await queryRunner.startTransaction();
+     } else {
+       // Use the default manager when not using transactions
+       queryRunner = {
+         manager: AppDataSource.manager,
+         commitTransaction: () => {},
+         rollbackTransaction: () => {},
+         release: () => {}
+       };
+     }
 
      try {
        // Get current user data
@@ -159,7 +175,9 @@ class GamificationService {
          // Continue with the transaction even if level calculation fails
        }
 
-       await queryRunner.commitTransaction();
+       if (shouldManageTransaction) {
+         await queryRunner.commitTransaction();
+       }
 
        // Force level recalculation after transaction to ensure consistency
        try {
@@ -178,14 +196,19 @@ class GamificationService {
        // Check for new badges after transaction commit
        let newBadges = [];
        try {
-         // Create a new queryRunner for badge operations since the previous one was committed
-         const badgeQueryRunner = AppDataSource.createQueryRunner();
-         await badgeQueryRunner.connect();
-         await badgeQueryRunner.startTransaction();
+         if (shouldManageTransaction) {
+           // Create a new queryRunner for badge operations since the previous one was committed
+           const badgeQueryRunner = AppDataSource.createQueryRunner();
+           await badgeQueryRunner.connect();
+           await badgeQueryRunner.startTransaction();
 
-         newBadges = await this.checkAndAwardBadges(badgeQueryRunner, userId, actionType, metadata);
-         await badgeQueryRunner.commitTransaction();
-         await badgeQueryRunner.release();
+           newBadges = await this.checkAndAwardBadges(badgeQueryRunner, userId, actionType, metadata);
+           await badgeQueryRunner.commitTransaction();
+           await badgeQueryRunner.release();
+         } else {
+           // Use the same manager for badge operations when not using transactions
+           newBadges = await this.checkAndAwardBadges(queryRunner, userId, actionType, metadata);
+         }
 
          logger.info(`Badge check completed for user ${userId}: ${newBadges.length} new badges awarded`);
        } catch (badgeError) {
@@ -216,10 +239,14 @@ class GamificationService {
        return response;
 
      } catch (error) {
-       await queryRunner.rollbackTransaction();
+       if (shouldManageTransaction) {
+         await queryRunner.rollbackTransaction();
+       }
        throw error;
      } finally {
-       await queryRunner.release();
+       if (shouldManageTransaction) {
+         await queryRunner.release();
+       }
      }
    }
 
@@ -447,7 +474,7 @@ class GamificationService {
   async awardBadge(queryRunner, userId, badge) {
     const user = await queryRunner.manager.findOne("User", {
       where: { id: userId },
-      select: ['badges']
+      select: ['badges', 'email']
     });
 
     const newBadge = {
@@ -461,6 +488,23 @@ class GamificationService {
     await queryRunner.manager.update("User", userId, {
       badges: updatedBadges
     });
+
+    // Send email notification asynchronously (don't block the transaction)
+    try {
+      if (user && user.email) {
+        setImmediate(async () => {
+          try {
+            await emailService.sendBadgeNotification(user.email, badge);
+            logger.info(`Badge notification sent to user ${userId} for badge: ${badge.name}`);
+          } catch (emailError) {
+            logger.error(`Failed to send badge notification email to user ${userId}:`, emailError);
+          }
+        });
+      }
+    } catch (error) {
+      logger.error(`Error preparing badge notification for user ${userId}:`, error);
+      // Don't throw - we don't want email failures to break badge assignment
+    }
   }
 
   /**

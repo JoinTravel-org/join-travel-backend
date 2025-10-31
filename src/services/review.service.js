@@ -1,5 +1,6 @@
 import reviewRepository from "../repository/review.repository.js";
 import reviewMediaRepository from "../repository/reviewMedia.repository.js";
+import reviewLikeRepository from "../repository/reviewLike.repository.js";
 import placeRepository from "../repository/place.repository.js";
 import { validateUploadedFiles, getFileUrl, deleteFile } from "../utils/fileUpload.js";
 import gamificationService from "./gamification.service.js";
@@ -143,9 +144,9 @@ class ReviewService {
         `Review created successfully: ${newReview.id} for place ${placeId} by user ${userId} with ${mediaRecords.length} media files`
       );
 
-      // Award points for creating a review
+      // Award points for creating a review (without transaction since we're already in one)
       try {
-        await gamificationService.awardPoints(userId, 'review_created', { review_id: newReview.id });
+        await gamificationService.awardPoints(userId, 'review_created', { review_id: newReview.id }, false);
       } catch (gamificationError) {
         logger.error(`Failed to award points for review creation: ${gamificationError.message}`);
         // Don't fail the review creation if gamification fails
@@ -154,7 +155,7 @@ class ReviewService {
       // Check for media upload badge if files were uploaded
       if (files && files.length > 0) {
         try {
-          await gamificationService.awardPoints(userId, 'media_upload', { review_id: newReview.id });
+          await gamificationService.awardPoints(userId, 'media_upload', { review_id: newReview.id }, false);
         } catch (gamificationError) {
           logger.error(`Failed to award points for media upload: ${gamificationError.message}`);
           // Don't fail the review creation if gamification fails
@@ -214,7 +215,7 @@ class ReviewService {
 
       const reviews = await reviewRepository.findByPlaceId(placeId);
 
-      // Formatear las reseñas para incluir el email del usuario y media
+      // Formatear las reseñas para incluir el email del usuario, media y likes
       const formattedReviews = await Promise.all(
         reviews.map(async (review) => {
           // Obtener media de la reseña
@@ -229,6 +230,9 @@ class ReviewService {
             createdAt: m.createdAt,
           }));
 
+          // Obtener conteo de likes
+          const likeCount = await reviewLikeRepository.countByReviewId(review.id);
+
           return {
             id: review.id,
             rating: review.rating,
@@ -237,6 +241,7 @@ class ReviewService {
             userId: review.userId,
             userEmail: review.user?.email || "Usuario anónimo",
             media: formattedMedia,
+            likeCount,
             createdAt: review.createdAt,
             updatedAt: review.updatedAt,
           };
@@ -361,6 +366,139 @@ class ReviewService {
         status: 500,
         message: "Error al obtener las reseñas.",
         details: error.message,
+      };
+    }
+  }
+
+  /**
+   * Toggle like on a review
+   * @param {string} reviewId - Review ID
+   * @param {string} userId - User ID
+   * @returns {Promise<Object>} - Like status and count
+   */
+  async toggleLike(reviewId, userId) {
+    try {
+      // Check if review exists
+      const review = await reviewRepository.findById(reviewId);
+      if (!review) {
+        throw {
+          status: 404,
+          message: "Reseña no encontrada.",
+        };
+      }
+
+      // Check if user is trying to like their own review
+      if (review.userId === userId) {
+        throw {
+          status: 400,
+          message: "No puedes dar like a tu propia reseña.",
+        };
+      }
+
+      // Check if user already liked this review
+      const existingLike = await reviewLikeRepository.findByReviewIdAndUserId(reviewId, userId);
+
+      let liked = false;
+      let likeCount = 0;
+
+      if (existingLike) {
+        // Unlike: remove the like
+        await reviewLikeRepository.deleteByReviewIdAndUserId(reviewId, userId);
+        liked = false;
+        logger.info(`User ${userId} unliked review ${reviewId}`);
+      } else {
+        // Like: add the like
+        await reviewLikeRepository.create({
+          reviewId,
+          userId,
+        });
+        liked = true;
+        logger.info(`User ${userId} liked review ${reviewId}`);
+
+        // Award points for giving a like
+        try {
+          await gamificationService.awardPoints(userId, 'vote_received', { review_id: reviewId }, false);
+        } catch (gamificationError) {
+          logger.error(`Failed to award points for like: ${gamificationError.message}`);
+          // Don't fail the like if gamification fails
+        }
+
+        // Check if review author should get a badge for receiving likes
+        try {
+          const currentLikeCount = await reviewLikeRepository.countByReviewId(reviewId);
+          if (currentLikeCount >= 5) {
+            await gamificationService.awardPoints(review.userId, 'vote_received', { review_id: reviewId }, false);
+          }
+        } catch (badgeError) {
+          logger.error(`Failed to check badge for review author: ${badgeError.message}`);
+        }
+      }
+
+      // Get updated like count
+      likeCount = await reviewLikeRepository.countByReviewId(reviewId);
+
+      return {
+        success: true,
+        data: {
+          liked,
+          likeCount,
+          reviewId,
+        },
+      };
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+
+      logger.error(`Error toggling like for review ${reviewId}: ${error.message}`);
+      throw {
+        status: 500,
+        message: "Error al procesar el like.",
+      };
+    }
+  }
+
+  /**
+   * Get like status for a review
+   * @param {string} reviewId - Review ID
+   * @param {string} userId - User ID (optional)
+   * @returns {Promise<Object>} - Like status and count
+   */
+  async getLikeStatus(reviewId, userId = null) {
+    try {
+      // Check if review exists
+      const review = await reviewRepository.findById(reviewId);
+      if (!review) {
+        throw {
+          status: 404,
+          message: "Reseña no encontrada.",
+        };
+      }
+
+      const likeCount = await reviewLikeRepository.countByReviewId(reviewId);
+      let liked = false;
+
+      if (userId) {
+        liked = await reviewLikeRepository.hasUserLiked(reviewId, userId);
+      }
+
+      return {
+        success: true,
+        data: {
+          liked,
+          likeCount,
+          reviewId,
+        },
+      };
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+
+      logger.error(`Error getting like status for review ${reviewId}: ${error.message}`);
+      throw {
+        status: 500,
+        message: "Error al obtener el estado del like.",
       };
     }
   }

@@ -229,4 +229,112 @@ describe("Gamification Service", () => {
       expect(stats).toHaveProperty("progressToNext");
     });
   });
+
+  describe("Badge Assignment", () => {
+    let badgeTestUser;
+
+    beforeAll(async () => {
+      const userRepository = AppDataSource.getRepository("User");
+      badgeTestUser = await userRepository.save({
+        email: "badge-test@example.com",
+        password: "hashedpassword",
+        isEmailConfirmed: true,
+        points: 0,
+        level: 1,
+        levelName: "Explorador",
+        badges: [],
+      });
+    });
+
+    afterAll(async () => {
+      if (badgeTestUser) {
+        await AppDataSource.getRepository("User").delete({ id: badgeTestUser.id });
+        await AppDataSource.getRepository("UserAction").delete({ userId: badgeTestUser.id });
+        await AppDataSource.getRepository("Review").delete({ userId: badgeTestUser.id });
+        await AppDataSource.getRepository("ReviewMedia").delete({ review: { userId: badgeTestUser.id } });
+      }
+    });
+
+    it("should award '🌍 Primera Reseña' badge on first review", async () => {
+      // Create a review for the user
+      const reviewRepository = AppDataSource.getRepository("Review");
+      const placeRepository = AppDataSource.getRepository("Place");
+
+      // Get a test place
+      const testPlace = await placeRepository.findOne();
+      expect(testPlace).toBeTruthy();
+
+      // Create a review
+      const review = await reviewRepository.save({
+        userId: badgeTestUser.id,
+        placeId: testPlace.id,
+        rating: 5,
+        content: "Test review for badge",
+      });
+
+      // Award points for review creation (this should trigger badge check)
+      const result = await gamificationService.awardPoints(badgeTestUser.id, "review_created", { review_id: review.id });
+
+      // Check if badge was awarded
+      const userRepository = AppDataSource.getRepository("User");
+      const updatedUser = await userRepository.findOne({ where: { id: badgeTestUser.id } });
+
+      const hasFirstReviewBadge = updatedUser.badges.some(badge => badge.name === '🌍 Primera Reseña');
+      expect(hasFirstReviewBadge).toBe(true);
+    });
+
+    it("should award '📸 Fotógrafo' badge on media upload", async () => {
+      // Create media for the user
+      const reviewMediaRepository = AppDataSource.getRepository("ReviewMedia");
+      const reviewRepository = AppDataSource.getRepository("Review");
+
+      // Get user's review
+      const userReview = await reviewRepository.findOne({ where: { userId: badgeTestUser.id } });
+      expect(userReview).toBeTruthy();
+
+      // Create media
+      await reviewMediaRepository.save({
+        reviewId: userReview.id,
+        userId: badgeTestUser.id,
+        mediaType: "image",
+        mediaUrl: "test-image.jpg",
+        fileName: "test.jpg",
+      });
+
+      // Award points for media upload (this should trigger badge check)
+      const result = await gamificationService.awardPoints(badgeTestUser.id, "media_upload");
+
+      // Check if badge was awarded
+      const userRepository = AppDataSource.getRepository("User");
+      const updatedUser = await userRepository.findOne({ where: { id: badgeTestUser.id } });
+
+      const hasPhotographerBadge = updatedUser.badges.some(badge => badge.name === '📸 Fotógrafo');
+      expect(hasPhotographerBadge).toBe(true);
+    });
+
+    it("should award '⭐ Popular' badge after receiving 5 likes", async () => {
+      // Award 5 vote_received actions
+      for (let i = 0; i < 5; i++) {
+        await gamificationService.awardPoints(badgeTestUser.id, "vote_received", { review_id: "test-review" });
+      }
+
+      // Check if badge was awarded
+      const userRepository = AppDataSource.getRepository("User");
+      const updatedUser = await userRepository.findOne({ where: { id: badgeTestUser.id } });
+
+      const hasPopularBadge = updatedUser.badges.some(badge => badge.name === '⭐ Popular');
+      expect(hasPopularBadge).toBe(true);
+    });
+
+    it("should not award duplicate badges", async () => {
+      // Try to award the same badge again
+      await gamificationService.awardPoints(badgeTestUser.id, "review_created", { review_id: "another-review" });
+
+      const userRepository = AppDataSource.getRepository("User");
+      const updatedUser = await userRepository.findOne({ where: { id: badgeTestUser.id } });
+
+      const firstReviewBadges = updatedUser.badges.filter(badge => badge.name === '🌍 Primera Reseña');
+      expect(firstReviewBadges.length).toBe(1); // Should still be only 1
+    });
+  });
 });
