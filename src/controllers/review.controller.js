@@ -148,6 +148,90 @@ export const getReviewsByPlace = async (req, res, next) => {
 };
 
 /**
+ * Toggle like on a review
+ * POST /api/reviews/:reviewId/like
+ */
+export const toggleLike = async (req, res, next) => {
+  const { reviewId } = req.params;
+  const userId = req.user?.id;
+
+  logger.info(`Toggle like endpoint called for review: ${reviewId} by user: ${userId}`);
+
+  try {
+    // Verificar que el usuario esté autenticado
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Usuario no está autenticado.",
+      });
+    }
+
+    const result = await reviewService.toggleLike(reviewId, userId);
+
+    logger.info(
+      `Toggle like endpoint completed successfully for review: ${reviewId}, user: ${userId}, liked: ${result.data.liked}`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result.data,
+    });
+  } catch (err) {
+    logger.error(
+      `Toggle like endpoint failed for review: ${reviewId}, user: ${userId}, error: ${err.message}`
+    );
+
+    // Si es un error conocido con status
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+      });
+    }
+
+    next(err);
+  }
+};
+
+/**
+ * Get like status for a review
+ * GET /api/reviews/:reviewId/like
+ */
+export const getLikeStatus = async (req, res, next) => {
+  const { reviewId } = req.params;
+  const userId = req.user?.id;
+
+  logger.info(`Get like status endpoint called for review: ${reviewId} by user: ${userId}`);
+
+  try {
+    const result = await reviewService.getLikeStatus(reviewId, userId);
+
+    logger.info(
+      `Get like status endpoint completed successfully for review: ${reviewId}`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result.data,
+    });
+  } catch (err) {
+    logger.error(
+      `Get like status endpoint failed for review: ${reviewId}, error: ${err.message}`
+    );
+
+    // Si es un error conocido con status
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+      });
+    }
+
+    next(err);
+  }
+};
+
+/**
  * Obtiene estadísticas de reseñas de un lugar
  * GET /api/places/:placeId/reviews/stats
  */

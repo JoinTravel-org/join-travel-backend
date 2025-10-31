@@ -11,6 +11,8 @@ import {
   getReviewsByPlace,
   getReviewStats,
   getAllReviews,
+  toggleLike,
+  getLikeStatus,
 } from "../controllers/review.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -746,6 +748,91 @@ router.get("/:placeId/reviews", getReviewsByPlace);
  *         description: Place not found
  */
 router.get("/:placeId/reviews/stats", getReviewStats);
+
+/**
+ * @swagger
+ * /api/reviews/{reviewId}/like:
+ *   post:
+ *     summary: Toggle like on a review
+ *     description: Like or unlike a review. Requires user authentication.
+ *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reviewId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the review to like/unlike
+ *     responses:
+ *       200:
+ *         description: Like toggled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     liked:
+ *                       type: boolean
+ *                       example: true
+ *                     likeCount:
+ *                       type: integer
+ *                       example: 5
+ *                     reviewId:
+ *                       type: string
+ *                       example: "uuid"
+ *       400:
+ *         description: Cannot like own review
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Review not found
+ *   get:
+ *     summary: Get like status for a review
+ *     description: Get the current like status and count for a review
+ *     tags: [Reviews]
+ *     parameters:
+ *       - in: path
+ *         name: reviewId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the review
+ *     responses:
+ *       200:
+ *         description: Like status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     liked:
+ *                       type: boolean
+ *                       example: true
+ *                     likeCount:
+ *                       type: integer
+ *                       example: 5
+ *                     reviewId:
+ *                       type: string
+ *                       example: "uuid"
+ *       404:
+ *         description: Review not found
+ */
+router.post("/reviews/:reviewId/like", authenticate, toggleLike);
+router.get("/reviews/:reviewId/like", authenticate, getLikeStatus);
 
 
 

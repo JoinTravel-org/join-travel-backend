@@ -107,7 +107,7 @@ router.get("/users/:userId/stats", getUserStats);
  *             properties:
  *               action:
  *                 type: string
- *                 enum: [review_created, vote_received, profile_completed, comment_posted]
+ *                 enum: [review_created, vote_received, profile_completed, comment_posted, media_upload]
  *                 example: "review_created"
  *               metadata:
  *                 type: object
