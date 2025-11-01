@@ -152,6 +152,16 @@ class AuthService {
       emailConfirmationExpires: null,
     });
 
+    // Award profile_completed action to enable level progression
+    try {
+      const gamificationService = (await import('./gamification.service.js')).default;
+      await gamificationService.awardPoints(user.id, 'profile_completed', {}, false);
+      console.log(`Profile completed action awarded to user ${user.id} after email confirmation`);
+    } catch (gamificationError) {
+      console.error(`Failed to award profile_completed action for user ${user.id}:`, gamificationError);
+      // Don't fail email confirmation if gamification fails
+    }
+
     return { message: "Email confirmado exitosamente." };
   }
 
