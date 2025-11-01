@@ -125,7 +125,7 @@ class AuthService {
     const accessToken = this.generateAccessToken(user);
     const refreshToken = this.generateRefreshToken(user);
 
-    return { accessToken, refreshToken };
+    return { user, accessToken, refreshToken };
   }
 
   /**

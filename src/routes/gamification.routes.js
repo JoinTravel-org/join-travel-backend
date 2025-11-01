@@ -5,6 +5,7 @@ import {
   awardPoints,
   getAllLevels,
   getAllBadges,
+  getUserMilestones,
 } from "../controllers/gamification.controller.js";
 
 const router = Router();
@@ -235,5 +236,77 @@ router.get("/levels", getAllLevels);
  *                         type: string
  */
 router.get("/badges", getAllBadges);
+
+/**
+ * @swagger
+ * /api/users/{userId}/milestones:
+ *   get:
+ *     summary: Get user milestones for badges and leveling up
+ *     description: Returns the user's current milestones for earning badges and leveling up, including progress and instructions
+ *     tags: [Gamification]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User milestones retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "first-review"
+ *                       title:
+ *                         type: string
+ *                         example: "Primera Reseña"
+ *                       description:
+ *                         type: string
+ *                         example: "Escribe tu primera reseña de un lugar"
+ *                       progress:
+ *                         type: integer
+ *                         example: 0
+ *                       target:
+ *                         type: integer
+ *                         example: 1
+ *                       isCompleted:
+ *                         type: boolean
+ *                         example: false
+ *                       category:
+ *                         type: string
+ *                         enum: [badge, level]
+ *                         example: "badge"
+ *                       badgeName:
+ *                         type: string
+ *                         example: "Crítico Novato"
+ *                       levelRequired:
+ *                         type: integer
+ *                         example: 2
+ *                       instructions:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         example: ["Navega a la página de un lugar que hayas visitado", "Haz clic en 'Escribir reseña'"]
+ *       403:
+ *         description: Forbidden - can only view own milestones
+ *       404:
+ *         description: User not found
+ */
+router.get("/users/:userId/milestones", getUserMilestones);
 
 export default router;

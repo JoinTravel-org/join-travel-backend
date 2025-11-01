@@ -526,6 +526,243 @@ class GamificationService {
   }
 
   /**
+   * Get user milestones for badges and levels
+   * @param {string} userId - User ID
+   * @returns {Promise<Array>} User milestones
+   */
+  async getUserMilestones(userId) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        select: ['id', 'points', 'level', 'levelName', 'badges']
+      });
+
+      if (!user) {
+        throw { status: 404, message: "Usuario no encontrado" };
+      }
+
+      const milestones = [];
+
+      // Get all levels and create level milestones
+      const levels = await this.levelRepository.find({
+        order: { levelNumber: 'ASC' }
+      });
+
+      for (const level of levels) {
+        const isCompleted = user.level >= level.levelNumber;
+        let progress = 0;
+
+        if (isCompleted) {
+          progress = level.minPoints;
+        } else if (user.level === level.levelNumber - 1) {
+          // Calculate progress towards this level
+          const currentLevel = await this.levelRepository.findOne({
+            where: { levelNumber: user.level }
+          });
+          if (currentLevel) {
+            const qualifies = await this.checkLevelCriteria(userId, level.levelNumber);
+            if (qualifies) {
+              progress = level.minPoints;
+            } else {
+              // Calculate partial progress based on criteria
+              progress = await this.calculateLevelProgress(userId, level.levelNumber);
+            }
+          }
+        }
+
+        const milestone = {
+          id: `level-${level.levelNumber}`,
+          title: level.name,
+          description: level.description,
+          progress: Math.min(progress, level.minPoints),
+          target: level.minPoints,
+          isCompleted,
+          category: "level",
+          levelRequired: level.levelNumber,
+          instructions: this.getLevelInstructions(level.levelNumber)
+        };
+
+        milestones.push(milestone);
+      }
+
+      // Get all badges and create badge milestones
+      const badges = await this.badgeRepository.find();
+
+      for (const badge of badges) {
+        const isCompleted = user.badges && user.badges.some(b => b.name === badge.name);
+        let progress = 0;
+
+        if (!isCompleted) {
+          progress = await this.calculateBadgeProgress(userId, badge);
+        } else {
+          progress = badge.criteria.count || 1;
+        }
+
+        const target = badge.criteria.count || 1;
+
+        const milestone = {
+          id: `badge-${badge.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}`,
+          title: badge.name,
+          description: badge.description,
+          progress: Math.min(progress, target),
+          target,
+          isCompleted,
+          category: "badge",
+          badgeName: badge.name,
+          instructions: this.getBadgeInstructions(badge.name)
+        };
+
+        milestones.push(milestone);
+      }
+
+      return milestones;
+    } catch (error) {
+      logger.error(`Error getting user milestones for ${userId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate progress towards a level
+   * @param {string} userId - User ID
+   * @param {number} levelNumber - Level number
+   * @returns {Promise<number>} Progress value
+   */
+  async calculateLevelProgress(userId, levelNumber) {
+    switch (levelNumber) {
+      case 1:
+        const profileCompleted = await this.userActionRepository.count({
+          where: { userId, actionType: 'profile_completed' }
+        });
+        return profileCompleted > 0 ? 5 : 0;
+
+      case 2:
+        const reviewCount = await this.userActionRepository.count({
+          where: { userId, actionType: 'review_created' }
+        });
+        return Math.min(reviewCount * 10, 30); // Max 30 points towards level 2
+
+      case 3:
+        const likeCount = await this.userActionRepository.count({
+          where: { userId, actionType: 'vote_received' }
+        });
+        return Math.min(likeCount * 5, 50); // Max 50 points towards level 3
+
+      case 4:
+        const reviewCount4 = await this.userActionRepository.count({
+          where: { userId, actionType: 'review_created' }
+        });
+        const likeCount4 = await this.userActionRepository.count({
+          where: { userId, actionType: 'vote_received' }
+        });
+        const reviewProgress = Math.min(reviewCount4 * 2, 50);
+        const likeProgress = Math.min(likeCount4, 50);
+        return Math.min(reviewProgress + likeProgress, 100);
+
+      default:
+        return 0;
+    }
+  }
+
+  /**
+   * Calculate progress towards a badge
+   * @param {string} userId - User ID
+   * @param {Object} badge - Badge data
+   * @returns {Promise<number>} Progress value
+   */
+  async calculateBadgeProgress(userId, badge) {
+    const criteria = badge.criteria;
+
+    if (criteria.action_type && criteria.count) {
+      const actionCount = await this.userActionRepository.count({
+        where: { userId, actionType: criteria.action_type }
+      });
+      return Math.min(actionCount, criteria.count);
+    }
+
+    if (badge.name === '🌍 Primera Reseña') {
+      const reviewCount = await this.userActionRepository.count({
+        where: { userId, actionType: 'review_created' }
+      });
+      return Math.min(reviewCount, 1);
+    }
+
+    if (badge.name === '📸 Fotógrafo') {
+      const mediaCount = await this.userActionRepository.count({
+        where: { userId, actionType: 'media_upload' }
+      });
+      return Math.min(mediaCount, 1);
+    }
+
+    if (badge.name === '⭐ Popular') {
+      const likeCount = await this.userActionRepository.count({
+        where: { userId, actionType: 'vote_received' }
+      });
+      return Math.min(likeCount, 5);
+    }
+
+    return 0;
+  }
+
+  /**
+   * Get instructions for a level
+   * @param {number} levelNumber - Level number
+   * @returns {Array<string>} Instructions
+   */
+  getLevelInstructions(levelNumber) {
+    const instructions = {
+      1: [
+        "Completa tu perfil con información personal",
+        "Agrega una foto de perfil",
+        "Escribe una breve biografía"
+      ],
+      2: [
+        "Escribe reseñas de calidad sobre lugares que has visitado",
+        "Sé específico sobre tu experiencia",
+        "Incluye detalles útiles para otros usuarios"
+      ],
+      3: [
+        "Recibe votos positivos en tus reseñas",
+        "Interactúa con otros usuarios",
+        "Comparte reseñas detalladas con fotos"
+      ],
+      4: [
+        "Continúa escribiendo reseñas de calidad",
+        "Mantén un alto nivel de engagement",
+        "Ayuda a la comunidad con tus experiencias"
+      ]
+    };
+    return instructions[levelNumber] || [];
+  }
+
+  /**
+   * Get instructions for a badge
+   * @param {string} badgeName - Badge name
+   * @returns {Array<string>} Instructions
+   */
+  getBadgeInstructions(badgeName) {
+    const instructions = {
+      '🌍 Primera Reseña': [
+        "Navega a la página de un lugar que hayas visitado",
+        "Haz clic en 'Escribir reseña'",
+        "Completa el formulario con tu experiencia",
+        "Publica la reseña"
+      ],
+      '📸 Fotógrafo': [
+        "Toma fotos de calidad de los lugares que visitas",
+        "Sube imágenes junto con tus reseñas",
+        "Asegúrate de que las fotos sean nítidas y relevantes"
+      ],
+      '⭐ Popular': [
+        "Escribe reseñas útiles y detalladas",
+        "Interactúa con la comunidad",
+        "Comparte experiencias auténticas"
+      ]
+    };
+    return instructions[badgeName] || [];
+  }
+
+  /**
    * Recalculate user stats (for cron job)
    * @param {string} userId - User ID
    * @returns {Promise<Object>} Recalculated stats

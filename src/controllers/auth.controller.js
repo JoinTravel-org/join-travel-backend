@@ -47,8 +47,14 @@ export const login = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Login exitoso.",
       data: {
+        user: {
+          id: result.user.id,
+          email: result.user.email,
+          isEmailConfirmed: result.user.isEmailConfirmed,
+          createdAt: result.user.createdAt,
+          updatedAt: result.user.updatedAt,
+        },
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
       },

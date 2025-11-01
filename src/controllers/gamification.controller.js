@@ -14,10 +14,8 @@ export const getUserStats = async (req, res, next) => {
   try {
     // Allow access if:
     // 1. userId matches the authenticated user ID, OR
-    // 2. userId is "temp-id" (frontend placeholder), OR
-    // 3. user is admin
-    const effectiveUserId = (userId === 'temp-id') ? requestingUserId : userId;
-    const isOwner = effectiveUserId === requestingUserId;
+    // 2. user is admin
+    const isOwner = userId === requestingUserId;
     const isAdmin = req.user?.role === 'admin';
 
     if (!isOwner && !isAdmin) {
@@ -27,7 +25,7 @@ export const getUserStats = async (req, res, next) => {
       });
     }
 
-    const stats = await gamificationService.getUserStats(effectiveUserId);
+    const stats = await gamificationService.getUserStats(userId);
 
     logger.info(`Get user stats endpoint completed successfully for user: ${userId}`);
     res.status(200).json({
@@ -62,10 +60,8 @@ export const awardPoints = async (req, res, next) => {
   try {
     // Allow access if:
     // 1. userId matches the authenticated user ID, OR
-    // 2. userId is "temp-id" (frontend placeholder), OR
-    // 3. user is admin
-    const effectiveUserId = (userId === 'temp-id') ? requestingUserId : userId;
-    const isOwner = effectiveUserId === requestingUserId;
+    // 2. user is admin
+    const isOwner = userId === requestingUserId;
     const isAdmin = req.user?.role === 'admin';
 
     if (!isOwner && !isAdmin) {
@@ -94,7 +90,7 @@ export const awardPoints = async (req, res, next) => {
       });
     }
 
-    const result = await gamificationService.awardPoints(effectiveUserId, action, metadata || {});
+    const result = await gamificationService.awardPoints(userId, action, metadata || {});
 
     logger.info(`Award points endpoint completed successfully for user: ${userId}, action: ${action}`);
     res.status(200).json({
@@ -176,6 +172,51 @@ export const getAllBadges = async (req, res, next) => {
     });
   } catch (err) {
     logger.error(`Get all badges endpoint failed: ${err.message}`);
+
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+      });
+    }
+
+    next(err);
+  }
+};
+
+/**
+ * GET /api/users/{userId}/milestones
+ * Returns user's current milestones for earning badges and leveling up
+ */
+export const getUserMilestones = async (req, res, next) => {
+  const { userId } = req.params;
+  const requestingUserId = req.user?.id;
+
+  logger.info(`Get user milestones endpoint called for user: ${userId} by user: ${requestingUserId}`);
+
+  try {
+    // Allow access if:
+    // 1. userId matches the authenticated user ID, OR
+    // 2. user is admin
+    const isOwner = userId === requestingUserId;
+    const isAdmin = req.user?.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "No tienes permiso para ver los hitos de este usuario.",
+      });
+    }
+
+    const milestones = await gamificationService.getUserMilestones(userId);
+
+    logger.info(`Get user milestones endpoint completed successfully for user: ${userId}, returned ${milestones.length} milestones`);
+    res.status(200).json({
+      success: true,
+      data: milestones,
+    });
+  } catch (err) {
+    logger.error(`Get user milestones endpoint failed for user: ${userId}, error: ${err.message}`);
 
     if (err.status) {
       return res.status(err.status).json({
