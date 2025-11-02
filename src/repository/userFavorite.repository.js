@@ -99,6 +99,19 @@ class UserFavoriteRepository {
       where: { placeId },
     });
   }
+
+  /**
+   * Obtiene todos los lugares favoritos de un usuario con detalles completos
+   * @param {string} userId - ID del usuario
+   * @returns {Promise<Array>} - Lista de lugares favoritos con detalles
+   */
+  async getUserFavoritesWithDetails(userId) {
+    return await this.getRepository().find({
+      where: { userId },
+      relations: ['place'],
+      order: { createdAt: 'DESC' },
+    });
+  }
 }
 
 export default new UserFavoriteRepository();

@@ -302,5 +302,35 @@ export const getFavoriteStatus = async (req, res, next) => {
   }
 };
 
+/**
+ * Get all favorite places for the authenticated user
+ * GET /api/places/favorites
+ */
+export const getUserFavorites = async (req, res, next) => {
+  logger.info(`Get user favorites endpoint called for user: ${req.user.id}`);
+  try {
+    const userId = req.user.id;
+
+    const result = await placeService.getUserFavorites(userId);
+
+    logger.info(`Get user favorites endpoint completed successfully for user: ${userId}, returned ${result.favorites.length} favorites`);
+    res.status(200).json({
+      success: true,
+      data: result.favorites,
+      message: result.message,
+    });
+  } catch (err) {
+    logger.error(`Get user favorites endpoint failed for user: ${req.user.id}, error: ${err.message}`);
+    if (err.details) {
+      return res.status(err.status || 400).json({
+        success: false,
+        message: err.message,
+        errors: err.details,
+      });
+    }
+    next(err);
+  }
+};
+
 
 

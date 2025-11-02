@@ -334,6 +334,51 @@ class PlaceService {
       throw err;
     }
   }
+
+  /**
+   * Get all favorite places for a user
+   * @param {string} userId - ID del usuario
+   * @returns {Promise<Object>} - { favorites: Array, message: string }
+   * @throws {Error} - Si hay error en la operación
+   */
+  async getUserFavorites(userId) {
+    try {
+      if (!userId) {
+        const error = new Error("User ID is required");
+        error.status = 400;
+        throw error;
+      }
+
+      const favorites = await userFavoriteRepository.getUserFavoritesWithDetails(userId);
+
+      // Extraer solo los datos del lugar, filtrando lugares que ya no existen
+      const places = favorites
+        .filter(fav => fav.place !== null)
+        .map(fav => ({
+          id: fav.place.id,
+          name: fav.place.name,
+          address: fav.place.address,
+          latitude: fav.place.latitude,
+          longitude: fav.place.longitude,
+          image: fav.place.image,
+          rating: fav.place.rating,
+          createdAt: fav.place.createdAt,
+          updatedAt: fav.place.updatedAt,
+          description: fav.place.description,
+          city: fav.place.city,
+        }));
+
+      logger.info(`Retrieved ${places.length} favorites for user ${userId}`);
+
+      return {
+        favorites: places,
+        message: "Favorites retrieved successfully",
+      };
+    } catch (err) {
+      logger.error(`Error getting favorites for user ${userId}: ${err.message}`);
+      throw err;
+    }
+  }
 }
 
 export default new PlaceService();
