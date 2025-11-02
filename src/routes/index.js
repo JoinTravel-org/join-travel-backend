@@ -6,6 +6,9 @@ import debugRoutes from "./debug.routes.js";
 import itineraryRoutes from "./itinerary.routes.js";
 import mediaRoutes from "./media.routes.js";
 import chatRoutes from "./chat.routes.js";
+import gamificationRoutes from "./gamification.routes.js";
+import cronRoutes from "./cron.routes.js";
+import usersRoutes from "./users.routes.js";
 
 const router = Router();
 
@@ -16,6 +19,9 @@ router.use("/debug", debugRoutes);
 router.use("/itineraries", itineraryRoutes);
 router.use("/media", mediaRoutes);
 router.use("/chat", chatRoutes);
+router.use("/users", usersRoutes);
+router.use("", gamificationRoutes);
+router.use("/cron", cronRoutes);
 
 const apiRouter = Router();
 apiRouter.use("/api", router);

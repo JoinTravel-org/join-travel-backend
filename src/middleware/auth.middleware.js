@@ -11,7 +11,7 @@ export const authenticate = async (req, res, next) => {
   try {
     // Get token from Authorization header (Bearer token)
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
@@ -20,7 +20,7 @@ export const authenticate = async (req, res, next) => {
     }
 
     const token = authHeader.substring(7); // Remove "Bearer " prefix
-    
+
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -30,7 +30,7 @@ export const authenticate = async (req, res, next) => {
 
     // Verify token using your JWT secret from environment
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     // Check if token is revoked
     const isRevoked = await authService.isTokenRevoked(token);
     if (isRevoked) {
@@ -39,7 +39,7 @@ export const authenticate = async (req, res, next) => {
         message: "Token has been revoked."
       });
     }
-    
+
     // Find user in database
     const user = await AppDataSource.getRepository(User).findOne({ where: { id: decoded.id } });
 
@@ -66,7 +66,7 @@ export const authenticate = async (req, res, next) => {
         message: "Token expired. Please login again."
       });
     }
-    
+
     if (error.name === "JsonWebTokenError") {
       return res.status(401).json({
         success: false,
@@ -81,6 +81,11 @@ export const authenticate = async (req, res, next) => {
     });
   }
 };
+
+/**
+ * Alias for authenticate middleware to maintain backward compatibility
+ */
+export const authenticateToken = authenticate;
 
 /**
  * Authorization Middleware

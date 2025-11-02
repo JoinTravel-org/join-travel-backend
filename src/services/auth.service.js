@@ -7,6 +7,7 @@ import config from "../config/index.js";
 import { AppDataSource } from "../load/typeorm.loader.js";
 import RevokedToken from "../models/revokedToken.model.js";
 import { isValidEmail, validatePassword } from "../utils/validators.js";
+import { ValidationError, AuthenticationError, DatabaseError } from "../utils/customErrors.js";
 
 class AuthService {
   constructor() {
@@ -21,28 +22,19 @@ class AuthService {
   async register({ email, password }) {
     // 1. Validar formato de email
     if (!isValidEmail(email)) {
-      const error = new Error("Formato de correo inválido.");
-      error.status = 400;
-      throw error;
+      throw new ValidationError("Formato de correo inválido.");
     }
 
     // 2. Validar requisitos de contraseña
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      const error = new Error("La contraseña no cumple con los requisitos.");
-      error.status = 400;
-      error.details = passwordValidation.errors;
-      throw error;
+      throw new ValidationError("La contraseña no cumple con los requisitos.", passwordValidation.errors);
     }
 
     // 3. Verificar que el email no exista
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
-      const error = new Error(
-        "El email ya está en uso. Intente iniciar sesión."
-      );
-      error.status = 409;
-      throw error;
+      throw new ValidationError("El email ya está en uso. Intente iniciar sesión.");
     }
 
     // 4. Hash de la contraseña
@@ -115,31 +107,25 @@ class AuthService {
     // 1. Verificar que el usuario exista
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      const error = new Error("Credenciales inválidas.");
-      error.status = 401;
-      throw error;
+      throw new AuthenticationError("Credenciales inválidas.");
     }
 
     // 2. Verificar que el email esté confirmado
     if (!user.isEmailConfirmed) {
-      const error = new Error("El email no ha sido confirmado.");
-      error.status = 403;
-      throw error;
+      throw new AuthenticationError("El email no ha sido confirmado.");
     }
 
     // 3. Verificar la contraseña
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      const error = new Error("Credenciales inválidas.");
-      error.status = 401;
-      throw error;
+      throw new AuthenticationError("Credenciales inválidas.");
     }
 
     // 4. Generar tokens JWT
     const accessToken = this.generateAccessToken(user);
     const refreshToken = this.generateRefreshToken(user);
 
-    return { accessToken, refreshToken };
+    return { user, accessToken, refreshToken };
   }
 
   /**
@@ -151,19 +137,13 @@ class AuthService {
     const user = await this.userRepository.findByConfirmationToken(token);
 
     if (!user) {
-      const error = new Error("Token de confirmación inválido.");
-      error.status = 400;
-      console.log(error);
-      throw error;
+      throw new ValidationError("Token de confirmación inválido.");
     }
 
     // Comparar fecha actual (UTC) con fecha de expiración (UTC)
     const now = new Date(); // Fecha actual en UTC
     if (now > user.emailConfirmationExpires) {
-      const error = new Error("El token de confirmación ha expirado.");
-      error.status = 400;
-      console.log(error);
-      throw error;
+      throw new ValidationError("El token de confirmación ha expirado.");
     }
 
     await this.userRepository.update(user.id, {
@@ -171,6 +151,16 @@ class AuthService {
       emailConfirmationToken: null,
       emailConfirmationExpires: null,
     });
+
+    // Award profile_completed action to enable level progression
+    try {
+      const gamificationService = (await import('./gamification.service.js')).default;
+      await gamificationService.awardPoints(user.id, 'profile_completed', {}, false);
+      console.log(`Profile completed action awarded to user ${user.id} after email confirmation`);
+    } catch (gamificationError) {
+      console.error(`Failed to award profile_completed action for user ${user.id}:`, gamificationError);
+      // Don't fail email confirmation if gamification fails
+    }
 
     return { message: "Email confirmado exitosamente." };
   }
@@ -216,9 +206,7 @@ class AuthService {
       const user = await this.userRepository.findById(decoded.id);
 
       if (!user) {
-        const error = new Error("Usuario no encontrado.");
-        error.status = 401;
-        throw error;
+        throw new AuthenticationError("Usuario no encontrado.");
       }
 
       // Generar nuevos tokens
@@ -227,9 +215,7 @@ class AuthService {
 
       return { accessToken: newAccessToken, refreshToken: newRefreshToken };
     } catch (error) {
-      const err = new Error("Refresh token inválido.");
-      err.status = 401;
-      throw err;
+      throw new AuthenticationError("Refresh token inválido.");
     }
   }
 

@@ -8,18 +8,76 @@ import fs from "fs";
 import path from "path";
 import bcrypt from "bcrypt";
 
+// Gamification seed data
+export const LEVELS_DATA = [
+  { levelNumber: 1, name: 'Explorador', minPoints: 0, description: 'Registrarse', rewards: { badge: 'Explorador' }, instructions: ["Registrate en la plataforma"] },
+  { levelNumber: 2, name: 'Viajero Activo', minPoints: 30, description: 'Tener al menos 3 reseñas publicadas', rewards: { badge: 'Viajero Activo', unlock_feature: 'advanced_search' }, instructions: ["Escribe reseñas de calidad sobre lugares que has visitado", "Sé específico sobre tu experiencia", "Incluye detalles útiles para otros usuarios"] },
+  { levelNumber: 3, name: 'Guía Experto', minPoints: 100, description: 'Obtener al menos 10 likes en sus aportes', rewards: { badge: 'Guía Experto', unlock_feature: 'expert_badge_display' }, instructions: ["Recibe votos positivos en tus reseñas", "Interactúa con otros usuarios", "Comparte reseñas detalladas con fotos"] },
+  { levelNumber: 4, name: 'Maestro Viajero', minPoints: 150, description: 'Alcanzar 10 reseñas y 50 likes', rewards: { badge: 'Maestro Viajero', unlock_feature: 'priority_support' }, instructions: ["Continúa escribiendo reseñas de calidad", "Mantén un alto nivel de engagement", "Ayuda a la comunidad con tus experiencias"] },
+];
+
+export const BADGES_DATA = [
+  { name: '🌍 Primera Reseña', description: 'Crear tu primera reseña', criteria: { action_type: 'review_created', count: 1 }, iconUrl: '🌍', instructions: ["Navega a la página de un lugar que hayas visitado", "Haz clic en 'Escribir reseña'", "Completa el formulario con tu experiencia", "Publica la reseña"] },
+  { name: '📸 Fotógrafo', description: 'Subir una foto o video en cualquier reseña', criteria: { action_type: 'media_upload', count: 1 }, iconUrl: '📸', instructions: ["Toma fotos de calidad de los lugares que visitas", "Sube imágenes junto con tus reseñas", "Asegúrate de que las fotos sean nítidas y relevantes"] },
+  { name: '⭐ Popular', description: 'Recibir al menos 5 likes en reseñas propias', criteria: { action_type: 'vote_received', count: 5 }, iconUrl: '⭐', instructions: ["Escribe reseñas útiles y detalladas", "Interactúa con la comunidad", "Comparte experiencias auténticas"] },
+  { name: 'Viajero Activo', description: 'Alcanzar nivel 2', criteria: { level: 2 }, iconUrl: '🏆', instructions: [] },
+  { name: 'Guía Experto', description: 'Alcanzar nivel 3', criteria: { level: 3 }, iconUrl: '🎯', instructions: [] },
+  { name: 'Maestro Viajero', description: 'Alcanzar nivel 4', criteria: { level: 4 }, iconUrl: '👑', instructions: [] },
+  { name: 'Super Like', description: 'Recibir 10 likes en una sola reseña', criteria: { action_type: 'vote_received', per_review: 10 }, iconUrl: '🔥', instructions: [] },
+];
+
+export const POINTS_DATA = {
+  'review_created': 10,
+  'vote_received': 1,
+  'profile_completed': 5,
+  'comment_posted': 2,
+  'media_upload': 5, // Bonus points for uploading media
+  'place_added': 15, // Points for adding a new place
+};
+
 export default async function seedDatabase() {
   try {
+    logger.info("Seeding database with gamification data, users, places, reviews, and media...");
+
+    // Seed levels and badges first (always, regardless of places)
+    logger.info("Seeding levels...");
+    for (const levelData of LEVELS_DATA) {
+      try {
+        const existingLevel = await AppDataSource.getRepository("Level").findOne({ where: { levelNumber: levelData.levelNumber } });
+        if (!existingLevel) {
+          await AppDataSource.getRepository("Level").save(levelData);
+          logger.info(`Seeded level: ${levelData.name}`);
+        } else {
+          logger.info(`Level ${levelData.name} already exists, skipping`);
+        }
+      } catch (error) {
+        logger.error(`Failed to seed level ${levelData.name}:`, error.message);
+      }
+    }
+
+    logger.info("Seeding badges...");
+    for (const badgeData of BADGES_DATA) {
+      try {
+        const existingBadge = await AppDataSource.getRepository("Badge").findOne({ where: { name: badgeData.name } });
+        if (!existingBadge) {
+          await AppDataSource.getRepository("Badge").save(badgeData);
+          logger.info(`Seeded badge: ${badgeData.name}`);
+        } else {
+          logger.info(`Badge ${badgeData.name} already exists, skipping`);
+        }
+      } catch (error) {
+        logger.error(`Failed to seed badge ${badgeData.name}:`, error.message);
+      }
+    }
+
     // Check if places already exist
     const existingPlaces = await placeRepository.getRepository().count();
     if (existingPlaces > 0) {
       logger.info(
-        `Database already has ${existingPlaces} places, skipping seed`
+        `Database already has ${existingPlaces} places, skipping user/place/review seeding`
       );
       return;
     }
-
-    logger.info("Seeding database with users, places, reviews, and media...");
     const usersData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/users.json"), "utf8"));
     const placesData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/places.json"), "utf8"));
     const reviewsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/reviews.json"), "utf8"));

@@ -32,7 +32,7 @@ class ReviewRepository {
   async findByPlaceId(placeId) {
     return await this.getRepository()
       .createQueryBuilder("review")
-      .innerJoinAndSelect("review.user", "user")
+      .leftJoinAndSelect("review.user", "user")
       .where("review.placeId = :placeId", { placeId })
       .orderBy("review.createdAt", "DESC")
       .select([

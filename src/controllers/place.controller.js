@@ -215,5 +215,122 @@ export const getPlaceById = async (req, res, next) => {
   }
 };
 
+/**
+ * Toggle favorite status for a place
+ * POST /api/places/{placeId}/favorite
+ */
+export const toggleFavorite = async (req, res, next) => {
+  logger.info(`Toggle favorite endpoint called for place: ${req.params.placeId}, user: ${req.user.id}`);
+  try {
+    const { placeId } = req.params;
+    const userId = req.user.id;
+
+    if (!placeId) {
+      return res.status(400).json({
+        success: false,
+        message: "Place ID is required.",
+      });
+    }
+
+    const result = await placeService.toggleFavorite(userId, placeId);
+
+    logger.info(`Toggle favorite endpoint completed successfully for place: ${placeId}, user: ${userId}`);
+    res.status(200).json({
+      success: true,
+      isFavorite: result.isFavorite,
+      message: result.message,
+    });
+  } catch (err) {
+    logger.error(`Toggle favorite endpoint failed for place: ${req.params.placeId}, user: ${req.user.id}, error: ${err.message}`);
+    if (err.details) {
+      return res.status(err.status || 400).json({
+        success: false,
+        message: err.message,
+        errors: err.details,
+      });
+    }
+    if (err.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "Place not found",
+      });
+    }
+    next(err);
+  }
+};
+
+/**
+ * Get favorite status for a place
+ * GET /api/places/{placeId}/favorite
+ */
+export const getFavoriteStatus = async (req, res, next) => {
+  logger.info(`Get favorite status endpoint called for place: ${req.params.placeId}, user: ${req.user.id}`);
+  try {
+    const { placeId } = req.params;
+    const userId = req.user.id;
+
+    if (!placeId) {
+      return res.status(400).json({
+        success: false,
+        message: "Place ID is required.",
+      });
+    }
+
+    const result = await placeService.getFavoriteStatus(userId, placeId);
+
+    logger.info(`Get favorite status endpoint completed successfully for place: ${placeId}, user: ${userId}`);
+    res.status(200).json({
+      success: true,
+      isFavorite: result.isFavorite,
+    });
+  } catch (err) {
+    logger.error(`Get favorite status endpoint failed for place: ${req.params.placeId}, user: ${req.user.id}, error: ${err.message}`);
+    if (err.details) {
+      return res.status(err.status || 400).json({
+        success: false,
+        message: err.message,
+        errors: err.details,
+      });
+    }
+    if (err.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: "Place not found",
+      });
+    }
+    next(err);
+  }
+};
+
+/**
+ * Get all favorite places for the authenticated user
+ * GET /api/places/favorites
+ */
+export const getUserFavorites = async (req, res, next) => {
+  logger.info(`Get user favorites endpoint called for user: ${req.user.id}`);
+  try {
+    const userId = req.user.id;
+
+    const result = await placeService.getUserFavorites(userId);
+
+    logger.info(`Get user favorites endpoint completed successfully for user: ${userId}, returned ${result.favorites.length} favorites`);
+    res.status(200).json({
+      success: true,
+      data: result.favorites,
+      message: result.message,
+    });
+  } catch (err) {
+    logger.error(`Get user favorites endpoint failed for user: ${req.user.id}, error: ${err.message}`);
+    if (err.details) {
+      return res.status(err.status || 400).json({
+        success: false,
+        message: err.message,
+        errors: err.details,
+      });
+    }
+    next(err);
+  }
+};
+
 
 

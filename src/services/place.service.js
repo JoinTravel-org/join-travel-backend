@@ -1,4 +1,5 @@
 import placeRepository from "../repository/place.repository.js";
+import userFavoriteRepository from "../repository/userFavorite.repository.js";
 import { validatePlaceData, validateDescription } from "../utils/validators.js";
 import logger from "../config/logger.js";
 
@@ -218,11 +219,11 @@ class PlaceService {
   }
 
   /**
-    * Obtiene un lugar por su ID
-    * @param {string} id - ID del lugar a buscar
-    * @returns {Promise<Object>} - Lugar encontrado
-    * @throws {Error} - Si el lugar no existe o hay un error en la búsqueda
-    */
+     * Obtiene un lugar por su ID
+     * @param {string} id - ID del lugar a buscar
+     * @returns {Promise<Object>} - Lugar encontrado
+     * @throws {Error} - Si el lugar no existe o hay un error en la búsqueda
+     */
   async getPlaceById(id) {
     try {
       if (!id) {
@@ -255,6 +256,126 @@ class PlaceService {
       };
     } catch (err) {
       logger.error(`Error getting place by ID ${id}: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * Toggle favorite status for a place
+   * @param {string} userId - ID del usuario
+   * @param {string} placeId - ID del lugar
+   * @returns {Promise<Object>} - { isFavorite: boolean, message: string }
+   * @throws {Error} - Si hay error en la operación
+   */
+  async toggleFavorite(userId, placeId) {
+    try {
+      if (!userId || !placeId) {
+        const error = new Error("User ID and Place ID are required");
+        error.status = 400;
+        throw error;
+      }
+
+      // Verificar que el lugar existe
+      const place = await placeRepository.findById(placeId);
+      if (!place) {
+        const error = new Error("Place not found");
+        error.status = 404;
+        throw error;
+      }
+
+      const result = await userFavoriteRepository.toggleFavorite(userId, placeId);
+
+      const message = result.isFavorite ? "Place favorited successfully" : "Place unfavorited successfully";
+
+      logger.info(`User ${userId} ${result.isFavorite ? 'favorited' : 'unfavorited'} place ${placeId}`);
+
+      return {
+        isFavorite: result.isFavorite,
+        message,
+      };
+    } catch (err) {
+      logger.error(`Error toggling favorite for user ${userId} and place ${placeId}: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * Check if a place is favorited by a user
+   * @param {string} userId - ID del usuario
+   * @param {string} placeId - ID del lugar
+   * @returns {Promise<Object>} - { isFavorite: boolean }
+   * @throws {Error} - Si hay error en la operación
+   */
+  async getFavoriteStatus(userId, placeId) {
+    try {
+      if (!userId || !placeId) {
+        const error = new Error("User ID and Place ID are required");
+        error.status = 400;
+        throw error;
+      }
+
+      // Verificar que el lugar existe
+      const place = await placeRepository.findById(placeId);
+      if (!place) {
+        const error = new Error("Place not found");
+        error.status = 404;
+        throw error;
+      }
+
+      const isFavorite = await userFavoriteRepository.isFavorite(userId, placeId);
+
+      logger.info(`Retrieved favorite status for user ${userId} and place ${placeId}: ${isFavorite}`);
+
+      return {
+        isFavorite,
+      };
+    } catch (err) {
+      logger.error(`Error getting favorite status for user ${userId} and place ${placeId}: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * Get all favorite places for a user
+   * @param {string} userId - ID del usuario
+   * @returns {Promise<Object>} - { favorites: Array, message: string }
+   * @throws {Error} - Si hay error en la operación
+   */
+  async getUserFavorites(userId) {
+    try {
+      if (!userId) {
+        const error = new Error("User ID is required");
+        error.status = 400;
+        throw error;
+      }
+
+      const favorites = await userFavoriteRepository.getUserFavoritesWithDetails(userId);
+
+      // Extraer solo los datos del lugar, filtrando lugares que ya no existen
+      const places = favorites
+        .filter(fav => fav.place !== null)
+        .map(fav => ({
+          id: fav.place.id,
+          name: fav.place.name,
+          address: fav.place.address,
+          latitude: fav.place.latitude,
+          longitude: fav.place.longitude,
+          image: fav.place.image,
+          rating: fav.place.rating,
+          createdAt: fav.place.createdAt,
+          updatedAt: fav.place.updatedAt,
+          description: fav.place.description,
+          city: fav.place.city,
+        }));
+
+      logger.info(`Retrieved ${places.length} favorites for user ${userId}`);
+
+      return {
+        favorites: places,
+        message: "Favorites retrieved successfully",
+      };
+    } catch (err) {
+      logger.error(`Error getting favorites for user ${userId}: ${err.message}`);
       throw err;
     }
   }
