@@ -13,7 +13,7 @@ export const LEVELS_DATA = [
   { levelNumber: 1, name: 'Explorador', minPoints: 0, description: 'Registrarse y completar el perfil', rewards: { badge: 'Explorador' }, instructions: ["Completa tu perfil con información personal", "Agrega una foto de perfil", "Escribe una breve biografía"] },
   { levelNumber: 2, name: 'Viajero Activo', minPoints: 30, description: 'Tener al menos 3 reseñas publicadas', rewards: { badge: 'Viajero Activo', unlock_feature: 'advanced_search' }, instructions: ["Escribe reseñas de calidad sobre lugares que has visitado", "Sé específico sobre tu experiencia", "Incluye detalles útiles para otros usuarios"] },
   { levelNumber: 3, name: 'Guía Experto', minPoints: 100, description: 'Obtener al menos 10 likes en sus aportes', rewards: { badge: 'Guía Experto', unlock_feature: 'expert_badge_display' }, instructions: ["Recibe votos positivos en tus reseñas", "Interactúa con otros usuarios", "Comparte reseñas detalladas con fotos"] },
-  { levelNumber: 4, name: 'Maestro Viajero', minPoints: 250, description: 'Alcanzar 25 reseñas y 50 likes', rewards: { badge: 'Maestro Viajero', unlock_feature: 'priority_support' }, instructions: ["Continúa escribiendo reseñas de calidad", "Mantén un alto nivel de engagement", "Ayuda a la comunidad con tus experiencias"] },
+  { levelNumber: 4, name: 'Maestro Viajero', minPoints: 150, description: 'Alcanzar 10 reseñas y 50 likes', rewards: { badge: 'Maestro Viajero', unlock_feature: 'priority_support' }, instructions: ["Continúa escribiendo reseñas de calidad", "Mantén un alto nivel de engagement", "Ayuda a la comunidad con tus experiencias"] },
 ];
 
 export const BADGES_DATA = [

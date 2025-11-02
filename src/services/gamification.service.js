@@ -336,7 +336,7 @@ class GamificationService {
         return qualifiesForLevel3;
 
       case 4:
-        // Level 4: Alcanzar 25 reseñas y 50 likes
+        // Level 4: Alcanzar 10 reseñas y 50 likes
         // AND must qualify for level 3 (all previous requirements)
         const profileCompleted4 = await this.userActionRepository.count({
           where: { userId, actionType: 'profile_completed' }
@@ -348,7 +348,7 @@ class GamificationService {
           where: { userId, actionType: 'vote_received' }
         });
         logger.debug(`User ${userId} level 4 check - profile: ${profileCompleted4}, reviews: ${reviewCount4}, likes: ${likeCount4}`);
-        const qualifiesForLevel4 = profileCompleted4 > 0 && reviewCount4 >= 25 && likeCount4 >= 50;
+        const qualifiesForLevel4 = profileCompleted4 > 0 && reviewCount4 >= 10 && likeCount4 >= 50;
         logger.info(`User ${userId} qualifies for level 4: ${qualifiesForLevel4}`);
         return qualifiesForLevel4;
 
@@ -665,8 +665,8 @@ class GamificationService {
         const likeCount4 = await this.userActionRepository.count({
           where: { userId, actionType: 'vote_received' }
         });
-        const reviewProgress = Math.min(reviewCount4 * 2, 50);
-        const likeProgress = Math.min(likeCount4, 50);
+        const reviewProgress = Math.min(reviewCount4 * 10, 100); // 10 reviews = 100 points
+        const likeProgress = Math.min(likeCount4, 0); // Likes don't contribute to level 4 progress
         return Math.min(reviewProgress + likeProgress, 100);
 
       default:
