@@ -6,6 +6,7 @@ import {
   getAllLevels,
   getAllBadges,
   getUserMilestones,
+  createBulkLikes,
 } from "../controllers/gamification.controller.js";
 
 const router = Router();
@@ -308,5 +309,80 @@ router.get("/badges", getAllBadges);
  *         description: User not found
  */
 router.get("/users/:userId/milestones", getUserMilestones);
+
+/**
+ * @swagger
+ * /api/reviews/{reviewId}/bulk-likes:
+ *   post:
+ *     summary: Create verified users and make them like a review
+ *     description: Creates the specified number of verified users and makes each one like the specified review. Each user gets a random UUID-based email.
+ *     tags: [Gamification]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reviewId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Review ID to like
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - count
+ *             properties:
+ *               count:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 1000
+ *                 example: 10
+ *                 description: Number of users to create and likes to add (1-1000)
+ *     responses:
+ *       200:
+ *         description: Bulk likes created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     reviewId:
+ *                       type: string
+ *                     requestedCount:
+ *                       type: integer
+ *                     createdUsers:
+ *                       type: integer
+ *                     successfulLikes:
+ *                       type: integer
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           userId:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           liked:
+ *                             type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid count parameter
+ *       404:
+ *         description: Review not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/reviews/:reviewId/bulk-likes", createBulkLikes);
 
 export default router;

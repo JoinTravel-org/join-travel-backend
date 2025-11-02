@@ -1,5 +1,9 @@
 import gamificationService from "../services/gamification.service.js";
+import reviewService from "../services/review.service.js";
+import UserRepository from "../repository/user.repository.js";
 import logger from "../config/logger.js";
+import { v4 as uuidv4 } from "uuid";
+import bcrypt from "bcrypt";
 
 /**
  * GET /api/users/{userId}/stats
@@ -138,6 +142,109 @@ export const getAllLevels = async (req, res, next) => {
     });
   } catch (err) {
     logger.error(`Get all levels endpoint failed: ${err.message}`);
+
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+      });
+    }
+
+    next(err);
+  }
+};
+
+/**
+ * POST /api/reviews/{reviewId}/bulk-likes
+ * Creates verified users and makes them like a specific review
+ * @param {string} reviewId - Review ID to like
+ * @param {number} count - Number of likes to create (1 user = 1 like)
+ */
+export const createBulkLikes = async (req, res, next) => {
+  const { reviewId } = req.params;
+  const { count } = req.body;
+  const requestingUserId = req.user?.id;
+
+  logger.info(`Bulk likes endpoint called for review: ${reviewId} by user: ${requestingUserId}, count: ${count}`);
+
+  try {
+    // Allow any authenticated user to use this endpoint for testing purposes
+
+    // Validate required fields
+    if (!count || count < 1 || count > 1000) {
+      return res.status(400).json({
+        success: false,
+        message: "El campo 'count' debe ser un número entre 1 y 1000.",
+        details: ["count: debe ser un entero entre 1 y 1000"],
+      });
+    }
+
+    // Check if review exists
+    const review = await reviewService.getLikeStatus(reviewId, null);
+    if (!review.success) {
+      return res.status(404).json({
+        success: false,
+        message: "Reseña no encontrada.",
+      });
+    }
+
+    const userRepo = new UserRepository();
+    const createdUsers = [];
+    const successfulLikes = [];
+
+    // Create users and like the review
+    for (let i = 0; i < count; i++) {
+      try {
+        // Generate random email using UUID
+        const randomEmail = `${uuidv4()}@test.example.com`;
+
+        // Hash a default password
+        const hashedPassword = await bcrypt.hash("testpassword123", 10);
+
+        // Create verified user
+        const newUser = await userRepo.create({
+          email: randomEmail,
+          password: hashedPassword,
+          isEmailConfirmed: true,
+          role: 'user'
+        });
+
+        createdUsers.push(newUser);
+
+        // Make the user like the review
+        const likeResult = await reviewService.toggleLike(reviewId, newUser.id);
+        if (likeResult.success) {
+          successfulLikes.push({
+            userId: newUser.id,
+            email: randomEmail,
+            liked: likeResult.data.liked
+          });
+        }
+
+        logger.info(`Created user ${newUser.id} (${randomEmail}) and liked review ${reviewId}`);
+
+      } catch (userError) {
+        logger.error(`Failed to create user and like review: ${userError.message}`);
+        // Continue with next iteration
+      }
+    }
+
+    logger.info(`Bulk likes endpoint completed: created ${createdUsers.length} users, ${successfulLikes.length} successful likes`);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        reviewId,
+        requestedCount: count,
+        createdUsers: createdUsers.length,
+        successfulLikes: successfulLikes.length,
+        users: successfulLikes
+      },
+      message: `Se crearon ${createdUsers.length} usuarios y ${successfulLikes.length} likes exitosamente.`
+    });
+
+  } catch (err) {
+    logger.error(`Bulk likes endpoint failed for review ${reviewId}, error: ${err.message}`);
 
     if (err.status) {
       return res.status(err.status).json({
