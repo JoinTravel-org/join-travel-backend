@@ -5,6 +5,8 @@ import {
   getPlaces,
   getPlaceById,
   updatePlaceDescription,
+  toggleFavorite,
+  getFavoriteStatus,
 } from "../controllers/place.controller.js";
 import {
   createReview,
@@ -834,7 +836,84 @@ router.get("/:placeId/reviews/stats", getReviewStats);
 router.post("/reviews/:reviewId/like", authenticate, toggleLike);
 router.get("/reviews/:reviewId/like", authenticate, getLikeStatus);
 
-
-
+/**
+ * @swagger
+ * /api/places/{placeId}/favorite:
+ *   post:
+ *     summary: Toggle favorite status for a place
+ *     description: Add or remove a place from user's favorites. Requires user authentication.
+ *     tags: [Places]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: placeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the place to favorite/unfavorite
+ *     responses:
+ *       200:
+ *         description: Favorite status toggled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 isFavorite:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Place favorited successfully"
+ *       400:
+ *         description: Invalid place ID
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Place not found
+ *       500:
+ *         description: Internal server error
+ *   get:
+ *     summary: Get favorite status for a place
+ *     description: Check if a place is favorited by the authenticated user
+ *     tags: [Places]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: placeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the place to check
+ *     responses:
+ *       200:
+ *         description: Favorite status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 isFavorite:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: Invalid place ID
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Place not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/:placeId/favorite", authenticate, toggleFavorite);
+router.get("/:placeId/favorite", authenticate, getFavoriteStatus);
 
 export default router;

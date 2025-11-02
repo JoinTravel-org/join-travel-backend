@@ -6,6 +6,7 @@ import Level from "../models/levels.model.js";
 import Badge from "../models/badges.model.js";
 import RevokedToken from "../models/revokedToken.model.js";
 import Place from "../models/place.model.js";
+import UserFavorite from "../models/userFavorite.model.js";
 import Itinerary, { ItineraryItemSchema } from "../models/itinerary.model.js";
 import Review from "../models/review.model.js";
 import ReviewMedia from "../models/reviewMedia.model.js";
@@ -23,7 +24,7 @@ export const AppDataSource = new DataSource({
   database: config.db.name,
   synchronize: true, // Temporarily enabled to create missing tables
   logging: false,
-  entities: [ User, UserAction, Level, Badge, RevokedToken, Place, Itinerary, ItineraryItemSchema, Review, ReviewMedia, ReviewLike, Conversation, ChatMessage],
+  entities: [ User, UserAction, Level, Badge, RevokedToken, Place, UserFavorite, Itinerary, ItineraryItemSchema, Review, ReviewMedia, ReviewLike, Conversation, ChatMessage],
   migrations: ["./src/migrations/*.js"],
   timezone: "UTC", // Usar UTC para consistencia global
   // Create database if it doesn't exist
