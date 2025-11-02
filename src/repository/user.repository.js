@@ -1,5 +1,6 @@
 import { AppDataSource } from "../load/typeorm.loader.js";
 import User from "../models/user.model.js";
+import Fuse from "fuse.js";
 
 class UserRepository {
   constructor() {
@@ -58,6 +59,41 @@ class UserRepository {
   async update(id, updateData) {
     await this.getRepository().update(id, updateData);
     return await this.findById(id);
+  }
+
+  /**
+   * Busca usuarios por email con búsqueda fuzzy (aproximada)
+   * @param {string} email - Email a buscar
+   * @param {number} limit - Límite de resultados (default: 20)
+   * @returns {Promise<User[]>} - Lista de usuarios encontrados
+   */
+  async searchByEmail(email, limit = 20) {
+    // Primero obtener todos los usuarios (limitado para performance)
+    const allUsers = await this.getRepository()
+      .createQueryBuilder("user")
+      .select(["user.id", "user.email", "user.isEmailConfirmed", "user.createdAt", "user.updatedAt"])
+      .orderBy("user.email", "ASC")
+      .limit(1000) // Limitar para evitar cargar demasiados usuarios
+      .getMany();
+
+    // Configurar Fuse.js para búsqueda fuzzy
+    const fuse = new Fuse(allUsers, {
+      keys: ['email'],
+      threshold: 0.4, // Umbral de similitud (0.0 = exacto, 1.0 = muy permisivo)
+      includeScore: true,
+      shouldSort: true,
+    });
+
+    // Realizar búsqueda fuzzy
+    const results = fuse.search(email);
+
+    // Filtrar y limitar resultados
+    const matchedUsers = results
+      .filter(result => result.score < 0.6) // Solo resultados con buena similitud
+      .slice(0, limit)
+      .map(result => result.item);
+
+    return matchedUsers;
   }
 
   async findAtus() {
