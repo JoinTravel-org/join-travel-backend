@@ -14,8 +14,8 @@ import {
   getReviewsByPlace,
   getReviewStats,
   getAllReviews,
-  toggleLike,
-  getLikeStatus,
+  toggleReaction,
+  getReactionStatus,
 } from "../controllers/review.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -852,89 +852,114 @@ router.get("/:placeId/reviews", getReviewsByPlace);
 router.get("/:placeId/reviews/stats", getReviewStats);
 
 /**
- * @swagger
- * /api/reviews/{reviewId}/like:
- *   post:
- *     summary: Toggle like on a review
- *     description: Like or unlike a review. Requires user authentication.
- *     tags: [Reviews]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: reviewId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID of the review to like/unlike
- *     responses:
- *       200:
- *         description: Like toggled successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     liked:
- *                       type: boolean
- *                       example: true
- *                     likeCount:
- *                       type: integer
- *                       example: 5
- *                     reviewId:
- *                       type: string
- *                       example: "uuid"
- *       400:
- *         description: Cannot like own review
- *       401:
- *         description: Not authenticated
- *       404:
- *         description: Review not found
- *   get:
- *     summary: Get like status for a review
- *     description: Get the current like status and count for a review
- *     tags: [Reviews]
- *     parameters:
- *       - in: path
- *         name: reviewId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID of the review
- *     responses:
- *       200:
- *         description: Like status retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     liked:
- *                       type: boolean
- *                       example: true
- *                     likeCount:
- *                       type: integer
- *                       example: 5
- *                     reviewId:
- *                       type: string
- *                       example: "uuid"
- *       404:
- *         description: Review not found
- */
-router.post("/reviews/:reviewId/like", authenticate, toggleLike);
-router.get("/reviews/:reviewId/like", authenticate, getLikeStatus);
+  * @swagger
+  * /api/reviews/{reviewId}/reaction:
+  *   post:
+  *     summary: Toggle reaction on a review (like/dislike)
+  *     description: Like or dislike a review, or remove reaction. Requires user authentication.
+  *     tags: [Reviews]
+  *     security:
+  *       - bearerAuth: []
+  *     parameters:
+  *       - in: path
+  *         name: reviewId
+  *         required: true
+  *         schema:
+  *           type: string
+  *         description: ID of the review to react to
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             required:
+  *               - type
+  *             properties:
+  *               type:
+  *                 type: string
+  *                 enum: [like, dislike]
+  *                 description: Type of reaction
+  *                 example: "like"
+  *     responses:
+  *       200:
+  *         description: Reaction toggled successfully
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: true
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     reacted:
+  *                       type: boolean
+  *                       example: true
+  *                     reactionType:
+  *                       type: string
+  *                       enum: [like, dislike, null]
+  *                       example: "like"
+  *                     likeCount:
+  *                       type: integer
+  *                       example: 5
+  *                     dislikeCount:
+  *                       type: integer
+  *                       example: 2
+  *                     reviewId:
+  *                       type: string
+  *                       example: "uuid"
+  *       400:
+  *         description: Invalid reaction type or cannot react to own review
+  *       401:
+  *         description: Not authenticated
+  *       404:
+  *         description: Review not found
+  *   get:
+  *     summary: Get reaction status for a review
+  *     description: Get the current reaction status and counts for a review
+  *     tags: [Reviews]
+  *     parameters:
+  *       - in: path
+  *         name: reviewId
+  *         required: true
+  *         schema:
+  *           type: string
+  *         description: ID of the review
+  *     responses:
+  *       200:
+  *         description: Reaction status retrieved successfully
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: true
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     reactionType:
+  *                       type: string
+  *                       enum: [like, dislike, null]
+  *                       example: "like"
+  *                     likeCount:
+  *                       type: integer
+  *                       example: 5
+  *                     dislikeCount:
+  *                       type: integer
+  *                       example: 2
+  *                     reviewId:
+  *                       type: string
+  *                       example: "uuid"
+  *       404:
+  *         description: Review not found
+  */
+ router.post("/reviews/:reviewId/reaction", authenticate, toggleReaction);
+ router.get("/reviews/:reviewId/reaction", authenticate, getReactionStatus);
 
 /**
  * @swagger

@@ -6,28 +6,29 @@ class ReviewLikeRepository {
   }
 
   /**
-   * Create a new like for a review
-   * @param {Object} likeData - Like data
-   * @param {string} likeData.reviewId - Review ID
-   * @param {string} likeData.userId - User ID
-   * @returns {Promise<Object>} Created like
-   */
-  async create(likeData) {
-    const like = this.repository.create(likeData);
-    return await this.repository.save(like);
-  }
+    * Create a new like/dislike for a review
+    * @param {Object} likeData - Like data
+    * @param {string} likeData.reviewId - Review ID
+    * @param {string} likeData.userId - User ID
+    * @param {string} likeData.type - Type ('like' or 'dislike')
+    * @returns {Promise<Object>} Created like
+    */
+   async create(likeData) {
+     const like = this.repository.create(likeData);
+     return await this.repository.save(like);
+   }
 
   /**
-   * Find a like by review ID and user ID
-   * @param {string} reviewId - Review ID
-   * @param {string} userId - User ID
-   * @returns {Promise<Object|null>} Like or null
-   */
-  async findByReviewIdAndUserId(reviewId, userId) {
-    return await this.repository.findOne({
-      where: { reviewId, userId }
-    });
-  }
+    * Find a like/dislike by review ID and user ID
+    * @param {string} reviewId - Review ID
+    * @param {string} userId - User ID
+    * @returns {Promise<Object|null>} Like or null
+    */
+   async findByReviewIdAndUserId(reviewId, userId) {
+     return await this.repository.findOne({
+       where: { reviewId, userId }
+     });
+   }
 
   /**
    * Delete a like by review ID and user ID
@@ -41,15 +42,39 @@ class ReviewLikeRepository {
   }
 
   /**
-   * Count likes for a review
-   * @param {string} reviewId - Review ID
-   * @returns {Promise<number>} Number of likes
-   */
-  async countByReviewId(reviewId) {
-    return await this.repository.count({
-      where: { reviewId }
-    });
-  }
+    * Count likes for a review
+    * @param {string} reviewId - Review ID
+    * @returns {Promise<number>} Number of likes
+    */
+   async countByReviewId(reviewId) {
+     return await this.repository.count({
+       where: { reviewId, type: "like" }
+     });
+   }
+
+   /**
+    * Count dislikes for a review
+    * @param {string} reviewId - Review ID
+    * @returns {Promise<number>} Number of dislikes
+    */
+   async countDislikesByReviewId(reviewId) {
+     return await this.repository.count({
+       where: { reviewId, type: "dislike" }
+     });
+   }
+
+   /**
+    * Get counts for both likes and dislikes for a review
+    * @param {string} reviewId - Review ID
+    * @returns {Promise<{likes: number, dislikes: number}>} Object with like and dislike counts
+    */
+   async getCountsByReviewId(reviewId) {
+     const [likes, dislikes] = await Promise.all([
+       this.countByReviewId(reviewId),
+       this.countDislikesByReviewId(reviewId)
+     ]);
+     return { likes, dislikes };
+   }
 
   /**
    * Get all likes for a review with user details
@@ -74,17 +99,44 @@ class ReviewLikeRepository {
   }
 
   /**
-   * Check if user has liked a review
-   * @param {string} reviewId - Review ID
-   * @param {string} userId - User ID
-   * @returns {Promise<boolean>} Whether user has liked the review
-   */
-  async hasUserLiked(reviewId, userId) {
-    const count = await this.repository.count({
-      where: { reviewId, userId }
-    });
-    return count > 0;
-  }
+    * Check if user has liked a review
+    * @param {string} reviewId - Review ID
+    * @param {string} userId - User ID
+    * @returns {Promise<boolean>} Whether user has liked the review
+    */
+   async hasUserLiked(reviewId, userId) {
+     const count = await this.repository.count({
+       where: { reviewId, userId, type: "like" }
+     });
+     return count > 0;
+   }
+
+   /**
+    * Check if user has disliked a review
+    * @param {string} reviewId - Review ID
+    * @param {string} userId - User ID
+    * @returns {Promise<boolean>} Whether user has disliked the review
+    */
+   async hasUserDisliked(reviewId, userId) {
+     const count = await this.repository.count({
+       where: { reviewId, userId, type: "dislike" }
+     });
+     return count > 0;
+   }
+
+   /**
+    * Get user's reaction type for a review
+    * @param {string} reviewId - Review ID
+    * @param {string} userId - User ID
+    * @returns {Promise<string|null>} 'like', 'dislike', or null if no reaction
+    */
+   async getUserReaction(reviewId, userId) {
+     const reaction = await this.repository.findOne({
+       where: { reviewId, userId },
+       select: ['type']
+     });
+     return reaction ? reaction.type : null;
+   }
 }
 
 export default new ReviewLikeRepository();
