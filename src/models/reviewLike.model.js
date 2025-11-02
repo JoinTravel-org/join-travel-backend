@@ -17,6 +17,13 @@ export default new EntitySchema({
       type: "uuid",
       nullable: false,
     },
+    type: {
+      type: "varchar",
+      length: 10,
+      nullable: false,
+      enum: ["like", "dislike"],
+      default: 'like',
+    },
     createdAt: {
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",
@@ -48,6 +55,10 @@ export default new EntitySchema({
     {
       name: "IDX_REVIEW_LIKE_USER_ID",
       columns: ["userId"],
+    },
+    {
+      name: "IDX_REVIEW_LIKE_TYPE",
+      columns: ["type"],
     },
     {
       name: "IDX_REVIEW_LIKE_UNIQUE",
