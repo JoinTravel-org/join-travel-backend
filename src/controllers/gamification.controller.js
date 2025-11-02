@@ -16,18 +16,7 @@ export const getUserStats = async (req, res, next) => {
   logger.info(`Get user stats endpoint called for user: ${userId} by user: ${requestingUserId}`);
 
   try {
-    // Allow access if:
-    // 1. userId matches the authenticated user ID, OR
-    // 2. user is admin
-    const isOwner = userId === requestingUserId;
-    const isAdmin = req.user?.role === 'admin';
-
-    if (!isOwner && !isAdmin) {
-      return res.status(403).json({
-        success: false,
-        message: "No tienes permiso para ver las estadísticas de este usuario.",
-      });
-    }
+    // Allow access for all authenticated users (no permission restrictions)
 
     const stats = await gamificationService.getUserStats(userId);
 
@@ -302,18 +291,7 @@ export const getUserMilestones = async (req, res, next) => {
   logger.info(`Get user milestones endpoint called for user: ${userId} by user: ${requestingUserId}`);
 
   try {
-    // Allow access if:
-    // 1. userId matches the authenticated user ID, OR
-    // 2. user is admin
-    const isOwner = userId === requestingUserId;
-    const isAdmin = req.user?.role === 'admin';
-
-    if (!isOwner && !isAdmin) {
-      return res.status(403).json({
-        success: false,
-        message: "No tienes permiso para ver los hitos de este usuario.",
-      });
-    }
+    // Allow access for all authenticated users (no permission restrictions)
 
     const milestones = await gamificationService.getUserMilestones(userId);
 
