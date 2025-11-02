@@ -9,6 +9,7 @@ import chatRoutes from "./chat.routes.js";
 import gamificationRoutes from "./gamification.routes.js";
 import cronRoutes from "./cron.routes.js";
 import usersRoutes from "./users.routes.js";
+import groupRoutes from "./group.routes.js";
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.use("/chat", chatRoutes);
 router.use("/users", usersRoutes);
 router.use("", gamificationRoutes);
 router.use("/cron", cronRoutes);
+router.use("/groups", groupRoutes);
 
 const apiRouter = Router();
 apiRouter.use("/api", router);
