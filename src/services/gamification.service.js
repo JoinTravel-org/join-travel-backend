@@ -1,4 +1,5 @@
 import { AppDataSource } from "../load/typeorm.loader.js";
+import { LEVELS_DATA, BADGES_DATA, POINTS_DATA } from "../load/seed.loader.js";
 import logger from "../config/logger.js";
 import emailService from "./email.service.js";
 
@@ -12,15 +13,7 @@ class GamificationService {
 
   // Point calculation rules
   getPointsForAction(actionType) {
-    const pointRules = {
-      'review_created': 10,
-      'vote_received': 1,
-      'profile_completed': 5,
-      'comment_posted': 2,
-      'media_upload': 5, // Bonus points for uploading media
-      'place_added': 15, // Points for adding a new place
-    };
-    return pointRules[actionType] || 0;
+    return POINTS_DATA[actionType] || 0;
   }
 
   /**
@@ -710,29 +703,8 @@ class GamificationService {
    * @returns {Array<string>} Instructions
    */
   getLevelInstructions(levelNumber) {
-    const instructions = {
-      1: [
-        "Completa tu perfil con información personal",
-        "Agrega una foto de perfil",
-        "Escribe una breve biografía"
-      ],
-      2: [
-        "Escribe reseñas de calidad sobre lugares que has visitado",
-        "Sé específico sobre tu experiencia",
-        "Incluye detalles útiles para otros usuarios"
-      ],
-      3: [
-        "Recibe votos positivos en tus reseñas",
-        "Interactúa con otros usuarios",
-        "Comparte reseñas detalladas con fotos"
-      ],
-      4: [
-        "Continúa escribiendo reseñas de calidad",
-        "Mantén un alto nivel de engagement",
-        "Ayuda a la comunidad con tus experiencias"
-      ]
-    };
-    return instructions[levelNumber] || [];
+    const level = LEVELS_DATA.find(l => l.levelNumber === levelNumber);
+    return level ? level.instructions : [];
   }
 
   /**
@@ -741,25 +713,8 @@ class GamificationService {
    * @returns {Array<string>} Instructions
    */
   getBadgeInstructions(badgeName) {
-    const instructions = {
-      '🌍 Primera Reseña': [
-        "Navega a la página de un lugar que hayas visitado",
-        "Haz clic en 'Escribir reseña'",
-        "Completa el formulario con tu experiencia",
-        "Publica la reseña"
-      ],
-      '📸 Fotógrafo': [
-        "Toma fotos de calidad de los lugares que visitas",
-        "Sube imágenes junto con tus reseñas",
-        "Asegúrate de que las fotos sean nítidas y relevantes"
-      ],
-      '⭐ Popular': [
-        "Escribe reseñas útiles y detalladas",
-        "Interactúa con la comunidad",
-        "Comparte experiencias auténticas"
-      ]
-    };
-    return instructions[badgeName] || [];
+    const badge = BADGES_DATA.find(b => b.name === badgeName);
+    return badge ? badge.instructions : [];
   }
 
   /**
