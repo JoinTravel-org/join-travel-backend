@@ -415,22 +415,12 @@ class ReviewService {
         liked = true;
         logger.info(`User ${userId} liked review ${reviewId}`);
 
-        // Award points for giving a like
+        // Award points to the review author for receiving a like
         try {
-          await gamificationService.awardPoints(userId, 'vote_received', { review_id: reviewId }, false);
+          await gamificationService.awardPoints(review.userId, 'vote_received', { review_id: reviewId }, false);
         } catch (gamificationError) {
           logger.error(`Failed to award points for like: ${gamificationError.message}`);
           // Don't fail the like if gamification fails
-        }
-
-        // Check if review author should get a badge for receiving likes
-        try {
-          const currentLikeCount = await reviewLikeRepository.countByReviewId(reviewId);
-          if (currentLikeCount >= 5) {
-            await gamificationService.awardPoints(review.userId, 'vote_received', { review_id: reviewId }, false);
-          }
-        } catch (badgeError) {
-          logger.error(`Failed to check badge for review author: ${badgeError.message}`);
         }
       }
 

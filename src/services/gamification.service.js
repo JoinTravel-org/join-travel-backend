@@ -45,8 +45,12 @@ class GamificationService {
         });
         if (currentLevel) {
           const levelRange = nextLevel.minPoints - currentLevel.minPoints;
-          const userProgress = user.points - currentLevel.minPoints;
-          progressToNext = Math.min(100, Math.round((userProgress / levelRange) * 100));
+          if (levelRange > 0) {
+            const userProgress = user.points - currentLevel.minPoints;
+            progressToNext = Math.min(100, Math.max(0, Math.round((userProgress / levelRange) * 100)));
+          } else {
+            progressToNext = 100; // Same level points, max progress
+          }
         }
       } else {
         progressToNext = 100; // Max level reached
@@ -327,7 +331,9 @@ class GamificationService {
           where: { userId, actionType: 'vote_received' }
         });
         logger.debug(`User ${userId} level 3 check - profile: ${profileCompleted3}, reviews: ${reviewCount3}, likes: ${likeCount}`);
-        return profileCompleted3 > 0 && reviewCount3 >= 3 && likeCount >= 10;
+        const qualifiesForLevel3 = profileCompleted3 > 0 && reviewCount3 >= 3 && likeCount >= 10;
+        logger.info(`User ${userId} qualifies for level 3: ${qualifiesForLevel3}`);
+        return qualifiesForLevel3;
 
       case 4:
         // Level 4: Alcanzar 25 reseñas y 50 likes
@@ -342,7 +348,9 @@ class GamificationService {
           where: { userId, actionType: 'vote_received' }
         });
         logger.debug(`User ${userId} level 4 check - profile: ${profileCompleted4}, reviews: ${reviewCount4}, likes: ${likeCount4}`);
-        return profileCompleted4 > 0 && reviewCount4 >= 25 && likeCount4 >= 50;
+        const qualifiesForLevel4 = profileCompleted4 > 0 && reviewCount4 >= 25 && likeCount4 >= 50;
+        logger.info(`User ${userId} qualifies for level 4: ${qualifiesForLevel4}`);
+        return qualifiesForLevel4;
 
       default:
         return false;
@@ -584,14 +592,23 @@ class GamificationService {
       for (const badge of badges) {
         const isCompleted = user.badges && user.badges.some(b => b.name === badge.name);
         let progress = 0;
+        let target = badge.criteria.count || 1;
 
         if (!isCompleted) {
           progress = await this.calculateBadgeProgress(userId, badge);
         } else {
-          progress = badge.criteria.count || 1;
+          progress = target;
         }
 
-        const target = badge.criteria.count || 1;
+        // Special handling for level-based badges
+        if (badge.criteria.level) {
+          target = badge.criteria.level;
+          if (!isCompleted) {
+            progress = Math.min(user.level, target);
+          } else {
+            progress = target;
+          }
+        }
 
         const milestone = {
           id: `badge-${badge.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}`,
@@ -666,6 +683,15 @@ class GamificationService {
   async calculateBadgeProgress(userId, badge) {
     const criteria = badge.criteria;
 
+    if (criteria.level) {
+      // Level-based badges (Guía Experto, etc.)
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        select: ['level']
+      });
+      return user ? Math.min(user.level, criteria.level) : 0;
+    }
+
     if (criteria.action_type && criteria.count) {
       const actionCount = await this.userActionRepository.count({
         where: { userId, actionType: criteria.action_type }
@@ -673,6 +699,14 @@ class GamificationService {
       return Math.min(actionCount, criteria.count);
     }
 
+    if (criteria.action_type === 'vote_received' && criteria.per_review) {
+      // Super Like badge - check per review
+      // This is more complex, need to check individual reviews
+      // For now, return 0 as this is a special case
+      return 0;
+    }
+
+    // Specific badge criteria based on user story requirements
     if (badge.name === '🌍 Primera Reseña') {
       const reviewCount = await this.userActionRepository.count({
         where: { userId, actionType: 'review_created' }
