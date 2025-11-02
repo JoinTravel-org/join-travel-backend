@@ -125,3 +125,63 @@ export const getUserFavorites = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * Obtiene información básica de un usuario por su ID
+ * GET /api/users/{userId}
+ */
+export const getUserById = async (req, res, next) => {
+  logger.info(`Get user by ID endpoint called for userId: ${req.params.userId}`);
+
+  try {
+    const { userId } = req.params;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Buscar el usuario
+    const userRepo = new UserRepository();
+    const user = await userRepo.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "Usuario no encontrado"
+      });
+    }
+
+    // Obtener stats del usuario si están disponibles
+    let stats = null;
+    try {
+      stats = await gamificationService.getUserStats(userId);
+    } catch (statsError) {
+      logger.warn(`Failed to get stats for user ${userId}:`, statsError.message);
+      // Continuar sin stats si hay error
+    }
+
+    // Formatear respuesta
+    const formattedUser = {
+      id: user.id,
+      email: user.email,
+      isEmailConfirmed: user.isEmailConfirmed,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
+      stats
+    };
+
+    logger.info(`Get user by ID endpoint completed successfully for user: ${userId}`);
+
+    res.status(200).json({
+      success: true,
+      data: formattedUser,
+      message: null
+    });
+
+  } catch (err) {
+    logger.error(`Get user by ID endpoint failed: ${err.message}`);
+    next(err);
+  }
+};

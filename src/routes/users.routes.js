@@ -1,6 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { searchUsers, getUserFavorites } from "../controllers/users.controller.js";
+import { searchUsers, getUserFavorites, getUserById } from "../controllers/users.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -132,6 +132,161 @@ const searchLimiter = rateLimit({
  *                   example: "Demasiadas búsquedas de usuarios, por favor intenta de nuevo más tarde."
  */
 router.get("/search", authenticate, searchLimiter, searchUsers);
+
+/**
+ * @swagger
+ * /api/users/{userId}:
+ *   get:
+ *     summary: Get user by ID
+ *     description: Retrieve basic information for a specific user by their ID. Requires authentication.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user to retrieve
+ *         example: "123e4567-e89b-12d3-a456-426614174000"
+ *     responses:
+ *       200:
+ *         description: User retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "user-123"
+ *                     email:
+ *                       type: string
+ *                       example: "john.doe@example.com"
+ *                     isEmailConfirmed:
+ *                       type: boolean
+ *                       example: true
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-01-15T10:30:00Z"
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-11-02T15:45:00Z"
+ *                     stats:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         points:
+ *                           type: integer
+ *                           example: 1250
+ *                         level:
+ *                           type: integer
+ *                           example: 3
+ *                         levelName:
+ *                           type: string
+ *                           example: "Explorador Experto"
+ *                         progressToNext:
+ *                           type: integer
+ *                           example: 75
+ *                         badges:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               name:
+ *                                 type: string
+ *                                 example: "Primer Viaje"
+ *                               description:
+ *                                 type: string
+ *                                 example: "Completaste tu primer itinerario"
+ *                               earned_at:
+ *                                 type: string
+ *                                 format: date-time
+ *                                 example: "2024-02-01T08:00:00Z"
+ *                               iconUrl:
+ *                                 type: string
+ *                                 nullable: true
+ *                                 example: null
+ *                 message:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *       400:
+ *         description: Invalid user ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "ID de usuario inválido"
+ *       401:
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Authentication required"
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Usuario no encontrado"
+ *       429:
+ *         description: Too many requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Demasiadas solicitudes, por favor intenta de nuevo más tarde."
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
+router.get("/:userId", authenticate, getUserById);
 
 /**
  * @swagger
