@@ -66,6 +66,11 @@ export const ItineraryItemSchema = new EntitySchema({
       type: "date",
       nullable: false,
     },
+    order: {
+      type: "int",
+      nullable: false,
+      default: 0,
+    },
     createdAt: {
       type: "timestamp",
       createDate: true,
