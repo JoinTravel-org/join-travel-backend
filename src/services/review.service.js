@@ -230,8 +230,8 @@ class ReviewService {
             createdAt: m.createdAt,
           }));
 
-          // Obtener conteo de likes
-          const likeCount = await reviewLikeRepository.countByReviewId(review.id);
+          // Obtener conteo de likes y dislikes
+          const { likes: likeCount, dislikes: dislikeCount } = await reviewLikeRepository.getCountsByReviewId(review.id);
 
           return {
             id: review.id,
@@ -242,6 +242,7 @@ class ReviewService {
             userEmail: review.user?.email || "Usuario anónimo",
             media: formattedMedia,
             likeCount,
+            dislikeCount,
             createdAt: review.createdAt,
             updatedAt: review.updatedAt,
           };
@@ -371,12 +372,13 @@ class ReviewService {
   }
 
   /**
-   * Toggle like on a review
-   * @param {string} reviewId - Review ID
-   * @param {string} userId - User ID
-   * @returns {Promise<Object>} - Like status and count
-   */
-  async toggleLike(reviewId, userId) {
+    * Toggle like/dislike on a review
+    * @param {string} reviewId - Review ID
+    * @param {string} userId - User ID
+    * @param {string} type - Type of reaction ('like' or 'dislike')
+    * @returns {Promise<Object>} - Reaction status and counts
+    */
+   async toggleReaction(reviewId, userId, type) {
     try {
       // Check if review exists
       const review = await reviewRepository.findById(reviewId);
@@ -395,43 +397,73 @@ class ReviewService {
         };
       }
 
-      // Check if user already liked this review
-      const existingLike = await reviewLikeRepository.findByReviewIdAndUserId(reviewId, userId);
+      // Validate type
+      if (!['like', 'dislike'].includes(type)) {
+        throw {
+          status: 400,
+          message: "Tipo de reacción inválido. Debe ser 'like' o 'dislike'.",
+        };
+      }
 
-      let liked = false;
+      // Check if user already has a reaction on this review
+      const existingReaction = await reviewLikeRepository.findByReviewIdAndUserId(reviewId, userId);
+
+      let reacted = false;
+      let reactionType = null;
       let likeCount = 0;
+      let dislikeCount = 0;
 
-      if (existingLike) {
-        // Unlike: remove the like
-        await reviewLikeRepository.deleteByReviewIdAndUserId(reviewId, userId);
-        liked = false;
-        logger.info(`User ${userId} unliked review ${reviewId}`);
+      if (existingReaction) {
+        if (existingReaction.type === type) {
+          // Remove the reaction (unlike/undislike)
+          await reviewLikeRepository.deleteByReviewIdAndUserId(reviewId, userId);
+          reacted = false;
+          reactionType = null;
+          logger.info(`User ${userId} removed ${type} from review ${reviewId}`);
+        } else {
+          // Change reaction type (like to dislike or vice versa)
+          await reviewLikeRepository.deleteByReviewIdAndUserId(reviewId, userId);
+          await reviewLikeRepository.create({
+            reviewId,
+            userId,
+            type,
+          });
+          reacted = true;
+          reactionType = type;
+          logger.info(`User ${userId} changed reaction to ${type} on review ${reviewId}`);
+        }
       } else {
-        // Like: add the like
+        // Add new reaction
         await reviewLikeRepository.create({
           reviewId,
           userId,
+          type,
         });
-        liked = true;
-        logger.info(`User ${userId} liked review ${reviewId}`);
+        reacted = true;
+        reactionType = type;
+        logger.info(`User ${userId} ${type}d review ${reviewId}`);
 
-        // Award points to the review author for receiving a like
+        // Award points to the review author for receiving a reaction
         try {
           await gamificationService.awardPoints(review.userId, 'vote_received', { review_id: reviewId }, false);
         } catch (gamificationError) {
-          logger.error(`Failed to award points for like: ${gamificationError.message}`);
-          // Don't fail the like if gamification fails
+          logger.error(`Failed to award points for reaction: ${gamificationError.message}`);
+          // Don't fail the reaction if gamification fails
         }
       }
 
-      // Get updated like count
-      likeCount = await reviewLikeRepository.countByReviewId(reviewId);
+      // Get updated counts
+      const counts = await reviewLikeRepository.getCountsByReviewId(reviewId);
+      likeCount = counts.likes;
+      dislikeCount = counts.dislikes;
 
       return {
         success: true,
         data: {
-          liked,
+          reacted,
+          reactionType,
           likeCount,
+          dislikeCount,
           reviewId,
         },
       };
@@ -449,12 +481,12 @@ class ReviewService {
   }
 
   /**
-   * Get like status for a review
-   * @param {string} reviewId - Review ID
-   * @param {string} userId - User ID (optional)
-   * @returns {Promise<Object>} - Like status and count
-   */
-  async getLikeStatus(reviewId, userId = null) {
+    * Get reaction status for a review
+    * @param {string} reviewId - Review ID
+    * @param {string} userId - User ID (optional)
+    * @returns {Promise<Object>} - Reaction status and counts
+    */
+   async getReactionStatus(reviewId, userId = null) {
     try {
       // Check if review exists
       const review = await reviewRepository.findById(reviewId);
@@ -465,18 +497,19 @@ class ReviewService {
         };
       }
 
-      const likeCount = await reviewLikeRepository.countByReviewId(reviewId);
-      let liked = false;
+      const counts = await reviewLikeRepository.getCountsByReviewId(reviewId);
+      let reactionType = null;
 
       if (userId) {
-        liked = await reviewLikeRepository.hasUserLiked(reviewId, userId);
+        reactionType = await reviewLikeRepository.getUserReaction(reviewId, userId);
       }
 
       return {
         success: true,
         data: {
-          liked,
-          likeCount,
+          reactionType,
+          likeCount: counts.likes,
+          dislikeCount: counts.dislikes,
           reviewId,
         },
       };
