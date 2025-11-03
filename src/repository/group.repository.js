@@ -45,7 +45,7 @@ class GroupRepository {
   /**
    * Finds a group by its name
    */
-  async findByNameAndId(name) {
+  async findByName(name) {
     return await this.getRepository().findOne({ where: { name } });
   }
 
