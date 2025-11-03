@@ -13,6 +13,7 @@ import ReviewMedia from "../models/reviewMedia.model.js";
 import ReviewLike from "../models/reviewLike.model.js";
 import Conversation from "../models/conversation.model.js";
 import ChatMessage from "../models/chatMessage.model.js";
+import DirectMessage from "../models/directMessage.model.js";
 import config from "../config/index.js";
 
 export const AppDataSource = new DataSource({
@@ -24,7 +25,23 @@ export const AppDataSource = new DataSource({
   database: config.db.name,
   synchronize: true, // Temporarily enabled to create missing tables
   logging: false,
-  entities: [ User, UserAction, Level, Badge, RevokedToken, Place, UserFavorite, Itinerary, ItineraryItemSchema, Review, ReviewMedia, ReviewLike, Conversation, ChatMessage],
+  entities: [
+    User,
+    UserAction,
+    Level,
+    Badge,
+    RevokedToken,
+    Place,
+    UserFavorite,
+    Itinerary,
+    ItineraryItemSchema,
+    Review,
+    ReviewMedia,
+    ReviewLike,
+    Conversation,
+    ChatMessage,
+    DirectMessage,
+  ],
   migrations: ["./src/migrations/*.js"],
   timezone: "UTC", // Usar UTC para consistencia global
   // Create database if it doesn't exist
