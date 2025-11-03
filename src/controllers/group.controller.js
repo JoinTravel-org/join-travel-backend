@@ -103,10 +103,34 @@ export const removeMember = async (req, res, next) => {
   }
 };
 
+
+export const removeGroup = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const requesterId = req.user.id;
+
+    const result = await groupService.removeGroup(id, requesterId);
+    res.status(200).json(result);
+  } catch (err) {
+    logger.error(`Remove group failed: ${err.message}`);
+    if (err.status === 403) {
+      return res.status(403).json({ success: false, message: err.message });
+    }
+    if (err.status === 404) {
+      return res.status(404).json({ success: false, message: err.message });
+    }
+    if (err.status === 400) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+    next(err);
+  }
+};
+
 export default {
   createGroup,
   getUserGroups,
   getGroupById,
   addMembers,
+  removeGroup,
   removeMember,
 };

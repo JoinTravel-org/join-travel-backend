@@ -10,7 +10,9 @@ class GroupService {
   async createGroup({ name, description, adminId }) {
     try {
       if (!name || name.length < 5 || name.length > 50) {
-        const error = new Error("El nombre del grupo debe tener entre 5 y 50 caracteres.");
+        const error = new Error(
+          "El nombre del grupo debe tener entre 5 y 50 caracteres."
+        );
         error.status = 400;
         throw error;
       }
@@ -30,13 +32,13 @@ class GroupService {
       const group = await groupRepository.create({
         name: name.trim(),
         description: description ? description.trim() : null,
-        adminId
+        adminId,
       });
       logger.info(`Group created: ${group.id}`);
       return {
         success: true,
         data: group,
-        message: "Grupo creado exitosamente"
+        message: "Grupo creado exitosamente",
       };
     } catch (err) {
       logger.error(`Error creating group: ${err.message}`);
@@ -54,7 +56,7 @@ class GroupService {
       const groups = await groupRepository.findByUserId(userId);
       return {
         success: true,
-        data: groups
+        data: groups,
       };
     } catch (err) {
       logger.error(`Error getting groups for user ${userId}: ${err.message}`);
@@ -77,7 +79,7 @@ class GroupService {
       }
       return {
         success: true,
-        data: group
+        data: group,
       };
     } catch (err) {
       logger.error(`Error getting group ${groupId}: ${err.message}`);
@@ -109,7 +111,7 @@ class GroupService {
       return {
         success: true,
         data: updatedGroup,
-        message: "Miembros agregados exitosamente"
+        message: "Miembros agregados exitosamente",
       };
     } catch (err) {
       logger.error(`Error adding members to group ${groupId}: ${err.message}`);
@@ -133,12 +135,16 @@ class GroupService {
         throw error;
       }
       if (group.adminId !== requesterId) {
-        const error = new Error("Solo el administrador puede eliminar miembros");
+        const error = new Error(
+          "Solo el administrador puede eliminar miembros"
+        );
         error.status = 403;
         throw error;
       }
       if (userId === group.adminId) {
-        const error = new Error("No se puede eliminar al administrador del grupo");
+        const error = new Error(
+          "No se puede eliminar al administrador del grupo"
+        );
         error.status = 400;
         throw error;
       }
@@ -146,10 +152,46 @@ class GroupService {
       return {
         success: true,
         data: updatedGroup,
-        message: "Miembro eliminado exitosamente"
+        message: "Miembro eliminado exitosamente",
       };
     } catch (err) {
-      logger.error(`Error removing member from group ${groupId}: ${err.message}`);
+      logger.error(
+        `Error removing member from group ${groupId}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  /**
+   * Deletes a group
+   * @param {string} groupId
+   * @param {string} requesterId
+   * @returns {Promise<Object>} - { success, data, message }
+   */
+  async removeGroup(groupId, requesterId) {
+    try {
+      const group = await groupRepository.findById(groupId);
+      if (!group) {
+        const error = new Error("Grupo no encontrado");
+        error.status = 404;
+        throw error;
+      }
+      if (group.adminId !== requesterId) {
+        const error = new Error(
+          "Solo el administrador puede eliminar el grupo"
+        );
+        error.status = 403;
+        throw error;
+      }
+      const deleted = await groupRepository.delete(groupId);
+      logger.info(`Group deleted: ${groupId}`);
+      return {
+        success: true,
+        data: deleted,
+        message: "Grupo eliminado exitosamente",
+      };
+    } catch (err) {
+      logger.error(`Error deleting group ${groupId}: ${err.message}`);
       throw err;
     }
   }

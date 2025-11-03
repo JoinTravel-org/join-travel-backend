@@ -146,4 +146,30 @@ router.post("/:id/members", authenticate, groupController.addMembers);
  */
 router.delete("/:groupId/members/:userId", authenticate, groupController.removeMember);
 
+
+
+/**
+ * @swagger
+ * /api/groups/{id}:
+ *   delete:
+ *     summary: Delete a group
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Group deleted successfully
+ *       403:
+ *         description: Not authorized
+ *       404:
+ *         description: Group not found
+ */
+router.delete("/:id", authenticate, groupController.removeGroup);
+
 export default router;

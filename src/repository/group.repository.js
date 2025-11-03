@@ -108,6 +108,36 @@ class GroupRepository {
       .execute();
     return await this.findById(groupId);
   }
+
+  /**
+   * Deletes a group and its member relations, returns the deleted group data
+   */
+  async delete(groupId) {
+    const groupToDelete = await this.findById(groupId);
+    if (!groupToDelete) {
+      throw new Error(`Group with id ${groupId} not found`);
+    }
+
+    const queryRunner = AppDataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Remove join table entries first
+      await queryRunner.query(`DELETE FROM group_members WHERE "groupId" = $1`, [groupId]);
+
+      // Delete the group
+      await queryRunner.manager.delete(Group, groupId);
+
+      await queryRunner.commitTransaction();
+      return groupToDelete;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new Error(`Error deleting group: ${error.message}`);
+    } finally {
+      await queryRunner.release();
+    }
+  }
 }
 
 export default new GroupRepository();
