@@ -13,6 +13,7 @@ import ReviewMedia from "../models/reviewMedia.model.js";
 import ReviewLike from "../models/reviewLike.model.js";
 import Conversation from "../models/conversation.model.js";
 import ChatMessage from "../models/chatMessage.model.js";
+import Group from "../models/group.model.js";
 import DirectMessage from "../models/directMessage.model.js";
 import config from "../config/index.js";
 
@@ -25,7 +26,9 @@ export const AppDataSource = new DataSource({
   database: config.db.name,
   synchronize: true, // Temporarily enabled to create missing tables
   logging: false,
+
   entities: [
+    Group,
     User,
     UserAction,
     Level,
