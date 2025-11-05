@@ -207,34 +207,6 @@ class DirectMessageService {
       };
     }
   }
-
-  /**
-   * Mark all messages in a conversation as read
-   * @param {string} userId - Current user ID
-   * @param {string} otherUserId - Other user ID
-   * @returns {Promise<void>}
-   */
-  async markConversationAsRead(userId, otherUserId) {
-    try {
-      const conversationId = directMessageRepository.createConversationId(
-        userId,
-        otherUserId
-      );
-
-      await directMessageRepository.markAsRead(conversationId, userId);
-
-      logger.info(
-        `Marked messages as read in conversation ${conversationId} for user ${userId}`
-      );
-    } catch (error) {
-      logger.error(`Error marking conversation as read: ${error.message}`);
-      throw {
-        status: 500,
-        message: "Error marking messages as read",
-        details: [error.message],
-      };
-    }
-  }
 }
 
 export default new DirectMessageService();
