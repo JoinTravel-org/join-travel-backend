@@ -61,4 +61,22 @@ export default new EntitySchema({
       updateDate: true, // Se actualiza automáticamente al modificar
     },
   },
+  relations: {
+    groups: {
+      type: "many-to-many",
+      target: "Group",
+      inverseSide: "members",
+      joinTable: {
+        name: "group_members",
+        joinColumn: {
+          name: "userId",
+          referencedColumnName: "id",
+        },
+        inverseJoinColumn: {
+          name: "groupId",
+          referencedColumnName: "id",
+        },
+      },
+    },
+  },
 });
