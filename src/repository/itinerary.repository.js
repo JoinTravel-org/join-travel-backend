@@ -34,11 +34,12 @@ class ItineraryRepository {
       const savedItinerary = await queryRunner.manager.save(Itinerary, itinerary);
 
       // Create itinerary items
-      const items = itineraryData.items.map(item => 
+      const items = itineraryData.items.map((item, index) => 
         this.itineraryItemRepository.create({
           itineraryId: savedItinerary.id,
           placeId: item.placeId,
           date: item.date,
+          order: index,
         })
       );
 
@@ -73,6 +74,11 @@ class ItineraryRepository {
       const itinerary = await this.itineraryRepository.findOne({
         where: { id: itineraryId },
         relations: ["items", "items.place", "user"],
+        order: {
+          items: {
+            order: "ASC"
+          }
+        },
       });
 
       if (!itinerary) {
@@ -100,7 +106,12 @@ class ItineraryRepository {
       const itineraries = await this.itineraryRepository.find({
         where: { userId },
         relations: ["items", "items.place"],
-        order: { createdAt: "DESC" },
+        order: { 
+          createdAt: "DESC",
+          items: {
+            order: "ASC"
+          }
+        },
       });
 
       logger.info(`Retrieved ${itineraries.length} itineraries for user: ${userId}`);
@@ -161,11 +172,12 @@ class ItineraryRepository {
         await queryRunner.manager.delete(ItineraryItemSchema, { itineraryId });
 
         // Create new items
-        const items = updateData.items.map(item => 
+        const items = updateData.items.map((item, index) => 
           this.itineraryItemRepository.create({
             itineraryId,
             placeId: item.placeId,
             date: item.date,
+            order: index,
           })
         );
 

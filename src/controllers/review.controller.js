@@ -148,88 +148,97 @@ export const getReviewsByPlace = async (req, res, next) => {
 };
 
 /**
- * Toggle like on a review
- * POST /api/reviews/:reviewId/like
- */
-export const toggleLike = async (req, res, next) => {
-  const { reviewId } = req.params;
-  const userId = req.user?.id;
+  * Toggle reaction on a review (like/dislike)
+  * POST /api/reviews/:reviewId/reaction
+  */
+ export const toggleReaction = async (req, res, next) => {
+   const { reviewId } = req.params;
+   const { type } = req.body; // 'like' or 'dislike'
+   const userId = req.user?.id;
 
-  logger.info(`Toggle like endpoint called for review: ${reviewId} by user: ${userId}`);
+   logger.info(`Toggle reaction endpoint called for review: ${reviewId} by user: ${userId}, type: ${type}`);
 
-  try {
-    // Verificar que el usuario esté autenticado
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Usuario no está autenticado.",
-      });
-    }
+   try {
+     // Verificar que el usuario esté autenticado
+     if (!userId) {
+       return res.status(401).json({
+         success: false,
+         message: "Usuario no está autenticado.",
+       });
+     }
 
-    const result = await reviewService.toggleLike(reviewId, userId);
+     // Validar el tipo de reacción
+     if (!type || !['like', 'dislike'].includes(type)) {
+       return res.status(400).json({
+         success: false,
+         message: "Tipo de reacción inválido. Debe ser 'like' o 'dislike'.",
+       });
+     }
 
-    logger.info(
-      `Toggle like endpoint completed successfully for review: ${reviewId}, user: ${userId}, liked: ${result.data.liked}`
-    );
+     const result = await reviewService.toggleReaction(reviewId, userId, type);
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-    });
-  } catch (err) {
-    logger.error(
-      `Toggle like endpoint failed for review: ${reviewId}, user: ${userId}, error: ${err.message}`
-    );
+     logger.info(
+       `Toggle reaction endpoint completed successfully for review: ${reviewId}, user: ${userId}, reacted: ${result.data.reacted}, type: ${result.data.reactionType}`
+     );
 
-    // Si es un error conocido con status
-    if (err.status) {
-      return res.status(err.status).json({
-        success: false,
-        message: err.message,
-      });
-    }
+     res.status(200).json({
+       success: true,
+       data: result.data,
+     });
+   } catch (err) {
+     logger.error(
+       `Toggle reaction endpoint failed for review: ${reviewId}, user: ${userId}, error: ${err.message}`
+     );
 
-    next(err);
-  }
-};
+     // Si es un error conocido con status
+     if (err.status) {
+       return res.status(err.status).json({
+         success: false,
+         message: err.message,
+       });
+     }
+
+     next(err);
+   }
+ };
 
 /**
- * Get like status for a review
- * GET /api/reviews/:reviewId/like
- */
-export const getLikeStatus = async (req, res, next) => {
-  const { reviewId } = req.params;
-  const userId = req.user?.id;
+  * Get reaction status for a review
+  * GET /api/reviews/:reviewId/reaction
+  */
+ export const getReactionStatus = async (req, res, next) => {
+   const { reviewId } = req.params;
+   const userId = req.user?.id;
 
-  logger.info(`Get like status endpoint called for review: ${reviewId} by user: ${userId}`);
+   logger.info(`Get reaction status endpoint called for review: ${reviewId} by user: ${userId}`);
 
-  try {
-    const result = await reviewService.getLikeStatus(reviewId, userId);
+   try {
+     const result = await reviewService.getReactionStatus(reviewId, userId);
 
-    logger.info(
-      `Get like status endpoint completed successfully for review: ${reviewId}`
-    );
+     logger.info(
+       `Get reaction status endpoint completed successfully for review: ${reviewId}`
+     );
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-    });
-  } catch (err) {
-    logger.error(
-      `Get like status endpoint failed for review: ${reviewId}, error: ${err.message}`
-    );
+     res.status(200).json({
+       success: true,
+       data: result.data,
+     });
+   } catch (err) {
+     logger.error(
+       `Get reaction status endpoint failed for review: ${reviewId}, error: ${err.message}`
+     );
 
-    // Si es un error conocido con status
-    if (err.status) {
-      return res.status(err.status).json({
-        success: false,
-        message: err.message,
-      });
-    }
+     // Si es un error conocido con status
+     if (err.status) {
+       return res.status(err.status).json({
+         success: false,
+         message: err.message,
+       });
+     }
 
-    next(err);
-  }
-};
+     next(err);
+   }
+ };
 
 /**
  * Obtiene estadísticas de reseñas de un lugar
