@@ -37,7 +37,7 @@ COPY --from=deps /usr/src/app/node_modules ./node_modules
 
 COPY --from=builder /usr/src/app/src ./src
 COPY package.json ./
-COPY .env ./
+COPY .env* ./
 
 ENV NODE_ENV=production
 ENV PORT=8080
