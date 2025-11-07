@@ -239,7 +239,16 @@ const router = Router();
  *           maximum: 100
  *           default: 20
  *         description: Number of results per page
- *         example: 20
+ *       - in: query
+ *         name: minRating
+ *         required: false
+ *         schema:
+ *           type: number
+ *           format: float
+ *           minimum: 0.0
+ *           maximum: 5.0
+ *         description: Minimum average rating filter (0.0 to 5.0)
+ *         example: 4.0
  *     responses:
  *       200:
  *         description: Places retrieved successfully

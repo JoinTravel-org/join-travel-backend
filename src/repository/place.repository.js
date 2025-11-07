@@ -141,7 +141,7 @@ class PlaceRepository {
    * @param {number} limit - Número de resultados por página (default 20)
    * @returns {Promise<Object>} - { places: Array, totalCount: number }
    */
-  async searchPlaces(q, city, userLat, userLng, page = 1, limit = 20) {
+  async searchPlaces(q, city, userLat, userLng, page = 1, limit = 20, minRating) {
     const offset = (page - 1) * limit;
 
     // Get all places for fuzzy search
@@ -161,7 +161,28 @@ class PlaceRepository {
       ]
     });
 
-    let filteredPlaces = allPlaces;
+    // Calculate average ratings for places with reviews
+    const placesWithCalculatedRatings = await Promise.all(
+      allPlaces.map(async (place) => {
+        // Get reviews for this place
+        const reviews = await AppDataSource.getRepository("Review").find({
+          where: { placeId: place.id },
+          select: ["rating"]
+        });
+
+        const averageRating = reviews.length > 0
+          ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+          : null;
+
+        return {
+          ...place,
+          calculatedRating: averageRating,
+          reviewCount: reviews.length
+        };
+      })
+    );
+
+    let filteredPlaces = placesWithCalculatedRatings;
 
     // Apply fuzzy search if q is provided
     if (q && q.trim().length >= 3) {
@@ -194,8 +215,21 @@ class PlaceRepository {
         .map(result => result.item);
     }
 
+    // Apply minRating filter if provided
+    if (minRating !== undefined && !isNaN(minRating)) {
+      const minRatingFloat = parseFloat(minRating);
+      filteredPlaces = filteredPlaces.filter(place => {
+        // Exclude places without reviews if minRating > 0
+        if (minRatingFloat > 0 && place.reviewCount === 0) {
+          return false;
+        }
+        // Include places that meet the minimum rating requirement
+        return place.calculatedRating >= minRatingFloat;
+      });
+    }
+
     // If no filters applied, return empty
-    if ((!q || q.trim().length < 3) && (!city || city.trim().length === 0)) {
+    if ((!q || q.trim().length < 3) && (!city || city.trim().length === 0) && minRating === undefined) {
       return { places: [], totalCount: 0 };
     }
 
@@ -218,9 +252,15 @@ class PlaceRepository {
       filteredPlaces.sort((a, b) => a.name.localeCompare(b.name));
     }
 
+    // Update rating field with calculated rating for response
+    const placesWithUpdatedRating = filteredPlaces.map(place => ({
+      ...place,
+      rating: place.calculatedRating
+    }));
+
     // Apply pagination
-    const totalCount = filteredPlaces.length;
-    const paginatedPlaces = filteredPlaces.slice(offset, offset + limit);
+    const totalCount = placesWithUpdatedRating.length;
+    const paginatedPlaces = placesWithUpdatedRating.slice(offset, offset + limit);
 
     return { places: paginatedPlaces, totalCount };
   }

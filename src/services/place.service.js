@@ -389,7 +389,7 @@ class PlaceService {
    * @returns {Promise<Array>} - Array de lugares encontrados
    * @throws {Error} - Si la consulta es inválida
    */
-  async searchPlaces(q, city, latitude, longitude, page = 1, limit = 20) {
+  async searchPlaces(q, city, latitude, longitude, page = 1, limit = 20, minRating) {
     try {
       // Validar si se proporciona al menos un parámetro de filtro
       const hasQ = q && q.trim().length > 0;
@@ -406,6 +406,16 @@ class PlaceService {
         const error = new Error("La consulta de búsqueda debe tener al menos 3 caracteres");
         error.status = 400;
         throw error;
+      }
+
+      // Validar minRating si proporcionado
+      if (minRating !== undefined) {
+        const rating = parseFloat(minRating);
+        if (isNaN(rating) || rating < 0.0 || rating > 5.0) {
+          const error = new Error("minRating debe ser un número entre 0.0 y 5.0");
+          error.status = 400;
+          throw error;
+        }
       }
 
       // Validar coordenadas si se proporcionan
@@ -446,7 +456,8 @@ class PlaceService {
         latitude,
         longitude,
         pageNum,
-        limitNum
+        limitNum,
+        minRating
       );
 
       logger.info(`Search completed for query "${q || ''}", city: "${city || ''}", page: ${pageNum}, limit: ${limitNum}, found ${result.places.length} places`);
