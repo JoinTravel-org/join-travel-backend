@@ -107,6 +107,98 @@ class PlaceRepository {
 
     return { places, totalCount };
   }
+
+  /**
+   * Busca lugares con filtros opcionales, paginación y ordenamiento por proximidad
+   * @param {string|null} q - Término de búsqueda (nombre, opcional)
+   * @param {string|null} city - Ciudad para filtrar (opcional)
+   * @param {number|undefined} userLat - Latitud del usuario para ordenar por distancia (opcional)
+   * @param {number|undefined} userLng - Longitud del usuario para ordenar por distancia (opcional)
+   * @param {number} page - Número de página (1-based, default 1)
+   * @param {number} limit - Número de resultados por página (default 20)
+   * @returns {Promise<Object>} - { places: Array, totalCount: number }
+   */
+  async searchPlaces(q, city, userLat, userLng, page = 1, limit = 20) {
+    const offset = (page - 1) * limit;
+
+    // Build count query
+    const countBuilder = this.getRepository().createQueryBuilder("place");
+    let hasFilter = false;
+
+    if (q && q.trim().length >= 3) {
+      countBuilder.where("LOWER(place.name) LIKE :qPattern", { qPattern: `%${q.trim().toLowerCase()}%` });
+      hasFilter = true;
+    }
+
+    if (city && city.trim().length > 0) {
+      const cityPattern = `%${city.trim().toLowerCase()}%`;
+      if (hasFilter) {
+        countBuilder.andWhere("LOWER(place.city) LIKE :cityPattern", { cityPattern });
+      } else {
+        countBuilder.where("LOWER(place.city) LIKE :cityPattern", { cityPattern });
+        hasFilter = true;
+      }
+    }
+
+    const totalCount = hasFilter ? await countBuilder.getCount() : 0;
+
+    // If no filters, return empty
+    if (!hasFilter) {
+      return { places: [], totalCount: 0 };
+    }
+
+    // Build main query
+    const queryBuilder = this.getRepository()
+      .createQueryBuilder("place")
+      .select([
+        "place.id",
+        "place.name",
+        "place.address",
+        "place.latitude",
+        "place.longitude",
+        "place.image",
+        "place.rating",
+        "place.createdAt",
+        "place.updatedAt",
+        "place.description",
+        "place.city"
+      ])
+      .skip(offset)
+      .take(limit);
+
+    // Apply filters
+    if (q && q.trim().length >= 3) {
+      queryBuilder.where("LOWER(place.name) LIKE :qPattern", { qPattern: `%${q.trim().toLowerCase()}%` });
+    }
+
+    if (city && city.trim().length > 0) {
+      const cityPattern = `%${city.trim().toLowerCase()}%`;
+      if (q && q.trim().length >= 3) {
+        queryBuilder.andWhere("LOWER(place.city) LIKE :cityPattern", { cityPattern });
+      } else {
+        queryBuilder.where("LOWER(place.city) LIKE :cityPattern", { cityPattern });
+      }
+    }
+
+    // Sorting
+    if (userLat !== undefined && userLng !== undefined && !isNaN(userLat) && !isNaN(userLng)) {
+      const distanceExpr = `(6371 * 2 * ASIN(SQRT(
+        POWER(SIN((RADIANS(place.latitude - :userLat)) * 0.5), 2) +
+        COS(RADIANS(:userLat)) * COS(RADIANS(place.latitude)) *
+        POWER(SIN((RADIANS(place.longitude - :userLng)) * 0.5), 2)
+      ))) AS distance`;
+      queryBuilder.addSelect(distanceExpr);
+      queryBuilder.addOrderBy("distance", "ASC");
+      queryBuilder.setParameter("userLat", parseFloat(userLat));
+      queryBuilder.setParameter("userLng", parseFloat(userLng));
+    } else {
+      queryBuilder.orderBy("place.name", "ASC");
+    }
+
+    const places = await queryBuilder.getMany();
+
+    return { places, totalCount };
+  }
 }
 
 export default new PlaceRepository();

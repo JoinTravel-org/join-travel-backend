@@ -8,6 +8,7 @@ import {
   toggleFavorite,
   getFavoriteStatus,
   getUserFavorites,
+  searchPlaces,
 } from "../controllers/place.controller.js";
 import {
   createReview,
@@ -181,6 +182,164 @@ const router = Router();
  *                   type: string
  *                   example: "Servicio externo no disponible."
  */
+/**
+ * @swagger
+ * /api/places/search:
+ *   get:
+ *     summary: Search for places with flexible filtering options (by name, city, or both)
+ *     description: Returns places matching the provided criteria. If q is provided, filters by name (partial matching). If city is provided, filters by city. If both, combines filters. If latitude and longitude are provided, sorts by proximity. At least one filter parameter must be provided. Supports pagination.
+ *     tags: [Places]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: false
+ *         schema:
+ *           type: string
+ *           minLength: 3
+ *         description: Search query for place names (minimum 3 characters when provided)
+ *         example: "restaurant"
+ *       - in: query
+ *         name: city
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: City name to filter results
+ *         example: "Buenos Aires"
+ *       - in: query
+ *         name: latitude
+ *         required: false
+ *         schema:
+ *           type: number
+ *           format: float
+ *         description: User's latitude for proximity-based sorting
+ *         example: -34.6037
+ *       - in: query
+ *         name: longitude
+ *         required: false
+ *         schema:
+ *           type: number
+ *           format: float
+ *         description: User's longitude for proximity-based sorting
+ *         example: -58.3816
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number
+ *         example: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 20
+ *         description: Number of results per page
+ *         example: 20
+ *     responses:
+ *       200:
+ *         description: Places retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       name:
+ *                         type: string
+ *                         example: "La Boca Restaurant"
+ *                       address:
+ *                         type: string
+ *                         example: "Avenida Almirante Brown 123, Buenos Aires"
+ *                       latitude:
+ *                         type: number
+ *                         format: float
+ *                         example: -34.6250
+ *                       longitude:
+ *                         type: number
+ *                         format: float
+ *                         example: -58.3667
+ *                       image:
+ *                         type: string
+ *                         nullable: true
+ *                         example: "https://example.com/image.jpg"
+ *                       rating:
+ *                         type: number
+ *                         format: float
+ *                         nullable: true
+ *                         example: 4.5
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-01-01T00:00:00.000Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-01-01T00:00:00.000Z"
+ *                       description:
+ *                         type: string
+ *                         nullable: true
+ *                         example: "A traditional Argentine restaurant"
+ *                       city:
+ *                         type: string
+ *                         nullable: true
+ *                         example: "Buenos Aires"
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       example: 50
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 3
+ *                 message:
+ *                   type: string
+ *                   nullable: true
+ *       400:
+ *         description: Bad request (invalid parameters, no filter provided, etc.)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Se debe proporcionar al menos un parámetro de filtro"
+ *                 data:
+ *                   type: null
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get("/search", searchPlaces);
+
 router.get("/", getPlaces);
 router.post("/", addPlace);
 

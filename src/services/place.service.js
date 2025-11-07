@@ -379,6 +379,84 @@ class PlaceService {
       throw err;
     }
   }
+
+  /**
+   * Busca lugares por nombre con filtros opcionales y ordenamiento por proximidad
+   * @param {string} q - Término de búsqueda (nombre, mínimo 3 caracteres)
+   * @param {string} city - Ciudad para filtrar (opcional)
+   * @param {number} latitude - Latitud del usuario para ordenar por distancia (opcional)
+   * @param {number} longitude - Longitud del usuario para ordenar por distancia (opcional)
+   * @returns {Promise<Array>} - Array de lugares encontrados
+   * @throws {Error} - Si la consulta es inválida
+   */
+  async searchPlaces(q, city, latitude, longitude, page = 1, limit = 20) {
+    try {
+      // Validar si se proporciona al menos un parámetro de filtro
+      const hasQ = q && q.trim().length > 0;
+      const hasCity = city && city.trim().length > 0;
+      const hasCoords = latitude !== undefined && longitude !== undefined;
+      if (!hasQ && !hasCity && !hasCoords) {
+        const error = new Error("Se debe proporcionar al menos un parámetro de filtro (q, city, o coordenadas)");
+        error.status = 400;
+        throw error;
+      }
+
+      // Validar q si proporcionado
+      if (hasQ && q.trim().length < 3) {
+        const error = new Error("La consulta de búsqueda debe tener al menos 3 caracteres");
+        error.status = 400;
+        throw error;
+      }
+
+      // Validar coordenadas si se proporcionan
+      if (hasCoords) {
+        if (isNaN(latitude) || latitude < -90 || latitude > 90) {
+          const error = new Error("Latitud inválida");
+          error.status = 400;
+          throw error;
+        }
+        if (isNaN(longitude) || longitude < -180 || longitude > 180) {
+          const error = new Error("Longitud inválida");
+          error.status = 400;
+          throw error;
+        }
+      } else if (latitude !== undefined || longitude !== undefined) {
+        const error = new Error("Ambas coordenadas (latitud y longitud) deben proporcionarse para el ordenamiento por proximidad");
+        error.status = 400;
+        throw error;
+      }
+
+      // Validar paginación
+      const pageNum = parseInt(page, 10);
+      const limitNum = parseInt(limit, 10);
+      if (isNaN(pageNum) || pageNum < 1) {
+        const error = new Error("Número de página inválido");
+        error.status = 400;
+        throw error;
+      }
+      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+        const error = new Error("Límite inválido (debe estar entre 1 y 100)");
+        error.status = 400;
+        throw error;
+      }
+
+      const result = await placeRepository.searchPlaces(
+        hasQ ? q.trim() : null,
+        hasCity ? city.trim() : null,
+        latitude,
+        longitude,
+        pageNum,
+        limitNum
+      );
+
+      logger.info(`Search completed for query "${q || ''}", city: "${city || ''}", page: ${pageNum}, limit: ${limitNum}, found ${result.places.length} places`);
+
+      return result;
+    } catch (err) {
+      logger.error(`Error searching places: ${err.message}`);
+      throw err;
+    }
+  }
 }
 
 export default new PlaceService();
