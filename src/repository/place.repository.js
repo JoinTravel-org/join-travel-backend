@@ -186,7 +186,7 @@ class PlaceRepository {
 
     // Apply fuzzy search if q is provided
     if (q && q.trim().length >= 3) {
-      const fuse = new Fuse(allPlaces, {
+      const fuse = new Fuse(filteredPlaces, {
         keys: ['name', 'address', 'city'],
         threshold: 0.4, // Umbral de similitud (0.0 = exacto, 1.0 = muy permisivo)
         includeScore: true,
@@ -233,6 +233,21 @@ class PlaceRepository {
       return { places: [], totalCount: 0 };
     }
 
+    // Sort by rating descending if no coordinates provided
+    if (userLat === undefined || userLng === undefined) {
+      filteredPlaces.sort((a, b) => {
+        // Places with higher ratings first
+        if (b.calculatedRating !== null && a.calculatedRating !== null) {
+          return b.calculatedRating - a.calculatedRating;
+        }
+        // Places with ratings before places without ratings
+        if (b.calculatedRating !== null && a.calculatedRating === null) return -1;
+        if (a.calculatedRating !== null && b.calculatedRating === null) return 1;
+        // Alphabetical fallback
+        return a.name.localeCompare(b.name);
+      });
+    }
+
     // Calculate distances if user location provided
     if (userLat !== undefined && userLng !== undefined && !isNaN(userLat) && !isNaN(userLng)) {
       filteredPlaces = filteredPlaces.map(place => {
@@ -248,8 +263,18 @@ class PlaceRepository {
       // Sort by distance
       filteredPlaces.sort((a, b) => a.distance - b.distance);
     } else {
-      // Sort by name if no distance sorting
-      filteredPlaces.sort((a, b) => a.name.localeCompare(b.name));
+      // Sort by rating descending, then by name
+      filteredPlaces.sort((a, b) => {
+        // Places with higher ratings first
+        if (b.calculatedRating !== null && a.calculatedRating !== null) {
+          return b.calculatedRating - a.calculatedRating;
+        }
+        // Places with ratings before places without ratings
+        if (b.calculatedRating !== null && a.calculatedRating === null) return -1;
+        if (a.calculatedRating !== null && b.calculatedRating === null) return 1;
+        // Alphabetical fallback
+        return a.name.localeCompare(b.name);
+      });
     }
 
     // Update rating field with calculated rating for response

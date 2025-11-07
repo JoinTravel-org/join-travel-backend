@@ -395,8 +395,9 @@ class PlaceService {
       const hasQ = q && q.trim().length > 0;
       const hasCity = city && city.trim().length > 0;
       const hasCoords = latitude !== undefined && longitude !== undefined;
-      if (!hasQ && !hasCity && !hasCoords) {
-        const error = new Error("Se debe proporcionar al menos un parámetro de filtro (q, city, o coordenadas)");
+      const hasMinRating = minRating !== undefined;
+      if (!hasQ && !hasCity && !hasCoords && !hasMinRating) {
+        const error = new Error("Se debe proporcionar al menos un parámetro de filtro (q, city, coordenadas, o minRating)");
         error.status = 400;
         throw error;
       }
