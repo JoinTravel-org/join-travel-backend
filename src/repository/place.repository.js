@@ -1,5 +1,6 @@
 import { AppDataSource } from "../load/typeorm.loader.js";
 import Place from "../models/place.model.js";
+import Fuse from "fuse.js";
 
 class PlaceRepository {
   constructor() {
@@ -109,6 +110,28 @@ class PlaceRepository {
   }
 
   /**
+   * Obtiene todos los lugares con campos completos para búsqueda
+   * @returns {Promise<Array>} - Array de todos los lugares
+   */
+  async getAllPlaces() {
+    return await this.getRepository().find({
+      select: [
+        "id",
+        "name",
+        "address",
+        "latitude",
+        "longitude",
+        "image",
+        "rating",
+        "createdAt",
+        "updatedAt",
+        "description",
+        "city"
+      ]
+    });
+  }
+
+  /**
    * Busca lugares con filtros opcionales, paginación y ordenamiento por proximidad
    * @param {string|null} q - Término de búsqueda (nombre, opcional)
    * @param {string|null} city - Ciudad para filtrar (opcional)
@@ -121,83 +144,114 @@ class PlaceRepository {
   async searchPlaces(q, city, userLat, userLng, page = 1, limit = 20) {
     const offset = (page - 1) * limit;
 
-    // Build count query
-    const countBuilder = this.getRepository().createQueryBuilder("place");
-    let hasFilter = false;
+    // Get all places for fuzzy search
+    const allPlaces = await this.getRepository().find({
+      select: [
+        "id",
+        "name",
+        "address",
+        "latitude",
+        "longitude",
+        "image",
+        "rating",
+        "createdAt",
+        "updatedAt",
+        "description",
+        "city"
+      ]
+    });
 
+    let filteredPlaces = allPlaces;
+
+    // Apply fuzzy search if q is provided
     if (q && q.trim().length >= 3) {
-      countBuilder.where("LOWER(place.name) LIKE :qPattern", { qPattern: `%${q.trim().toLowerCase()}%` });
-      hasFilter = true;
+      const fuse = new Fuse(allPlaces, {
+        keys: ['name'],
+        threshold: 0.4, // Umbral de similitud (0.0 = exacto, 1.0 = muy permisivo)
+        includeScore: true,
+        shouldSort: true,
+      });
+
+      const results = fuse.search(q.trim());
+      filteredPlaces = results
+        .filter(result => result.score < 0.6) // Solo resultados con buena similitud
+        .map(result => result.item);
     }
 
+    // Apply city filter if provided
     if (city && city.trim().length > 0) {
-      const cityPattern = `%${city.trim().toLowerCase()}%`;
-      if (hasFilter) {
-        countBuilder.andWhere("LOWER(place.city) LIKE :cityPattern", { cityPattern });
-      } else {
-        countBuilder.where("LOWER(place.city) LIKE :cityPattern", { cityPattern });
-        hasFilter = true;
-      }
+      const cityLower = city.trim().toLowerCase();
+      const cityFuse = new Fuse(filteredPlaces, {
+        keys: ['city'],
+        threshold: 0.4,
+        includeScore: true,
+        shouldSort: true,
+      });
+
+      const cityResults = cityFuse.search(cityLower);
+      filteredPlaces = cityResults
+        .filter(result => result.score < 0.6)
+        .map(result => result.item);
     }
 
-    const totalCount = hasFilter ? await countBuilder.getCount() : 0;
-
-    // If no filters, return empty
-    if (!hasFilter) {
+    // If no filters applied, return empty
+    if ((!q || q.trim().length < 3) && (!city || city.trim().length === 0)) {
       return { places: [], totalCount: 0 };
     }
 
-    // Build main query
-    const queryBuilder = this.getRepository()
-      .createQueryBuilder("place")
-      .select([
-        "place.id",
-        "place.name",
-        "place.address",
-        "place.latitude",
-        "place.longitude",
-        "place.image",
-        "place.rating",
-        "place.createdAt",
-        "place.updatedAt",
-        "place.description",
-        "place.city"
-      ])
-      .skip(offset)
-      .take(limit);
-
-    // Apply filters
-    if (q && q.trim().length >= 3) {
-      queryBuilder.where("LOWER(place.name) LIKE :qPattern", { qPattern: `%${q.trim().toLowerCase()}%` });
-    }
-
-    if (city && city.trim().length > 0) {
-      const cityPattern = `%${city.trim().toLowerCase()}%`;
-      if (q && q.trim().length >= 3) {
-        queryBuilder.andWhere("LOWER(place.city) LIKE :cityPattern", { cityPattern });
-      } else {
-        queryBuilder.where("LOWER(place.city) LIKE :cityPattern", { cityPattern });
-      }
-    }
-
-    // Sorting
+    // Calculate distances if user location provided
     if (userLat !== undefined && userLng !== undefined && !isNaN(userLat) && !isNaN(userLng)) {
-      const distanceExpr = `(6371 * 2 * ASIN(SQRT(
-        POWER(SIN((RADIANS(place.latitude - :userLat)) * 0.5), 2) +
-        COS(RADIANS(:userLat)) * COS(RADIANS(place.latitude)) *
-        POWER(SIN((RADIANS(place.longitude - :userLng)) * 0.5), 2)
-      ))) AS distance`;
-      queryBuilder.addSelect(distanceExpr);
-      queryBuilder.addOrderBy("distance", "ASC");
-      queryBuilder.setParameter("userLat", parseFloat(userLat));
-      queryBuilder.setParameter("userLng", parseFloat(userLng));
+      filteredPlaces = filteredPlaces.map(place => {
+        const distance = this.calculateDistance(
+          parseFloat(userLat),
+          parseFloat(userLng),
+          place.latitude,
+          place.longitude
+        );
+        return { ...place, distance };
+      });
+
+      // Sort by distance
+      filteredPlaces.sort((a, b) => a.distance - b.distance);
     } else {
-      queryBuilder.orderBy("place.name", "ASC");
+      // Sort by name if no distance sorting
+      filteredPlaces.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    const places = await queryBuilder.getMany();
+    // Apply pagination
+    const totalCount = filteredPlaces.length;
+    const paginatedPlaces = filteredPlaces.slice(offset, offset + limit);
 
-    return { places, totalCount };
+    return { places: paginatedPlaces, totalCount };
+  }
+
+  /**
+   * Calcula la distancia entre dos puntos usando la fórmula de Haversine
+   * @param {number} lat1 - Latitud del punto 1
+   * @param {number} lng1 - Longitud del punto 1
+   * @param {number} lat2 - Latitud del punto 2
+   * @param {number} lng2 - Longitud del punto 2
+   * @returns {number} - Distancia en kilómetros
+   */
+  calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371; // Radio de la Tierra en km
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLng = this.toRadians(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  /**
+   * Convierte grados a radianes
+   * @param {number} degrees - Grados
+   * @returns {number} - Radianes
+   */
+  toRadians(degrees) {
+    return degrees * (Math.PI / 180);
   }
 }
 
