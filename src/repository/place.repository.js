@@ -166,7 +166,7 @@ class PlaceRepository {
     // Apply fuzzy search if q is provided
     if (q && q.trim().length >= 3) {
       const fuse = new Fuse(allPlaces, {
-        keys: ['name'],
+        keys: ['name', 'address', 'city'],
         threshold: 0.4, // Umbral de similitud (0.0 = exacto, 1.0 = muy permisivo)
         includeScore: true,
         shouldSort: true,
