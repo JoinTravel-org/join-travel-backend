@@ -33,6 +33,7 @@ export const POINTS_DATA = {
   'comment_posted': 2,
   'media_upload': 5, // Bonus points for uploading media
   'place_added': 15, // Points for adding a new place
+  'expense_created': 3, // Points for adding expenses to groups
 };
 
 export default async function seedDatabase() {

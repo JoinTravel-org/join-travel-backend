@@ -1,6 +1,12 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { searchUsers, getUserFavorites, getUserById, getUserMedia } from "../controllers/users.controller.js";
+import {
+  searchUsers,
+  getUserByEmail,
+  getUserFavorites,
+  getUserById,
+  getUserMedia,
+} from "../controllers/users.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -11,7 +17,8 @@ const searchLimiter = rateLimit({
   max: 30, // Limit each IP to 30 search requests per windowMs
   message: {
     success: false,
-    message: "Demasiadas búsquedas de usuarios, por favor intenta de nuevo más tarde."
+    message:
+      "Demasiadas búsquedas de usuarios, por favor intenta de nuevo más tarde.",
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -132,6 +139,77 @@ const searchLimiter = rateLimit({
  *                   example: "Demasiadas búsquedas de usuarios, por favor intenta de nuevo más tarde."
  */
 router.get("/search", authenticate, searchLimiter, searchUsers);
+
+/**
+ * @swagger
+ * /api/users/email/{email}:
+ *   get:
+ *     summary: Get user by exact email
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Email address of the user to find
+ *         example: john.doe@example.com
+ *     responses:
+ *       200:
+ *         description: User found successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "user-123"
+ *                     email:
+ *                       type: string
+ *                       example: "john.doe@example.com"
+ *                     name:
+ *                       type: string
+ *                       nullable: true
+ *                       example: "John Doe"
+ *                     isEmailConfirmed:
+ *                       type: boolean
+ *                       example: true
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-01-15T10:30:00Z"
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-11-02T15:45:00Z"
+ *                 message:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Usuario no encontrado"
+ */
+router.get("/email/:email", authenticate, searchLimiter, getUserByEmail);
 
 /**
  * @swagger
