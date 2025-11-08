@@ -65,6 +65,24 @@ class ReviewMediaRepository {
     const result = await this.getRepository().delete({ reviewId });
     return result.affected;
   }
+
+  /**
+   * Obtiene todos los media públicos de un usuario (de sus reseñas publicadas)
+   * @param {string} userId - ID del usuario
+   * @param {number} limit - Número máximo de resultados (default: 20)
+   * @returns {Promise<ReviewMedia[]>} - Lista de media ordenada por createdAt DESC
+   */
+  async getUserMedia(userId, limit = 20) {
+    return await this.getRepository()
+      .createQueryBuilder("media")
+      .innerJoin("media.review", "review")
+      .where("review.userId = :userId", { userId })
+      // Nota: Asumiendo que todas las reseñas son públicas por ahora
+      // Si se implementa moderación, agregar: .andWhere("review.isPublished = :isPublished", { isPublished: true })
+      .orderBy("media.createdAt", "DESC")
+      .limit(limit)
+      .getMany();
+  }
 }
 
 export default new ReviewMediaRepository();
