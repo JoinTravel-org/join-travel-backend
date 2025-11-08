@@ -45,7 +45,7 @@ export const getUserExpenses = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     next(error);
@@ -94,5 +94,6 @@ export default {
   createExpense,
   getGroupExpenses,
   getUserExpenses,
-  deleteExpense
+  deleteExpense,
+  assignExpense,
 };
