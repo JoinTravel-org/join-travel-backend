@@ -1,6 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { searchUsers, getUserFavorites, getUserById } from "../controllers/users.controller.js";
+import { searchUsers, getUserFavorites, getUserById, getUserMedia } from "../controllers/users.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -442,5 +442,104 @@ router.get("/:userId", authenticate, getUserById);
  *                   example: "Error interno del servidor"
  */
 router.get("/:userId/favorites", authenticate, getUserFavorites);
+
+/**
+ * @swagger
+ * /api/users/{userId}/media:
+ *   get:
+ *     summary: Get public media files uploaded by a specific user
+ *     description: Retrieve all public media files (images and videos) uploaded by a specific user from their published reviews. This endpoint is public and does not require authentication.
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user whose media to retrieve
+ *         example: "123e4567-e89b-12d3-a456-426614174000"
+ *     responses:
+ *       200:
+ *         description: Media files retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       filename:
+ *                         type: string
+ *                         example: "photo_123.jpg"
+ *                       originalFilename:
+ *                         type: string
+ *                         example: "my_trip_photo.jpg"
+ *                       fileSize:
+ *                         type: number
+ *                         example: 2048576
+ *                       mimeType:
+ *                         type: string
+ *                         example: "image/jpeg"
+ *                       url:
+ *                         type: string
+ *                         example: "/api/media/123e4567-e89b-12d3-a456-426614174000"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-01-15T10:30:00Z"
+ *                 message:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *       400:
+ *         description: Invalid user ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "ID de usuario inválido"
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Usuario no encontrado"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
+router.get("/:userId/media", getUserMedia);
 
 export default router;

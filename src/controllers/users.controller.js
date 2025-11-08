@@ -1,5 +1,6 @@
 import UserRepository from "../repository/user.repository.js";
 import userFavoriteRepository from "../repository/userFavorite.repository.js";
+import reviewMediaRepository from "../repository/reviewMedia.repository.js";
 import gamificationService from "../services/gamification.service.js";
 import logger from "../config/logger.js";
 import { ValidationError } from "../utils/customErrors.js";
@@ -182,6 +183,61 @@ export const getUserById = async (req, res, next) => {
 
   } catch (err) {
     logger.error(`Get user by ID endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Obtiene todos los archivos multimedia públicos de un usuario
+ * GET /api/users/{userId}/media
+ */
+export const getUserMedia = async (req, res, next) => {
+  logger.info(`Get user media endpoint called for userId: ${req.params.userId}`);
+
+  try {
+    const { userId } = req.params;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Verificar que el usuario existe
+    const userRepo = new UserRepository();
+    const targetUser = await userRepo.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "Usuario no encontrado"
+      });
+    }
+
+    // Obtener los archivos multimedia del usuario (de sus reseñas publicadas)
+    const mediaFiles = await reviewMediaRepository.getUserMedia(userId, 20);
+
+    // Formatear la respuesta según la especificación
+    const formattedMedia = mediaFiles.map(media => ({
+      id: media.id,
+      filename: media.filename,
+      originalFilename: media.originalFilename,
+      fileSize: parseInt(media.fileSize),
+      mimeType: media.mimeType,
+      url: `/api/media/${media.id}`, // URL para acceder al archivo
+      createdAt: media.createdAt.toISOString()
+    }));
+
+    logger.info(`Get user media endpoint completed successfully, found ${formattedMedia.length} media files`);
+
+    res.status(200).json({
+      success: true,
+      data: formattedMedia,
+      message: null
+    });
+
+  } catch (err) {
+    logger.error(`Get user media endpoint failed: ${err.message}`);
     next(err);
   }
 };

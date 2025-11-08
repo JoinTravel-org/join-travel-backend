@@ -332,5 +332,39 @@ export const getUserFavorites = async (req, res, next) => {
   }
 };
 
+/**
+ * Search places by name with optional filters and proximity sorting
+ * GET /api/places/search
+ */
+export const searchPlaces = async (req, res, next) => {
+  logger.info(`Search places endpoint called with query: ${req.query.q}, city: ${req.query.city}, minRating: ${req.query.minRating}`);
+  try {
+    const { q, city, latitude, longitude, page = 1, limit = 20, minRating } = req.query;
 
+    const result = await placeService.searchPlaces(q, city, latitude, longitude, page, limit, minRating);
 
+    const totalPages = Math.ceil(result.totalCount / parseInt(limit));
+
+    logger.info(`Search places endpoint completed successfully, found ${result.places.length} places out of ${result.totalCount}`);
+    res.status(200).json({
+      success: true,
+      data: result.places,
+      pagination: {
+        total: result.totalCount,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages,
+      },
+    });
+  } catch (err) {
+    logger.error(`Search places endpoint failed: ${err.message}`);
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+        data: null,
+      });
+    }
+    next(err);
+  }
+};

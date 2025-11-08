@@ -2,6 +2,70 @@ import reviewMediaRepository from "../repository/reviewMedia.repository.js";
 import logger from "../config/logger.js";
 
 /**
+ * Obtiene una lista paginada de media reciente público
+ * GET /api/media/recent?page=1&limit=20
+ */
+export const getRecentMedia = async (req, res, next) => {
+  const { page = 1, limit = 20 } = req.query;
+
+  logger.info(`Get recent media endpoint called with page: ${page}, limit: ${limit}`);
+
+  try {
+    // Validar parámetros
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+
+    if (isNaN(pageNum) || pageNum < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "El parámetro 'page' debe ser un número entero mayor o igual a 1.",
+      });
+    }
+
+    if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "El parámetro 'limit' debe ser un número entero entre 1 y 100.",
+      });
+    }
+
+    const mediaList = await reviewMediaRepository.getRecentMedia(pageNum, limitNum);
+
+    // Formatear respuesta
+    const formattedData = mediaList.map(media => ({
+      id: media.id,
+      filename: media.filename,
+      originalFilename: media.originalFilename,
+      fileSize: parseInt(media.fileSize, 10),
+      mimeType: media.mimeType,
+      url: `/api/media/${media.id}`,
+      createdAt: media.createdAt.toISOString(),
+    }));
+
+    logger.info(`Returning ${formattedData.length} recent media items for page ${pageNum}`);
+
+    res.json({
+      success: true,
+      data: formattedData,
+    });
+  } catch (err) {
+    logger.error(
+      `Get recent media endpoint failed, error: ${err.message}, stack: ${err.stack}`
+    );
+
+    // Si es un error conocido con status
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+      });
+    }
+
+    next(err);
+  }
+};
+
+/**
  * Obtiene un archivo multimedia por su ID
  * GET /api/media/:id
  */
@@ -11,6 +75,15 @@ export const getMediaFile = async (req, res, next) => {
   logger.info(`Get media file endpoint called for media: ${id}`);
 
   try {
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID del archivo multimedia debe ser un UUID válido.",
+      });
+    }
+
     const mediaRecord = await reviewMediaRepository.findById(id);
 
     if (!mediaRecord) {

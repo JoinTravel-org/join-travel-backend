@@ -65,6 +65,43 @@ class ReviewMediaRepository {
     const result = await this.getRepository().delete({ reviewId });
     return result.affected;
   }
+
+  /**
+   * Obtiene todos los media públicos de un usuario (de sus reseñas publicadas)
+   * @param {string} userId - ID del usuario
+   * @param {number} limit - Número máximo de resultados (default: 20)
+   * @returns {Promise<ReviewMedia[]>} - Lista de media ordenada por createdAt DESC
+   */
+  async getUserMedia(userId, limit = 20) {
+    return await this.getRepository()
+      .createQueryBuilder("media")
+      .innerJoin("media.review", "review")
+      .where("review.userId = :userId", { userId })
+      // Nota: Asumiendo que todas las reseñas son públicas por ahora
+      // Si se implementa moderación, agregar: .andWhere("review.isPublished = :isPublished", { isPublished: true })
+      .orderBy("media.createdAt", "DESC")
+      .limit(limit)
+      .getMany();
+  }
+
+  /**
+   * Obtiene media reciente público de todas las reseñas
+   * @param {number} page - Página (default: 1)
+   * @param {number} limit - Número máximo de resultados por página (default: 20)
+   * @returns {Promise<ReviewMedia[]>} - Lista de media ordenada por createdAt DESC
+   */
+  async getRecentMedia(page = 1, limit = 20) {
+    const offset = (page - 1) * limit;
+    return await this.getRepository()
+      .createQueryBuilder("media")
+      .innerJoin("media.review", "review")
+      // Nota: Asumiendo que todas las reseñas son públicas por ahora
+      // Si se implementa moderación, agregar: .where("review.isPublished = :isPublished", { isPublished: true })
+      .orderBy("media.createdAt", "DESC")
+      .skip(offset)
+      .take(limit)
+      .getMany();
+  }
 }
 
 export default new ReviewMediaRepository();
