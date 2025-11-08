@@ -110,7 +110,7 @@ class GroupRepository {
   }
 
   /**
-   * Deletes a group and its member relations, returns the deleted group data
+   * Deletes a group and its member relations and associated expenses, returns the deleted group data
    */
   async delete(groupId) {
     const groupToDelete = await this.findById(groupId);
@@ -123,7 +123,10 @@ class GroupRepository {
     await queryRunner.startTransaction();
 
     try {
-      // Remove join table entries first
+      // Delete associated expenses first (cascade delete)
+      await queryRunner.query(`DELETE FROM expenses WHERE "groupId" = $1`, [groupId]);
+
+      // Remove join table entries
       await queryRunner.query(`DELETE FROM group_members WHERE "groupId" = $1`, [groupId]);
 
       // Delete the group
