@@ -74,7 +74,7 @@ export const awardPoints = async (req, res, next) => {
     }
 
     // Validate action type
-    const validActions = ['review_created', 'vote_received', 'profile_completed', 'comment_posted', 'media_upload', 'place_added'];
+    const validActions = ['review_created', 'vote_received', 'profile_completed', 'comment_posted', 'media_upload', 'place_added', 'expense_created'];
     if (!validActions.includes(action)) {
       return res.status(400).json({
         success: false,

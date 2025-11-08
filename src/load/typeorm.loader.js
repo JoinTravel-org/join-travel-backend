@@ -15,6 +15,7 @@ import Conversation from "../models/conversation.model.js";
 import ChatMessage from "../models/chatMessage.model.js";
 import Group from "../models/group.model.js";
 import DirectMessage from "../models/directMessage.model.js";
+import Expense from "../models/expense.model.js";
 import config from "../config/index.js";
 
 export const AppDataSource = new DataSource({
@@ -44,6 +45,7 @@ export const AppDataSource = new DataSource({
     Conversation,
     ChatMessage,
     DirectMessage,
+    Expense,
   ],
   migrations: ["./src/migrations/*.js"],
   timezone: "UTC", // Usar UTC para consistencia global
