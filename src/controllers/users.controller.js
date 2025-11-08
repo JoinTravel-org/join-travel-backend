@@ -16,13 +16,17 @@ export const searchUsers = async (req, res, next) => {
     const { email } = req.query;
 
     // Validar que se proporcione el parámetro email
-    if (!email || typeof email !== 'string' || email.trim().length === 0) {
-      throw new ValidationError("El parámetro 'email' es requerido y debe ser una cadena no vacía.");
+    if (!email || typeof email !== "string" || email.trim().length === 0) {
+      throw new ValidationError(
+        "El parámetro 'email' es requerido y debe ser una cadena no vacía."
+      );
     }
 
     // Limitar la longitud del email para prevenir búsquedas demasiado amplias
     if (email.length < 2) {
-      throw new ValidationError("El email debe tener al menos 2 caracteres para la búsqueda.");
+      throw new ValidationError(
+        "El email debe tener al menos 2 caracteres para la búsqueda."
+      );
     }
 
     // Buscar usuarios
@@ -36,7 +40,10 @@ export const searchUsers = async (req, res, next) => {
         try {
           stats = await gamificationService.getUserStats(user.id);
         } catch (statsError) {
-          logger.warn(`Failed to get stats for user ${user.id}:`, statsError.message);
+          logger.warn(
+            `Failed to get stats for user ${user.id}:`,
+            statsError.message
+          );
           // Continuar sin stats si hay error
         }
 
@@ -46,21 +53,89 @@ export const searchUsers = async (req, res, next) => {
           isEmailConfirmed: user.isEmailConfirmed,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
-          stats
+          stats,
         };
       })
     );
 
-    logger.info(`Search users endpoint completed successfully, found ${formattedUsers.length} users`);
+    logger.info(
+      `Search users endpoint completed successfully, found ${formattedUsers.length} users`
+    );
 
     res.status(200).json({
       success: true,
       data: formattedUsers,
-      message: null
+      message: null,
     });
-
   } catch (err) {
     logger.error(`Search users endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Obtiene un usuario específico por email
+ * GET /api/users/email/:email
+ */
+export const getUserByEmail = async (req, res, next) => {
+  logger.info(
+    `Get user by email endpoint called with email: ${req.params.email}`
+  );
+
+  try {
+    const { email } = req.params;
+
+    // Validar que se proporcione el email
+    if (!email || typeof email !== "string" || email.trim().length === 0) {
+      throw new ValidationError("El email es requerido");
+    }
+
+    // Buscar el usuario
+    const userRepo = new UserRepository();
+    const user = await userRepo.findByEmail(email.trim());
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Obtener stats del usuario si están disponibles
+    let stats = null;
+    try {
+      stats = await gamificationService.getUserStats(user.id);
+    } catch (statsError) {
+      logger.warn(
+        `Failed to get stats for user ${user.id}:`,
+        statsError.message
+      );
+      // Continuar sin stats si hay error
+    }
+
+    // Formatear respuesta
+    const formattedUser = {
+      id: user.id,
+      email: user.email,
+      name: user.name || null,
+      isEmailConfirmed: user.isEmailConfirmed,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
+      stats,
+    };
+
+    logger.info(
+      `Get user by email endpoint completed successfully for user: ${user.id}`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: formattedUser,
+      message: null,
+    });
+  } catch (err) {
+    logger.error(`Get user by email endpoint failed: ${err.message}`);
     next(err);
   }
 };
@@ -70,14 +145,17 @@ export const searchUsers = async (req, res, next) => {
  * GET /api/users/{userId}/favorites
  */
 export const getUserFavorites = async (req, res, next) => {
-  logger.info(`Get user favorites endpoint called for userId: ${req.params.userId}`);
+  logger.info(
+    `Get user favorites endpoint called for userId: ${req.params.userId}`
+  );
 
   try {
     const { userId } = req.params;
     const requestingUserId = req.user.id;
 
     // Validar que el userId sea un UUID válido
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(userId)) {
       throw new ValidationError("ID de usuario inválido");
     }
@@ -89,7 +167,7 @@ export const getUserFavorites = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         data: null,
-        message: "Usuario no encontrado"
+        message: "Usuario no encontrado",
       });
     }
 
@@ -97,10 +175,12 @@ export const getUserFavorites = async (req, res, next) => {
     // según los requisitos de la especificación
 
     // Obtener los favoritos del usuario
-    const favorites = await userFavoriteRepository.getUserFavoritesWithDetails(userId);
+    const favorites = await userFavoriteRepository.getUserFavoritesWithDetails(
+      userId
+    );
 
     // Formatear la respuesta con los datos de los lugares
-    const formattedFavorites = favorites.map(favorite => ({
+    const formattedFavorites = favorites.map((favorite) => ({
       id: favorite.place.id,
       name: favorite.place.name,
       address: favorite.place.address,
@@ -110,17 +190,18 @@ export const getUserFavorites = async (req, res, next) => {
       city: favorite.place.city,
       description: favorite.place.description,
       createdAt: favorite.place.createdAt.toISOString(),
-      updatedAt: favorite.place.updatedAt.toISOString()
+      updatedAt: favorite.place.updatedAt.toISOString(),
     }));
 
-    logger.info(`Get user favorites endpoint completed successfully, found ${formattedFavorites.length} favorites`);
+    logger.info(
+      `Get user favorites endpoint completed successfully, found ${formattedFavorites.length} favorites`
+    );
 
     res.status(200).json({
       success: true,
       data: formattedFavorites,
-      message: null
+      message: null,
     });
-
   } catch (err) {
     logger.error(`Get user favorites endpoint failed: ${err.message}`);
     next(err);
@@ -132,13 +213,16 @@ export const getUserFavorites = async (req, res, next) => {
  * GET /api/users/{userId}
  */
 export const getUserById = async (req, res, next) => {
-  logger.info(`Get user by ID endpoint called for userId: ${req.params.userId}`);
+  logger.info(
+    `Get user by ID endpoint called for userId: ${req.params.userId}`
+  );
 
   try {
     const { userId } = req.params;
 
     // Validar que el userId sea un UUID válido
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(userId)) {
       throw new ValidationError("ID de usuario inválido");
     }
@@ -150,7 +234,7 @@ export const getUserById = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         data: null,
-        message: "Usuario no encontrado"
+        message: "Usuario no encontrado",
       });
     }
 
@@ -159,7 +243,10 @@ export const getUserById = async (req, res, next) => {
     try {
       stats = await gamificationService.getUserStats(userId);
     } catch (statsError) {
-      logger.warn(`Failed to get stats for user ${userId}:`, statsError.message);
+      logger.warn(
+        `Failed to get stats for user ${userId}:`,
+        statsError.message
+      );
       // Continuar sin stats si hay error
     }
 
@@ -170,17 +257,18 @@ export const getUserById = async (req, res, next) => {
       isEmailConfirmed: user.isEmailConfirmed,
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
-      stats
+      stats,
     };
 
-    logger.info(`Get user by ID endpoint completed successfully for user: ${userId}`);
+    logger.info(
+      `Get user by ID endpoint completed successfully for user: ${userId}`
+    );
 
     res.status(200).json({
       success: true,
       data: formattedUser,
-      message: null
+      message: null,
     });
-
   } catch (err) {
     logger.error(`Get user by ID endpoint failed: ${err.message}`);
     next(err);
@@ -192,13 +280,16 @@ export const getUserById = async (req, res, next) => {
  * GET /api/users/{userId}/media
  */
 export const getUserMedia = async (req, res, next) => {
-  logger.info(`Get user media endpoint called for userId: ${req.params.userId}`);
+  logger.info(
+    `Get user media endpoint called for userId: ${req.params.userId}`
+  );
 
   try {
     const { userId } = req.params;
 
     // Validar que el userId sea un UUID válido
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(userId)) {
       throw new ValidationError("ID de usuario inválido");
     }
@@ -210,7 +301,7 @@ export const getUserMedia = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         data: null,
-        message: "Usuario no encontrado"
+        message: "Usuario no encontrado",
       });
     }
 
@@ -218,24 +309,25 @@ export const getUserMedia = async (req, res, next) => {
     const mediaFiles = await reviewMediaRepository.getUserMedia(userId, 20);
 
     // Formatear la respuesta según la especificación
-    const formattedMedia = mediaFiles.map(media => ({
+    const formattedMedia = mediaFiles.map((media) => ({
       id: media.id,
       filename: media.filename,
       originalFilename: media.originalFilename,
       fileSize: parseInt(media.fileSize),
       mimeType: media.mimeType,
       url: `/api/media/${media.id}`, // URL para acceder al archivo
-      createdAt: media.createdAt.toISOString()
+      createdAt: media.createdAt.toISOString(),
     }));
 
-    logger.info(`Get user media endpoint completed successfully, found ${formattedMedia.length} media files`);
+    logger.info(
+      `Get user media endpoint completed successfully, found ${formattedMedia.length} media files`
+    );
 
     res.status(200).json({
       success: true,
       data: formattedMedia,
-      message: null
+      message: null,
     });
-
   } catch (err) {
     logger.error(`Get user media endpoint failed: ${err.message}`);
     next(err);
