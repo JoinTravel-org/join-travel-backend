@@ -53,7 +53,11 @@ const router = Router();
  *       404:
  *         description: Group not found
  */
-router.post("/groups/:groupId/expenses", authenticate, expenseController.createExpense);
+router.post(
+  "/groups/:groupId/expenses",
+  authenticate,
+  expenseController.createExpense
+);
 
 /**
  * @swagger
@@ -77,7 +81,11 @@ router.post("/groups/:groupId/expenses", authenticate, expenseController.createE
  *       404:
  *         description: Group not found
  */
-router.get("/groups/:groupId/expenses", authenticate, expenseController.getGroupExpenses);
+router.get(
+  "/groups/:groupId/expenses",
+  authenticate,
+  expenseController.getGroupExpenses
+);
 
 /**
  * @swagger
@@ -101,6 +109,52 @@ router.get("/groups/:groupId/expenses", authenticate, expenseController.getGroup
  *       404:
  *         description: Expense not found
  */
-router.delete("/expenses/:expenseId", authenticate, expenseController.deleteExpense);
+router.delete(
+  "/expenses/:expenseId",
+  authenticate,
+  expenseController.deleteExpense
+);
+
+/**
+ * @swagger
+ * /api/expenses/{expenseId}/assign:
+ *   patch:
+ *     summary: Assign an expense to a group member (admin only)
+ *     tags: [Expenses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: expenseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - paidById
+ *             properties:
+ *               paidById:
+ *                 type: string
+ *                 description: ID of the user who paid for the expense
+ *     responses:
+ *       200:
+ *         description: Expense assigned successfully
+ *       400:
+ *         description: Invalid user ID
+ *       403:
+ *         description: Not authorized (only group admin)
+ *       404:
+ *         description: Expense not found
+ */
+router.patch(
+  "/expenses/:expenseId/assign",
+  authenticate,
+  expenseController.assignExpense
+);
 
 export default router;
