@@ -19,7 +19,7 @@ class GroupMessageService {
       }
 
       // Verificar que el usuario es miembro del grupo
-      const isMember = group.members?.some(member => member.id === senderId);
+      const isMember = group.members?.some((member) => member.id === senderId);
       if (!isMember) {
         const error = new Error("No eres miembro de este grupo");
         error.status = 403;
@@ -72,7 +72,7 @@ class GroupMessageService {
       }
 
       // Verificar que el usuario es miembro del grupo
-      const isMember = group.members?.some(member => member.id === userId);
+      const isMember = group.members?.some((member) => member.id === userId);
       if (!isMember) {
         const error = new Error("No eres miembro de este grupo");
         error.status = 403;
@@ -80,10 +80,14 @@ class GroupMessageService {
       }
 
       // Obtener mensajes
-      const messages = await groupMessageRepository.findByGroupId(groupId, limit, offset);
+      const messages = await groupMessageRepository.findByGroupId(
+        groupId,
+        limit,
+        offset
+      );
       const total = await groupMessageRepository.countByGroupId(groupId);
 
-      const formattedMessages = messages.map(msg => ({
+      const formattedMessages = messages.map((msg) => ({
         id: msg.id,
         groupId: msg.groupId,
         senderId: msg.senderId,

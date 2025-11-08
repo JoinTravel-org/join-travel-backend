@@ -42,7 +42,11 @@ const router = Router();
  *       404:
  *         description: Group not found
  */
-router.post("/:groupId/messages", authenticate, groupMessageController.sendMessage);
+router.post(
+  "/:groupId/messages",
+  authenticate,
+  groupMessageController.sendMessage
+);
 
 /**
  * @swagger
@@ -79,6 +83,10 @@ router.post("/:groupId/messages", authenticate, groupMessageController.sendMessa
  *       404:
  *         description: Group not found
  */
-router.get("/:groupId/messages", authenticate, groupMessageController.getMessages);
+router.get(
+  "/:groupId/messages",
+  authenticate,
+  groupMessageController.getMessages
+);
 
 export default router;

@@ -13,7 +13,7 @@ class GroupMessageRepository {
   async create(messageData) {
     const message = this.repository.create(messageData);
     const savedMessage = await this.repository.save(message);
-    
+
     // Cargar relaciones
     return await this.repository.findOne({
       where: { id: savedMessage.id },
