@@ -2,12 +2,12 @@ import expenseService from "../services/expense.service.js";
 
 export const createExpense = async (req, res, next) => {
   try {
-    const { concept, amount, paidById } = req.body;
+    const { concept, amount } = req.body;
     const { groupId } = req.params;
     const userId = req.user.id;
 
     const expense = await expenseService.createExpense(
-      { concept, amount, groupId, paidById },
+      { concept, amount, groupId },
       userId
     );
 
@@ -53,8 +53,31 @@ export const deleteExpense = async (req, res, next) => {
   }
 };
 
+export const assignExpense = async (req, res, next) => {
+  try {
+    const { expenseId } = req.params;
+    const { paidById } = req.body;
+    const userId = req.user.id;
+
+    const expense = await expenseService.assignExpense(
+      expenseId,
+      paidById,
+      userId
+    );
+
+    res.status(200).json({
+      success: true,
+      data: expense,
+      message: "Expense assigned successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   createExpense,
   getGroupExpenses,
   deleteExpense,
+  assignExpense,
 };

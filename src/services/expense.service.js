@@ -13,7 +13,7 @@ const groupRepository = AppDataSource.getRepository(Group);
 const userRepository = AppDataSource.getRepository(User);
 
 export const createExpense = async (expenseData, userId) => {
-  const { concept, amount, groupId, paidById } = expenseData;
+  const { concept, amount, groupId } = expenseData;
 
   // Validate input
   if (!concept || typeof concept !== "string" || concept.trim().length === 0) {
@@ -68,23 +68,13 @@ export const createExpense = async (expenseData, userId) => {
     );
   }
 
-  // Validate paidById if provided
-  if (paidById) {
-    const isPaidByMember =
-      group.members.some((member) => member.id === paidById) ||
-      group.adminId === paidById;
-    if (!isPaidByMember) {
-      throw new ValidationError("Usuario inválido.");
-    }
-  }
-
-  // Create expense
+  // Create expense without paidById
   const expense = expenseRepository.create({
     concept: concept.trim(),
     amount: amountInCents, // Store as cents
     groupId,
     userId,
-    paidById: paidById || null,
+    paidById: null,
   });
 
   await expenseRepository.save(expense);
@@ -213,8 +203,52 @@ export const deleteExpense = async (expenseId, userId) => {
   return { message: "Expense deleted successfully" };
 };
 
+export const assignExpense = async (expenseId, paidById, userId) => {
+  // Get expense with group and members
+  const expense = await expenseRepository.findOne({
+    where: { id: expenseId },
+    relations: ["group", "group.members"],
+  });
+
+  if (!expense) {
+    throw new NotFoundError("Expense not found");
+  }
+
+  // Only group admin can assign expenses
+  if (expense.group.adminId !== userId) {
+    throw new AuthorizationError(
+      "Only the group admin can assign expenses to members"
+    );
+  }
+
+  // Validate that paidById is a member of the group
+  const isPaidByMember =
+    expense.group.members.some((member) => member.id === paidById) ||
+    expense.group.adminId === paidById;
+
+  if (!isPaidByMember) {
+    throw new ValidationError("Usuario inválido.");
+  }
+
+  // Update expense
+  expense.paidById = paidById;
+  await expenseRepository.save(expense);
+
+  // Load paidBy relation for response
+  const updatedExpense = await expenseRepository.findOne({
+    where: { id: expenseId },
+    relations: ["user", "paidBy"],
+  });
+
+  return {
+    ...updatedExpense,
+    amount: (updatedExpense.amount / 100).toFixed(2),
+  };
+};
+
 export default {
   createExpense,
   getGroupExpenses,
   deleteExpense,
+  assignExpense,
 };
