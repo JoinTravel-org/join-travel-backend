@@ -88,27 +88,38 @@ export const createExpense = async (expenseData, userId) => {
 };
 
 export const getGroupExpenses = async (groupId, userId) => {
-  // Check if group exists and user is a member
-  const group = await groupRepository.findOne({
-    where: { id: groupId },
-    relations: ['members']
-  });
+  let expenses;
 
-  if (!group) {
-    throw new NotFoundError("Group not found");
+  if (groupId) {
+    // Check if group exists and user is a member
+    const group = await groupRepository.findOne({
+      where: { id: groupId },
+      relations: ['members']
+    });
+
+    if (!group) {
+      throw new NotFoundError("Group not found");
+    }
+
+    const isMember = group.members.some(member => member.id === userId) || group.adminId === userId;
+    if (!isMember) {
+      throw new AuthorizationError("You must be a member of the group to view expenses");
+    }
+
+    // Get expenses for specific group
+    expenses = await expenseRepository.find({
+      where: { groupId },
+      relations: ['user'],
+      order: { createdAt: 'DESC' }
+    });
+  } else {
+    // Get all expenses for the user across all groups
+    expenses = await expenseRepository.find({
+      where: { userId },
+      relations: ['user', 'group'],
+      order: { createdAt: 'DESC' }
+    });
   }
-
-  const isMember = group.members.some(member => member.id === userId) || group.adminId === userId;
-  if (!isMember) {
-    throw new AuthorizationError("You must be a member of the group to view expenses");
-  }
-
-  // Get expenses with user information
-  const expenses = await expenseRepository.find({
-    where: { groupId },
-    relations: ['user'],
-    order: { createdAt: 'DESC' }
-  });
 
   // Convert amounts back to decimal and calculate total
   const expensesWithDecimal = expenses.map(expense => ({

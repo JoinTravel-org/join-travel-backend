@@ -37,6 +37,21 @@ export const getGroupExpenses = async (req, res, next) => {
   }
 };
 
+export const getUserExpenses = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const result = await expenseService.getGroupExpenses(null, userId);
+
+    res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteExpense = async (req, res, next) => {
   try {
     const { expenseId } = req.params;
@@ -56,5 +71,6 @@ export const deleteExpense = async (req, res, next) => {
 export default {
   createExpense,
   getGroupExpenses,
+  getUserExpenses,
   deleteExpense
 };

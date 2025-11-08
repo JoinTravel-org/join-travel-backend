@@ -81,6 +81,22 @@ router.get("/groups/:groupId/expenses", authenticate, expenseController.getGroup
 
 /**
  * @swagger
+ * /api/expenses/user:
+ *   get:
+ *     summary: Get all expenses for the current user across all groups
+ *     tags: [Expenses]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all user expenses retrieved successfully
+ *       403:
+ *         description: Not authorized
+ */
+router.get("/expenses/user", authenticate, expenseController.getUserExpenses);
+
+/**
+ * @swagger
  * /api/expenses/{expenseId}:
  *   delete:
  *     summary: Delete an expense
