@@ -14,7 +14,7 @@ export const createExpense = async (req, res, next) => {
     res.status(201).json({
       success: true,
       data: expense,
-      message: "Expense created successfully"
+      message: "Expense created successfully",
     });
   } catch (error) {
     next(error);
@@ -30,7 +30,7 @@ export const getGroupExpenses = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     next(error);
@@ -61,7 +61,29 @@ export const deleteExpense = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: result
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const assignExpense = async (req, res, next) => {
+  try {
+    const { expenseId } = req.params;
+    const { paidById } = req.body;
+    const userId = req.user.id;
+
+    const expense = await expenseService.assignExpense(
+      expenseId,
+      paidById,
+      userId
+    );
+
+    res.status(200).json({
+      success: true,
+      data: expense,
+      message: "Expense assigned successfully",
     });
   } catch (error) {
     next(error);

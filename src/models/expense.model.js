@@ -7,50 +7,61 @@ export default new EntitySchema({
     id: {
       primary: true,
       type: "uuid",
-      generated: "uuid"
+      generated: "uuid",
     },
     concept: {
       type: "varchar",
       length: 100,
-      nullable: false
+      nullable: false,
     },
     amount: {
       type: "decimal",
       precision: 10,
       scale: 2,
-      nullable: false
+      nullable: false,
     },
     groupId: {
       type: "uuid",
-      nullable: false
+      nullable: false,
     },
     userId: {
       type: "uuid",
-      nullable: false
+      nullable: false,
+    },
+    paidById: {
+      type: "uuid",
+      nullable: true,
     },
     createdAt: {
       type: "timestamp",
-      createDate: true
+      createDate: true,
     },
     updatedAt: {
       type: "timestamp",
-      updateDate: true
-    }
+      updateDate: true,
+    },
   },
   relations: {
     group: {
       type: "many-to-one",
       target: "Group",
       joinColumn: {
-        name: "groupId"
-      }
+        name: "groupId",
+      },
     },
     user: {
       type: "many-to-one",
       target: "User",
       joinColumn: {
-        name: "userId"
-      }
-    }
-  }
+        name: "userId",
+      },
+    },
+    paidBy: {
+      type: "many-to-one",
+      target: "User",
+      joinColumn: {
+        name: "paidById",
+      },
+    },
+  },
 });
