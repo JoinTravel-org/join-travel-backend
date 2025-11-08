@@ -10,6 +10,7 @@ import gamificationRoutes from "./gamification.routes.js";
 import cronRoutes from "./cron.routes.js";
 import usersRoutes from "./users.routes.js";
 import groupRoutes from "./group.routes.js";
+import groupMessageRoutes from "./groupMessage.routes.js";
 import directMessageRoutes from "./directMessage.routes.js";
 import expenseRoutes from "./expense.routes.js";
 
@@ -28,6 +29,7 @@ router.use("", gamificationRoutes);
 router.use("/cron", cronRoutes);
 router.use("/groups", groupRoutes);
 router.use("", expenseRoutes);
+router.use("/groups", groupMessageRoutes);
 
 const apiRouter = Router();
 apiRouter.use("/api", router);
