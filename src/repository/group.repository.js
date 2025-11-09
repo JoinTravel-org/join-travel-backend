@@ -55,7 +55,7 @@ class GroupRepository {
   async findById(id) {
     return await this.getRepository().findOne({
       where: { id },
-      relations: ["admin", "members"]
+      relations: ["admin", "members", "assignedItinerary", "assignedItinerary.items", "assignedItinerary.items.place"]
     });
   }
 
@@ -67,9 +67,33 @@ class GroupRepository {
       .createQueryBuilder("group")
       .leftJoinAndSelect("group.admin", "admin")
       .leftJoinAndSelect("group.members", "members")
+      .leftJoinAndSelect("group.assignedItinerary", "assignedItinerary")
+      .leftJoinAndSelect("assignedItinerary.items", "items")
+      .leftJoinAndSelect("items.place", "place")
       .where("group.adminId = :userId", { userId })
       .orWhere("members.id = :userId", { userId })
       .getMany();
+  }
+
+  /**
+   * Assigns an itinerary to a group
+   * @param {string} groupId - Group ID
+   * @param {string} itineraryId - Itinerary ID
+   * @returns {Promise<Group>} Updated group
+   */
+  async assignItinerary(groupId, itineraryId) {
+    await this.getRepository().update(groupId, { assignedItineraryId: itineraryId });
+    return await this.findById(groupId);
+  }
+
+  /**
+   * Removes the assigned itinerary from a group
+   * @param {string} groupId - Group ID
+   * @returns {Promise<Group>} Updated group
+   */
+  async removeItinerary(groupId) {
+    await this.getRepository().update(groupId, { assignedItineraryId: null });
+    return await this.findById(groupId);
   }
 
   /**

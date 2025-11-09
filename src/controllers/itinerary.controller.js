@@ -234,3 +234,37 @@ export const deleteItinerary = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * Gets groups where an itinerary is assigned
+ * GET /api/itineraries/:id/groups
+ */
+export const getItineraryGroups = async (req, res, next) => {
+  logger.info(`Get itinerary groups endpoint called: ${req.params.id} for user: ${req.user.id}`);
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "ID del itinerario es requerido.",
+      });
+    }
+
+    const result = await itineraryService.getItineraryGroups(id, req.user.id);
+
+    logger.info(`Get itinerary groups endpoint completed successfully: ${id}`);
+    res.status(200).json(result);
+  } catch (err) {
+    logger.error(`Get itinerary groups endpoint failed: ${req.params.id}, error: ${err.message}`);
+    
+    if (err.status && err.message) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+      });
+    }
+    
+    next(err);
+  }
+};

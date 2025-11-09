@@ -1,7 +1,12 @@
 import groupRepository from "../repository/group.repository.js";
+import itineraryRepository from "../repository/itinerary.repository.js";
+import UserRepository from "../repository/user.repository.js";
 import logger from "../config/logger.js";
 
 class GroupService {
+  constructor() {
+    this.userRepository = new UserRepository();
+  }
   /**
    * Creates a new group and assigns the creator as admin and member
    * @param {Object} data - { name, description, adminId }
@@ -192,6 +197,116 @@ class GroupService {
       };
     } catch (err) {
       logger.error(`Error deleting group ${groupId}: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * Assigns an itinerary to a group
+   * @param {string} groupId
+   * @param {string} itineraryId
+   * @param {string} requesterId
+   * @returns {Promise<Object>} - { success, data, message }
+   */
+  async assignItinerary(groupId, itineraryId, requesterId) {
+    try {
+      // Validate group exists
+      const group = await groupRepository.findById(groupId);
+      if (!group) {
+        const error = new Error("Grupo no encontrado");
+        error.status = 404;
+        throw error;
+      }
+
+      // Validate requester is admin
+      if (group.adminId !== requesterId) {
+        const error = new Error("Solo el administrador puede asignar itinerarios");
+        error.status = 403;
+        throw error;
+      }
+
+      // Validate group has members (besides admin)
+      if (!group.members || group.members.length <= 1) {
+        const error = new Error("No hay miembros para asignar.");
+        error.status = 400;
+        throw error;
+      }
+
+      // Validate itinerary exists and belongs to requester
+      const itinerary = await itineraryRepository.getItineraryById(itineraryId);
+      if (!itinerary) {
+        const error = new Error("Itinerario no encontrado");
+        error.status = 404;
+        throw error;
+      }
+
+      if (itinerary.userId !== requesterId) {
+        const error = new Error("Solo puedes asignar tus propios itinerarios");
+        error.status = 403;
+        throw error;
+      }
+
+      // Validate itinerary has items
+      if (!itinerary.items || itinerary.items.length === 0) {
+        const error = new Error("No se puede asignar un itinerario vacío");
+        error.status = 400;
+        throw error;
+      }
+
+      // Assign itinerary
+      const updatedGroup = await groupRepository.assignItinerary(groupId, itineraryId);
+
+      // TODO: Send notifications to all members (except admin)
+      // Note: In-app notification system not yet implemented
+      // When implemented, notify members: `${adminName} ha asignado el itinerario "${itinerary.name}" al grupo "${group.name}"`
+      logger.info(`Itinerary ${itineraryId} assigned to group ${groupId} by user ${requesterId}`);
+      return {
+        success: true,
+        data: updatedGroup,
+        message: "Itinerario asignado exitosamente",
+      };
+    } catch (err) {
+      logger.error(`Error assigning itinerary to group ${groupId}: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * Removes the assigned itinerary from a group
+   * @param {string} groupId
+   * @param {string} requesterId
+   * @returns {Promise<Object>} - { success, data, message }
+   */
+  async removeItinerary(groupId, requesterId) {
+    try {
+      const group = await groupRepository.findById(groupId);
+      if (!group) {
+        const error = new Error("Grupo no encontrado");
+        error.status = 404;
+        throw error;
+      }
+
+      if (group.adminId !== requesterId) {
+        const error = new Error("Solo el administrador puede desasignar itinerarios");
+        error.status = 403;
+        throw error;
+      }
+
+      if (!group.assignedItineraryId) {
+        const error = new Error("El grupo no tiene un itinerario asignado");
+        error.status = 400;
+        throw error;
+      }
+
+      const updatedGroup = await groupRepository.removeItinerary(groupId);
+      logger.info(`Itinerary removed from group ${groupId}`);
+      return {
+        success: true,
+        data: updatedGroup,
+        message: "Itinerario desasignado exitosamente",
+      };
+    } catch (err) {
+      logger.error(`Error removing itinerary from group ${groupId}: ${err.message}`);
       throw err;
     }
   }
