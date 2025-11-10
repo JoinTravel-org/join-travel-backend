@@ -63,6 +63,24 @@ class GroupRepository {
    * Finds all groups for a user (as admin or member)
    */
   async findByUserId(userId) {
+    // Use raw query to get group IDs where user is admin or member
+    const result = await AppDataSource.query(
+      `SELECT DISTINCT g.id 
+       FROM groups g 
+       LEFT JOIN group_members gm ON g.id = gm."groupId" 
+       WHERE g."adminId" = $1 OR gm."userId" = $1`,
+      [userId]
+    );
+
+    // If no groups found, return empty array
+    if (result.length === 0) {
+      return [];
+    }
+
+    // Extract group IDs
+    const ids = result.map(row => row.id);
+
+    // Fetch complete group data with all members
     return await this.getRepository()
       .createQueryBuilder("group")
       .leftJoinAndSelect("group.admin", "admin")
@@ -70,8 +88,7 @@ class GroupRepository {
       .leftJoinAndSelect("group.assignedItinerary", "assignedItinerary")
       .leftJoinAndSelect("assignedItinerary.items", "items")
       .leftJoinAndSelect("items.place", "place")
-      .where("group.adminId = :userId", { userId })
-      .orWhere("members.id = :userId", { userId })
+      .where("group.id IN (:...ids)", { ids })
       .getMany();
   }
 
