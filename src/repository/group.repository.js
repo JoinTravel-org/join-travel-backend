@@ -55,7 +55,7 @@ class GroupRepository {
   async findById(id) {
     return await this.getRepository().findOne({
       where: { id },
-      relations: ["admin", "members"]
+      relations: ["admin", "members", "assignedItinerary", "assignedItinerary.items", "assignedItinerary.items.place"]
     });
   }
 
@@ -63,13 +63,54 @@ class GroupRepository {
    * Finds all groups for a user (as admin or member)
    */
   async findByUserId(userId) {
+    // Use raw query to get group IDs where user is admin or member
+    const result = await AppDataSource.query(
+      `SELECT DISTINCT g.id 
+       FROM groups g 
+       LEFT JOIN group_members gm ON g.id = gm."groupId" 
+       WHERE g."adminId" = $1 OR gm."userId" = $1`,
+      [userId]
+    );
+
+    // If no groups found, return empty array
+    if (result.length === 0) {
+      return [];
+    }
+
+    // Extract group IDs
+    const ids = result.map(row => row.id);
+
+    // Fetch complete group data with all members
     return await this.getRepository()
       .createQueryBuilder("group")
       .leftJoinAndSelect("group.admin", "admin")
       .leftJoinAndSelect("group.members", "members")
-      .where("group.adminId = :userId", { userId })
-      .orWhere("members.id = :userId", { userId })
+      .leftJoinAndSelect("group.assignedItinerary", "assignedItinerary")
+      .leftJoinAndSelect("assignedItinerary.items", "items")
+      .leftJoinAndSelect("items.place", "place")
+      .where("group.id IN (:...ids)", { ids })
       .getMany();
+  }
+
+  /**
+   * Assigns an itinerary to a group
+   * @param {string} groupId - Group ID
+   * @param {string} itineraryId - Itinerary ID
+   * @returns {Promise<Group>} Updated group
+   */
+  async assignItinerary(groupId, itineraryId) {
+    await this.getRepository().update(groupId, { assignedItineraryId: itineraryId });
+    return await this.findById(groupId);
+  }
+
+  /**
+   * Removes the assigned itinerary from a group
+   * @param {string} groupId - Group ID
+   * @returns {Promise<Group>} Updated group
+   */
+  async removeItinerary(groupId) {
+    await this.getRepository().update(groupId, { assignedItineraryId: null });
+    return await this.findById(groupId);
   }
 
   /**

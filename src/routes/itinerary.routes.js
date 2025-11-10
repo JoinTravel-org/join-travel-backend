@@ -5,6 +5,7 @@ import {
   getUserItineraries,
   updateItinerary,
   deleteItinerary,
+  getItineraryGroups,
 } from "../controllers/itinerary.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -487,5 +488,67 @@ router.put("/:id", authenticate, updateItinerary);
  *         description: Internal server error
  */
 router.delete("/:id", authenticate, deleteItinerary);
+
+/**
+ * @swagger
+ * /api/itineraries/{id}/groups:
+ *   get:
+ *     summary: Get groups where an itinerary is assigned
+ *     description: Retrieves all groups where the specified itinerary is assigned.
+ *     tags: [Itineraries]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Itinerary ID
+ *         example: "123e4567-e89b-12d3-a456-426614174000"
+ *     responses:
+ *       200:
+ *         description: Groups retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Grupos obtenidos exitosamente."
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                       name:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       adminId:
+ *                         type: string
+ *                         format: uuid
+ *                       memberCount:
+ *                         type: integer
+ *       400:
+ *         description: Bad request - invalid ID
+ *       401:
+ *         description: Unauthorized - authentication required
+ *       403:
+ *         description: Forbidden - user doesn't own this itinerary
+ *       404:
+ *         description: Itinerary not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/:id/groups", authenticate, getItineraryGroups);
 
 export default router;

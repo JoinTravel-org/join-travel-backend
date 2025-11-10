@@ -49,7 +49,7 @@ export const createExpense = async (expenseData, userId) => {
     throw new ValidationError("Amount must be between 0.01 and 9,999,999.99");
   }
 
-  // Check if group exists and user is a member
+  // Check if group exists and user is the admin
   const group = await groupRepository.findOne({
     where: { id: groupId },
     relations: ["members"],
@@ -59,12 +59,10 @@ export const createExpense = async (expenseData, userId) => {
     throw new NotFoundError("Group not found");
   }
 
-  const isMember =
-    group.members.some((member) => member.id === userId) ||
-    group.adminId === userId;
-  if (!isMember) {
+  // Only group admin can create expenses
+  if (group.adminId !== userId) {
     throw new AuthorizationError(
-      "You must be a member of the group to add expenses"
+      "Only the group admin can add expenses"
     );
   }
 
@@ -203,10 +201,10 @@ export const deleteExpense = async (expenseId, userId) => {
     throw new NotFoundError("Expense not found");
   }
 
-  // Only the expense creator or group admin can delete
-  if (expense.userId !== userId && expense.group.adminId !== userId) {
+  // Only the group admin can delete expenses
+  if (expense.group.adminId !== userId) {
     throw new AuthorizationError(
-      "You can only delete your own expenses or be the group admin"
+      "Only the group admin can delete expenses"
     );
   }
 

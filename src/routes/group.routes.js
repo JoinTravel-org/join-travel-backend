@@ -172,4 +172,70 @@ router.delete("/:groupId/members/:userId", authenticate, groupController.removeM
  */
 router.delete("/:id", authenticate, groupController.removeGroup);
 
+/**
+ * @swagger
+ * /api/groups/{id}/itinerary:
+ *   post:
+ *     summary: Assign an itinerary to a group
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Group ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - itineraryId
+ *             properties:
+ *               itineraryId:
+ *                 type: string
+ *                 description: ID of the itinerary to assign
+ *     responses:
+ *       200:
+ *         description: Itinerary assigned successfully
+ *       400:
+ *         description: Invalid input or no members in group
+ *       403:
+ *         description: Not authorized
+ *       404:
+ *         description: Group or itinerary not found
+ */
+router.post("/:id/itinerary", authenticate, groupController.assignItinerary);
+
+/**
+ * @swagger
+ * /api/groups/{id}/itinerary:
+ *   delete:
+ *     summary: Remove the assigned itinerary from a group
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Group ID
+ *     responses:
+ *       200:
+ *         description: Itinerary removed successfully
+ *       400:
+ *         description: No itinerary assigned
+ *       403:
+ *         description: Not authorized
+ *       404:
+ *         description: Group not found
+ */
+router.delete("/:id/itinerary", authenticate, groupController.removeItinerary);
+
 export default router;
