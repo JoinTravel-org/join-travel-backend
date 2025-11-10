@@ -46,6 +46,7 @@ class AnswerService {
         content: answer.content,
         createdAt: answer.createdAt,
         updatedAt: answer.updatedAt,
+        userEmail: answer.user?.email,
         user: answer.user ? {
           id: answer.user.id,
           email: answer.user.email,
@@ -85,6 +86,7 @@ class AnswerService {
         content: answer.content,
         createdAt: answer.createdAt,
         updatedAt: answer.updatedAt,
+        userEmail: answer.user?.email,
         user: answer.user ? {
           id: answer.user.id,
           email: answer.user.email,

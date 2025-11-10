@@ -46,6 +46,7 @@ class QuestionService {
         content: question.content,
         createdAt: question.createdAt,
         updatedAt: question.updatedAt,
+        userEmail: question.user?.email,
         user: question.user ? {
           id: question.user.id,
           email: question.user.email,
@@ -87,6 +88,7 @@ class QuestionService {
         content: question.content,
         createdAt: question.createdAt,
         updatedAt: question.updatedAt,
+        userEmail: question.user?.email,
         user: question.user ? {
           id: question.user.id,
           email: question.user.email,
