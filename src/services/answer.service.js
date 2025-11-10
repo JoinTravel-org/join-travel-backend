@@ -29,13 +29,7 @@ class AnswerService {
         throw error;
       }
 
-      // Verificar que el usuario no haya respondido ya a esta pregunta
-      const hasAnswered = await this.answerRepository.hasUserAnswered(userId, questionId);
-      if (hasAnswered) {
-        const error = new Error("Ya has respondido a esta pregunta");
-        error.status = 409;
-        throw error;
-      }
+      // Allow multiple answers per user per question - removed restriction
 
       const answer = await this.answerRepository.create({
         questionId,

@@ -29,13 +29,7 @@ class QuestionService {
         throw error;
       }
 
-      // Verificar que el usuario no haya preguntado ya sobre este lugar
-      const hasAsked = await this.questionRepository.hasUserAsked(userId, placeId);
-      if (hasAsked) {
-        const error = new Error("Ya has preguntado sobre este lugar");
-        error.status = 409;
-        throw error;
-      }
+      // Allow multiple questions per user per place - removed restriction
 
       const question = await this.questionRepository.create({
         placeId,
