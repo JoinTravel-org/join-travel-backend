@@ -6,6 +6,8 @@ import {
   getUserFavorites,
   getUserById,
   getUserMedia,
+  getUserReviews,
+  getUserReviewStats,
 } from "../controllers/users.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -619,5 +621,279 @@ router.get("/:userId/favorites", authenticate, getUserFavorites);
  *                   example: "Error interno del servidor"
  */
 router.get("/:userId/media", getUserMedia);
+
+/**
+ * @swagger
+ * /api/users/{userId}/reviews:
+ *   get:
+ *     summary: Get reviews written by a specific user
+ *     description: Retrieve all reviews written by a specific user. Requires authentication and permission to view the target user's reviews.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user whose reviews to retrieve
+ *         example: "123e4567-e89b-12d3-a456-426614174000"
+ *     responses:
+ *       200:
+ *         description: Reviews retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       rating:
+ *                         type: integer
+ *                         example: 5
+ *                       content:
+ *                         type: string
+ *                         example: "Great place to visit!"
+ *                       placeId:
+ *                         type: string
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       userId:
+ *                         type: string
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       userEmail:
+ *                         type: string
+ *                         example: "john.doe@example.com"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-01-15T10:30:00Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-01-15T10:30:00Z"
+ *                       placeName:
+ *                         type: string
+ *                         nullable: true
+ *                         example: "Central Park"
+ *                       media:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: string
+ *                               example: "123e4567-e89b-12d3-a456-426614174000"
+ *                             filename:
+ *                               type: string
+ *                               example: "photo_123.jpg"
+ *                             originalFilename:
+ *                               type: string
+ *                               example: "my_trip_photo.jpg"
+ *                             fileSize:
+ *                               type: number
+ *                               example: 2048576
+ *                             mimeType:
+ *                               type: string
+ *                               example: "image/jpeg"
+ *                             url:
+ *                               type: string
+ *                               example: "/api/media/123e4567-e89b-12d3-a456-426614174000"
+ *                       likeCount:
+ *                         type: integer
+ *                         example: 10
+ *                       dislikeCount:
+ *                         type: integer
+ *                         example: 2
+ *                 message:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *       400:
+ *         description: Invalid user ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "ID de usuario inválido"
+ *       401:
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Authentication required"
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Usuario no encontrado"
+ *       429:
+ *         description: Too many requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Demasiadas solicitudes, por favor intenta de nuevo más tarde."
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
+router.get("/:userId/reviews", authenticate, getUserReviews);
+
+/**
+ * @swagger
+ * /api/users/{userId}/reviews/stats:
+ *   get:
+ *     summary: Get review statistics for a specific user
+ *     description: Retrieve aggregated statistics for a user's reviews including total reviews and average rating. Requires authentication and permission to view the target user's stats.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user whose review stats to retrieve
+ *         example: "123e4567-e89b-12d3-a456-426614174000"
+ *     responses:
+ *       200:
+ *         description: Review statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalReviews:
+ *                       type: integer
+ *                       example: 15
+ *                     averageRating:
+ *                       type: number
+ *                       format: float
+ *                       example: 4.2
+ *                 message:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *       400:
+ *         description: Invalid user ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "ID de usuario inválido"
+ *       401:
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Authentication required"
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Usuario no encontrado"
+ *       429:
+ *         description: Too many requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Demasiadas solicitudes, por favor intenta de nuevo más tarde."
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
+router.get("/:userId/reviews/stats", authenticate, getUserReviewStats);
 
 export default router;

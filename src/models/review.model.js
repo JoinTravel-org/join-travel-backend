@@ -50,6 +50,16 @@ export default new EntitySchema({
         name: "userId",
       },
     },
+    reviewMedia: {
+      target: "ReviewMedia",
+      type: "one-to-many",
+      inverseSide: "review",
+    },
+    reviewLikes: {
+      target: "ReviewLike",
+      type: "one-to-many",
+      inverseSide: "review",
+    },
   },
   indices: [
     {

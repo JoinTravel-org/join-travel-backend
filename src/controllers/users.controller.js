@@ -1,6 +1,8 @@
 import UserRepository from "../repository/user.repository.js";
 import userFavoriteRepository from "../repository/userFavorite.repository.js";
 import reviewMediaRepository from "../repository/reviewMedia.repository.js";
+import reviewRepository from "../repository/review.repository.js";
+import reviewLikeRepository from "../repository/reviewLike.repository.js";
 import gamificationService from "../services/gamification.service.js";
 import logger from "../config/logger.js";
 import { ValidationError } from "../utils/customErrors.js";
@@ -330,6 +332,134 @@ export const getUserMedia = async (req, res, next) => {
     });
   } catch (err) {
     logger.error(`Get user media endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Obtiene todas las reseñas de un usuario específico
+ * GET /api/users/{userId}/reviews
+ */
+export const getUserReviews = async (req, res, next) => {
+  logger.info(
+    `Get user reviews endpoint called for userId: ${req.params.userId}`
+  );
+
+  try {
+    const { userId } = req.params;
+    const requestingUserId = req.user.id;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Verificar que el usuario existe
+    const userRepo = new UserRepository();
+    const targetUser = await userRepo.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Obtener las reseñas del usuario
+    const rawReviews = await reviewRepository.getUserReviews(userId);
+
+    // Formatear la respuesta con media y likes
+    const formattedReviews = await Promise.all(
+      rawReviews.map(async (rawReview) => {
+        // Obtener media para esta reseña
+        const media = await reviewMediaRepository.findByReviewId(rawReview.review_id);
+
+        return {
+          id: rawReview.review_id,
+          rating: rawReview.review_rating,
+          content: rawReview.review_content,
+          placeId: rawReview.review_placeId,
+          userId: rawReview.review_userId,
+          userEmail: rawReview.user_email,
+          createdAt: rawReview.review_createdAt.toISOString(),
+          updatedAt: rawReview.review_updatedAt.toISOString(),
+          placeName: rawReview.place_name || null,
+          media: media.map(m => ({
+            id: m.id,
+            filename: m.filename,
+            originalFilename: m.originalFilename,
+            fileSize: parseInt(m.fileSize),
+            mimeType: m.mimeType,
+            url: `/api/media/${m.id}`,
+          })),
+          likeCount: parseInt(rawReview.likeCount) || 0,
+          dislikeCount: parseInt(rawReview.dislikeCount) || 0,
+        };
+      })
+    );
+
+    logger.info(
+      `Get user reviews endpoint completed successfully, found ${formattedReviews.length} reviews`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: formattedReviews,
+      message: null,
+    });
+  } catch (err) {
+    logger.error(`Get user reviews endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Obtiene estadísticas de reseñas de un usuario específico
+ * GET /api/users/{userId}/reviews/stats
+ */
+export const getUserReviewStats = async (req, res, next) => {
+  logger.info(
+    `Get user review stats endpoint called for userId: ${req.params.userId}`
+  );
+
+  try {
+    const { userId } = req.params;
+    const requestingUserId = req.user.id;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Verificar que el usuario existe
+    const userRepo = new UserRepository();
+    const targetUser = await userRepo.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Obtener estadísticas de reseñas del usuario
+    const stats = await reviewRepository.getUserReviewStats(userId);
+
+    logger.info(
+      `Get user review stats endpoint completed successfully for user: ${userId}`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: stats,
+      message: null,
+    });
+  } catch (err) {
+    logger.error(`Get user review stats endpoint failed: ${err.message}`);
     next(err);
   }
 };
