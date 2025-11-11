@@ -126,6 +126,47 @@ export const removeGroup = async (req, res, next) => {
   }
 };
 
+/**
+ * Assigns an itinerary to a group
+ * POST /api/groups/:id/itinerary
+ */
+export const assignItinerary = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { itineraryId } = req.body;
+    const requesterId = req.user.id;
+
+    const result = await groupService.assignItinerary(id, itineraryId, requesterId);
+    res.status(200).json(result);
+  } catch (err) {
+    logger.error(`Assign itinerary failed: ${err.message}`);
+    if (err.status === 403 || err.status === 400 || err.status === 404) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    next(err);
+  }
+};
+
+/**
+ * Removes the assigned itinerary from a group
+ * DELETE /api/groups/:id/itinerary
+ */
+export const removeItinerary = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const requesterId = req.user.id;
+
+    const result = await groupService.removeItinerary(id, requesterId);
+    res.status(200).json(result);
+  } catch (err) {
+    logger.error(`Remove itinerary failed: ${err.message}`);
+    if (err.status === 403 || err.status === 400 || err.status === 404) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    next(err);
+  }
+};
+
 export default {
   createGroup,
   getUserGroups,
@@ -133,4 +174,6 @@ export default {
   addMembers,
   removeGroup,
   removeMember,
+  assignItinerary,
+  removeItinerary,
 };

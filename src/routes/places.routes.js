@@ -18,6 +18,18 @@ import {
   toggleReaction,
   getReactionStatus,
 } from "../controllers/review.controller.js";
+import {
+  createQuestion,
+  getQuestionsByPlace,
+  voteQuestion,
+  getQuestionVoteStatus,
+} from "../controllers/question.controller.js";
+import {
+  createAnswer,
+  getAnswersByQuestion,
+  voteAnswer,
+  getAnswerVoteStatus,
+} from "../controllers/answer.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -1273,39 +1285,236 @@ router.get("/:placeId/favorite", authenticate, getFavoriteStatus);
  *                         nullable: true
  *                         example: "This is a beautiful historical monument..."
  *                       city:
- *                         type: string
- *                         nullable: true
- *                         example: "Paris"
- *                 message:
- *                   type: string
- *                   example: "Favorites retrieved successfully"
+router.get("/favorites", authenticate, getUserFavorites);
+
+/**
+ * @swagger
+ * /api/places/{placeId}/questions:
+ *   post:
+ *     summary: Create a new question for a place
+ *     description: Creates a new question for a specific place. Requires user authentication.
+ *     tags: [Questions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: placeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the place to ask about
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 500
+ *                 description: Question content
+ *                 example: "What are the opening hours?"
+ *     responses:
+ *       201:
+ *         description: Question created successfully
+ *       400:
+ *         description: Validation error
  *       401:
  *         description: Not authenticated
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Authentication required"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Error retrieving favorites"
+ *       409:
+ *         description: User already asked about this place
+ *   get:
+ *     summary: Get all questions for a place
+ *     description: Retrieves all questions for a specific place, ordered by votes and date
+ *     tags: [Questions]
+ *     parameters:
+ *       - in: path
+ *         name: placeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the place
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *         description: Number of questions per page
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Offset for pagination
+ *     responses:
+ *       200:
+ *         description: Questions retrieved successfully
+ *       404:
+ *         description: Place not found
  */
-router.get("/favorites", authenticate, getUserFavorites);
+router.post("/:placeId/questions", authenticate, createQuestion);
+router.get("/:placeId/questions", getQuestionsByPlace);
+
+/**
+ * @swagger
+ * /api/questions/{questionId}/vote:
+ *   post:
+ *     summary: Vote for a question
+ *     description: Upvote or remove vote from a question. Requires user authentication.
+ *     tags: [Questions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the question to vote for
+ *     responses:
+ *       200:
+ *         description: Vote toggled successfully
+ *       400:
+ *         description: Invalid question ID
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Question not found
+ *   get:
+ *     summary: Get vote status for a question
+ *     description: Get the current vote status and count for a question
+ *     tags: [Questions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the question
+ *     responses:
+ *       200:
+ *         description: Vote status retrieved successfully
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Question not found
+ */
+router.post("/questions/:questionId/vote", authenticate, voteQuestion);
+router.get("/questions/:questionId/vote", authenticate, getQuestionVoteStatus);
+
+/**
+ * @swagger
+ * /api/questions/{questionId}/answers:
+ *   post:
+ *     summary: Create a new answer for a question
+ *     description: Creates a new answer for a specific question. Requires user authentication.
+ *     tags: [Answers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the question to answer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 1000
+ *                 description: Answer content
+ *                 example: "The opening hours are from 9 AM to 6 PM."
+ *     responses:
+ *       201:
+ *         description: Answer created successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Not authenticated
+ *       409:
+ *         description: User already answered this question
+ *   get:
+ *     summary: Get all answers for a question
+ *     description: Retrieves all answers for a specific question, ordered by votes and date
+ *     tags: [Answers]
+ *     parameters:
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the question
+ *     responses:
+ *       200:
+ *         description: Answers retrieved successfully
+ *       404:
+ *         description: Question not found
+ */
+router.post("/questions/:questionId/answers", authenticate, createAnswer);
+router.get("/questions/:questionId/answers", getAnswersByQuestion);
+
+/**
+ * @swagger
+ * /api/answers/{answerId}/vote:
+ *   post:
+ *     summary: Vote for an answer
+ *     description: Upvote or remove vote from an answer. Requires user authentication.
+ *     tags: [Answers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: answerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the answer to vote for
+ *     responses:
+ *       200:
+ *         description: Vote toggled successfully
+ *       400:
+ *         description: Invalid answer ID
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Answer not found
+ *   get:
+ *     summary: Get vote status for an answer
+ *     description: Get the current vote status and count for an answer
+ *     tags: [Answers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: answerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the answer
+ *     responses:
+ *       200:
+ *         description: Vote status retrieved successfully
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Answer not found
+ */
+router.post("/answers/:answerId/vote", authenticate, voteAnswer);
+router.get("/answers/:answerId/vote", authenticate, getAnswerVoteStatus);
 
 export default router;

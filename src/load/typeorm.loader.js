@@ -14,7 +14,13 @@ import ReviewLike from "../models/reviewLike.model.js";
 import Conversation from "../models/conversation.model.js";
 import ChatMessage from "../models/chatMessage.model.js";
 import Group from "../models/group.model.js";
+import GroupMessage from "../models/groupMessage.model.js";
 import DirectMessage from "../models/directMessage.model.js";
+import Expense from "../models/expense.model.js";
+import Question from "../models/question.model.js";
+import Answer from "../models/answer.model.js";
+import QuestionVote from "../models/questionVote.model.js";
+import AnswerVote from "../models/answerVote.model.js";
 import config from "../config/index.js";
 
 export const AppDataSource = new DataSource({
@@ -29,6 +35,7 @@ export const AppDataSource = new DataSource({
 
   entities: [
     Group,
+    GroupMessage,
     User,
     UserAction,
     Level,
@@ -44,6 +51,11 @@ export const AppDataSource = new DataSource({
     Conversation,
     ChatMessage,
     DirectMessage,
+    Expense,
+    Question,
+    Answer,
+    QuestionVote,
+    AnswerVote,
   ],
   migrations: ["./src/migrations/*.js"],
   timezone: "UTC", // Usar UTC para consistencia global

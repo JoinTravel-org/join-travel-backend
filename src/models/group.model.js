@@ -21,6 +21,10 @@ export default new EntitySchema({
     adminId: {
       type: "uuid",
       nullable: false
+    },
+    assignedItineraryId: {
+      type: "uuid",
+      nullable: true
     }
   },
   relations: {
@@ -29,6 +33,13 @@ export default new EntitySchema({
       target: "User",
       joinColumn: {
         name: "adminId"
+      }
+    },
+    assignedItinerary: {
+      type: "many-to-one",
+      target: "Itinerary",
+      joinColumn: {
+        name: "assignedItineraryId"
       }
     },
     members: {

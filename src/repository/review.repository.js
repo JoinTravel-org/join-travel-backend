@@ -129,6 +129,65 @@ class ReviewRepository {
   async count() {
     return await this.getRepository().count();
   }
+
+  /**
+   * Obtiene todas las reseñas de un usuario específico
+   * @param {string} userId - ID del usuario
+   * @returns {Promise<Array>} - Lista de reseñas con detalles
+   */
+  async getUserReviews(userId) {
+    return await this.getRepository()
+      .createQueryBuilder("review")
+      .leftJoin("review.place", "place")
+      .leftJoin("review.user", "user")
+      .leftJoin("review.reviewMedia", "media")
+      .leftJoin("review.reviewLikes", "likes")
+      .where("review.userId = :userId", { userId })
+      .select([
+        "review.id",
+        "review.rating",
+        "review.content",
+        "review.placeId",
+        "review.userId",
+        "review.createdAt",
+        "review.updatedAt",
+        "user.email",
+        "place.name",
+      ])
+      .addSelect("COUNT(DISTINCT media.id)", "mediaCount")
+      .addSelect("COUNT(CASE WHEN likes.type = 'like' THEN 1 END)", "likeCount")
+      .addSelect("COUNT(CASE WHEN likes.type = 'dislike' THEN 1 END)", "dislikeCount")
+      .groupBy("review.id")
+      .addGroupBy("review.rating")
+      .addGroupBy("review.content")
+      .addGroupBy("review.placeId")
+      .addGroupBy("review.userId")
+      .addGroupBy("review.createdAt")
+      .addGroupBy("review.updatedAt")
+      .addGroupBy("user.email")
+      .addGroupBy("place.name")
+      .orderBy("review.createdAt", "DESC")
+      .getRawMany();
+  }
+
+  /**
+   * Obtiene estadísticas de reseñas para un usuario
+   * @param {string} userId - ID del usuario
+   * @returns {Promise<Object>} - Objeto con totalReviews y averageRating
+   */
+  async getUserReviewStats(userId) {
+    const result = await this.getRepository()
+      .createQueryBuilder("review")
+      .where("review.userId = :userId", { userId })
+      .select("COUNT(*)", "totalReviews")
+      .addSelect("COALESCE(AVG(review.rating), 0)", "averageRating")
+      .getRawOne();
+
+    return {
+      totalReviews: parseInt(result.totalReviews, 10),
+      averageRating: Math.round(parseFloat(result.averageRating) * 10) / 10, // Round to 1 decimal
+    };
+  }
 }
 
 export default new ReviewRepository();

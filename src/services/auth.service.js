@@ -42,6 +42,7 @@ class AuthService {
 
     // 5. Generar token de confirmación
     const confirmationToken = crypto.randomBytes(32).toString("hex");
+    console.log("CONFIRMATION TOKEN: ", confirmationToken);
     // Date.now() retorna timestamp en UTC, la fecha se guarda en UTC en PostgreSQL
     const tokenExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas desde ahora (UTC)
 

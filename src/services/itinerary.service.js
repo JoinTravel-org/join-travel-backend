@@ -109,12 +109,23 @@ class ItineraryService {
         };
       }
 
-      // Check if user owns this itinerary
-      if (itinerary.userId !== userId) {
-        throw {
-          status: 403,
-          message: "No tienes permisos para acceder a este itinerario.",
-        };
+      // Check if user owns this itinerary OR is member of a group that has it assigned
+      const isOwner = itinerary.userId === userId;
+      
+      if (!isOwner) {
+        // Check if user is member of any group with this itinerary assigned
+        const { default: groupRepository } = await import("../repository/group.repository.js");
+        const userGroups = await groupRepository.findByUserId(userId);
+        const hasAccessThroughGroup = userGroups.some(
+          group => group.assignedItineraryId === itineraryId
+        );
+
+        if (!hasAccessThroughGroup) {
+          throw {
+            status: 403,
+            message: "No tienes permisos para acceder a este itinerario.",
+          };
+        }
       }
 
       logger.info(`Itinerary retrieved successfully: ${itineraryId}`);
@@ -377,6 +388,72 @@ class ItineraryService {
       throw {
         status: 500,
         message: "Error interno del servidor al eliminar el itinerario.",
+      };
+    }
+  }
+
+  /**
+   * Gets all groups where an itinerary is assigned
+   * @param {string} itineraryId - The itinerary ID
+   * @param {string} userId - The user ID (for authorization)
+   * @returns {Promise<Object>} Array of groups
+   */
+  async getItineraryGroups(itineraryId, userId) {
+    try {
+      logger.info(`Getting groups for itinerary: ${itineraryId} for user: ${userId}`);
+
+      // Check if itinerary exists and user owns it
+      const itinerary = await itineraryRepository.getItineraryById(itineraryId);
+
+      if (!itinerary) {
+        throw {
+          status: 404,
+          message: "Itinerario no encontrado.",
+        };
+      }
+
+      if (itinerary.userId !== userId) {
+        throw {
+          status: 403,
+          message: "No tienes permisos para acceder a este itinerario.",
+        };
+      }
+
+      // Import here to avoid circular dependency
+      const groupRepository = (await import("../repository/group.repository.js")).default;
+      
+      // Get all groups where this itinerary is assigned
+      const groups = await groupRepository
+        .getRepository()
+        .createQueryBuilder("group")
+        .leftJoinAndSelect("group.admin", "admin")
+        .leftJoinAndSelect("group.members", "members")
+        .where("group.assignedItineraryId = :itineraryId", { itineraryId })
+        .getMany();
+
+      logger.info(`Found ${groups.length} groups for itinerary: ${itineraryId}`);
+
+      return {
+        success: true,
+        message: "Grupos obtenidos exitosamente.",
+        data: groups.map(group => ({
+          id: group.id,
+          name: group.name,
+          description: group.description,
+          adminId: group.adminId,
+          memberCount: group.members ? group.members.length : 0,
+        })),
+      };
+    } catch (error) {
+      logger.error(`Error in getItineraryGroups service: ${error.message}`);
+      
+      if (error.status && error.message) {
+        throw error;
+      }
+
+      throw {
+        status: 500,
+        message: "Error interno del servidor al obtener los grupos.",
       };
     }
   }
