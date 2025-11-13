@@ -333,3 +333,81 @@ export const validateItineraryData = (itineraryData) => {
     errors,
   };
 };
+
+/**
+ * Valida título de lista
+ * @param {string} title - Título de la lista a validar
+ * @returns {object} - { isValid: boolean, errors: string[] }
+ */
+export const validateListTitle = (title) => {
+  const errors = [];
+
+  if (!title || typeof title !== 'string') {
+    errors.push("El título de la lista es requerido");
+  } else {
+    const trimmed = title.trim();
+    if (trimmed.length === 0) {
+      errors.push("El título de la lista no puede estar vacío");
+    } else if (trimmed.length < 3) {
+      errors.push("El título de la lista debe tener al menos 3 caracteres");
+    } else if (trimmed.length > 100) {
+      errors.push("El título de la lista no puede exceder los 100 caracteres");
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+/**
+ * Valida descripción de lista
+ * @param {string} description - Descripción de la lista a validar
+ * @returns {object} - { isValid: boolean, errors: string[] }
+ */
+export const validateListDescription = (description) => {
+  const errors = [];
+
+  if (description !== undefined && description !== null) {
+    if (typeof description !== 'string') {
+      errors.push("La descripción de la lista debe ser una cadena de texto");
+    } else {
+      const trimmed = description.trim();
+      if (trimmed.length > 500) {
+        errors.push("La descripción de la lista no puede exceder los 500 caracteres");
+      }
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+/**
+ * Valida datos de lista
+ * @param {Object} listData - Datos de la lista { title, description? }
+ * @returns {object} - { isValid: boolean, errors: string[] }
+ */
+export const validateListData = (listData) => {
+  const errors = [];
+
+  // Validar título
+  const titleValidation = validateListTitle(listData.title);
+  if (!titleValidation.isValid) {
+    errors.push(...titleValidation.errors);
+  }
+
+  // Validar descripción
+  const descriptionValidation = validateListDescription(listData.description);
+  if (!descriptionValidation.isValid) {
+    errors.push(...descriptionValidation.errors);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
