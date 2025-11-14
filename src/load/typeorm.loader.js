@@ -8,6 +8,7 @@ import RevokedToken from "../models/revokedToken.model.js";
 import Place from "../models/place.model.js";
 import UserFavorite from "../models/userFavorite.model.js";
 import Itinerary, { ItineraryItemSchema } from "../models/itinerary.model.js";
+import List from "../models/list.model.js";
 import Review from "../models/review.model.js";
 import ReviewMedia from "../models/reviewMedia.model.js";
 import ReviewLike from "../models/reviewLike.model.js";
@@ -42,9 +43,10 @@ export const AppDataSource = new DataSource({
     Badge,
     RevokedToken,
     Place,
-    UserFavorite,
     Itinerary,
     ItineraryItemSchema,
+    List,
+    UserFavorite,
     Review,
     ReviewMedia,
     ReviewLike,
