@@ -1,5 +1,6 @@
 import { ChatXAI } from "@langchain/xai";
-import { SystemMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
+import { z } from "zod";
+import { createAgent, tool, HumanMessage, AIMessage, SystemMessage } from "langchain";
 import conversationRepository from "../repository/conversation.repository.js";
 import chatMessageRepository from "../repository/chatMessage.repository.js";
 import reviewRepository from "../repository/review.repository.js";
@@ -7,16 +8,10 @@ import placeRepository from "../repository/place.repository.js";
 import UserRepository from "../repository/user.repository.js";
 import logger from "../config/logger.js";
 
+
 class ChatService {
   constructor() {
-    this.model = new ChatXAI({
-      model: "grok-code-fast-1",
-      apiKey: process.env.XAI_API_KEY,
-      temperature: 0.7,
-      maxTokens: 1000,
-    });
-
-    this.systemPrompt = `Eres un asistente virtual útil y amable para JoinTravel, una plataforma de viajes que ayuda a los usuarios a descubrir lugares turísticos y conocer las opiniones de otros viajeros.  
+    this.systemPrompt = `Eres un asistente virtual útil y amable para JoinTravel, una plataforma de viajes que ayuda a los usuarios a descubrir lugares turísticos y conocer las opiniones de otros viajeros.
 Tienes acceso a información detallada sobre los lugares disponibles y a reseñas y valoraciones de usuarios.
 
 Usuario: {user_email}
@@ -28,12 +23,51 @@ Reseñas:
 {reviews_context}
 
 Instrucciones:
-- Ofrece una respuesta clara, útil y precisa basada en la información de los lugares, las reseñas y tu conocimiento general sobre viajes.  
-- Si la pregunta se refiere a un lugar específico, utiliza la información disponible y las opiniones relevantes para enriquecer tu respuesta.  
-- Mantén un tono conversacional, cercano y positivo, como si fueras un guía turístico experto y amigable.  
-- Cuando sea apropiado, sugiere actividades, recomendaciones gastronómicas, eventos o consejos prácticos relacionados con el destino.  
+- Ofrece una respuesta clara, útil y precisa basada en la información de los lugares, las reseñas y tu conocimiento general sobre viajes.
+- Si la pregunta se refiere a un lugar específico, utiliza la información disponible y las opiniones relevantes para enriquecer tu respuesta.
+- Mantén un tono conversacional, cercano y positivo, como si fueras un guía turístico experto y amigable.
+- Cuando sea apropiado, sugiere actividades, recomendaciones gastronómicas, eventos o consejos prácticos relacionados con el destino.
 - Si falta información, reconoce la limitación de forma natural y ofrece alternativas o formas de obtener más detalles.
-- Manten los mensajes de respuesta cortos, entre 50 y 100 palabras.`;
+- Manten los mensajes de respuesta cortos, entre 50 y 100 palabras. No hace falta que menciones la cantidad de palabras.
+- Si el usuario pregunta por el clima o condiciones meteorológicas, debes llamar la herramienta get_weather.
+`;
+
+    const model = new ChatXAI({
+      model: "grok-code-fast-1",
+      apiKey: process.env.XAI_API_KEY,
+    });
+
+    this.agent = createAgent({
+      model: model,
+      tools: this.build_tools()
+    });
+  }
+
+  static async get_weather(params) {
+    const city = params.city;
+    logger.info(
+      `Tool called: get_weather(city: ${city}); full params: ${JSON.stringify(
+        params
+      )}`
+    );
+
+    if (city === "LA" || city === "Los Angeles") {
+      return "Sunny 24.3°C";
+    }
+
+    return "Extreme storms with certain death 10°C";
+  }
+
+  build_tools() {
+    const weatherTool = tool(ChatService.get_weather, {
+      name: "get_weather",
+      description: "Get the current weather for a given city",
+      schema: z.object({
+        city: z.string().describe("The name of the city to get weather for"),
+      }),
+    });
+
+    return [weatherTool];
   }
 
   /**
@@ -98,7 +132,6 @@ Instrucciones:
       const messages = [
         new SystemMessage(this.systemPrompt.replace('{user_email}', userEmail).replace('{places_context}', placesContext).replace('{reviews_context}', reviewsContext)),
       ];
-
       // Load entire chat history for the user from all conversations
       logger.info(`Loading entire chat history for userId: ${userId}`);
 
@@ -142,7 +175,8 @@ Instrucciones:
       // Log messages being sent to AI
       logger.info(`Sending ${messages.length} messages to AI model`);
       
-      // Commented for use just in case when needed
+      // COMMENTED WHEN NEEDED TO DEBUG AGENT MESSAGE HISTORY PROCESSING
+      // DO NOT REMOVE
 
       // Log the complete chat history array for debugging
       // logger.info(`Complete Chat History Array: ${JSON.stringify(messages.map((msg, index) => ({
@@ -155,20 +189,24 @@ Instrucciones:
       // messages.forEach((msg, index) => {
       //   logger.info(`Message ${index}: ${msg.constructor.name} - ${msg.content ? msg.content.substring(0, 50) : 'No content'}...`);
       // });
+      
+      // DO NOT REMOVE
 
       // Generate AI response
       let response;
       try {
-        logger.info('Invoking AI model...');
-        response = await this.model.invoke(messages);
+        logger.info('Invoking AI agent...');
+        const agentResponse = await this.agent.invoke({ messages });
+
+        response = agentResponse.messages[agentResponse.messages.length - 1]; // Get the last message
         logger.info(`AI Response type: ${typeof response}`);
         logger.info(`AI Response keys: ${response ? Object.keys(response).join(', ') : 'No response object'}`);
         logger.info(`AI Response content type: ${response && response.content ? typeof response.content : 'No content property'}`);
         logger.info(`AI Response content length: ${response && response.content ? response.content.length : 'No content'}`);
         logger.info(`AI Response generated successfully: ${response && response.content ? response.content.substring(0, 100) : 'No content'}...`);
       } catch (aiError) {
-        logger.error(`AI model error: ${aiError.message}`);
-        logger.error(`AI model error stack: ${aiError.stack}`);
+        logger.error(`AI agent error: ${aiError.message}`);
+        logger.error(`AI agent error stack: ${aiError.stack}`);
         throw new Error(`AI service failed: ${aiError.message}`);
       }
 
