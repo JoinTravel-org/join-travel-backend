@@ -142,17 +142,19 @@ Instrucciones:
       // Log messages being sent to AI
       logger.info(`Sending ${messages.length} messages to AI model`);
       
+      // Commented for use just in case when needed
+
       // Log the complete chat history array for debugging
-      logger.info(`Complete Chat History Array: ${JSON.stringify(messages.map((msg, index) => ({
-        index,
-        type: msg.constructor.name,
-        content: msg.content
-      })), null, 2)}`);
+      // logger.info(`Complete Chat History Array: ${JSON.stringify(messages.map((msg, index) => ({
+      //   index,
+      //   type: msg.constructor.name,
+      //   content: msg.content
+      // })), null, 2)}`);
       
       // Also log each message individually for detailed inspection
-      messages.forEach((msg, index) => {
-        logger.info(`Message ${index}: ${msg.constructor.name} - ${msg.content ? msg.content.substring(0, 50) : 'No content'}...`);
-      });
+      // messages.forEach((msg, index) => {
+      //   logger.info(`Message ${index}: ${msg.constructor.name} - ${msg.content ? msg.content.substring(0, 50) : 'No content'}...`);
+      // });
 
       // Generate AI response
       let response;
