@@ -199,7 +199,7 @@ const PORT = config.port;
 (async () => {
   await connectDB();
   server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    logger.info(`Server running on http://localhost:${PORT}`);
     logger.info(`Socket.io server initialized on port ${PORT}`);
   });
 
