@@ -99,20 +99,27 @@ Instrucciones:
         new SystemMessage(this.systemPrompt.replace('{user_email}', userEmail).replace('{places_context}', placesContext).replace('{reviews_context}', reviewsContext)),
       ];
 
-      // Load conversation history for context
-      if (conversationId) {
-        const previousMessages = await chatMessageRepository.findByUserId(
+      // Load entire chat history for the user from all conversations
+      logger.info(`Loading entire chat history for userId: ${userId}`);
+
+      // Get total count of all messages for this user
+      const totalMessages = await chatMessageRepository.countByUserId(userId);
+      logger.info(`Total messages for user across all conversations: ${totalMessages}`);
+
+      if (totalMessages > 0) {
+        const allUserMessages = await chatMessageRepository.findByUserId(
           userId,
-          10, // Get last 10 messages for context to reduce token usage
+          totalMessages, // Get all messages for full context
           0,
-          conversationId
+          null // No conversation filter - get all conversations
         );
+        logger.info(`Found ${allUserMessages.length} total messages for user`);
+
         // Reverse to get chronological order (oldest first)
-        const chronologicalMessages = previousMessages.reverse();
+        const chronologicalMessages = allUserMessages.reverse();
+        logger.info(`After reversing, chronological messages: ${chronologicalMessages.length}`);
 
-        logger.info(`Loading ${chronologicalMessages.length} previous messages for conversation ${conversationId}`);
-
-        // Add conversation history as HumanMessage and AIMessage pairs
+        // Add entire chat history as HumanMessage and AIMessage pairs
         chronologicalMessages.forEach((msg, index) => {
           logger.info(`Adding message ${index}: HumanMessage - ${msg.message.substring(0, 50)}...`);
           messages.push(new HumanMessage(msg.message));
@@ -123,6 +130,10 @@ Instrucciones:
             logger.warn(`Message ${msg.id} has no response, skipping AIMessage`);
           }
         });
+
+        logger.info(`Added ${chronologicalMessages.length} message pairs from entire chat history to context`);
+      } else {
+        logger.info(`No previous messages found for user`);
       }
 
       // Add current user message
