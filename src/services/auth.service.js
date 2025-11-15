@@ -1,3 +1,4 @@
+import logger from "../config/logger.js";
 import UserRepository from "../repository/user.repository.js";
 import emailService from "./email.service.js";
 import bcrypt from "bcrypt";

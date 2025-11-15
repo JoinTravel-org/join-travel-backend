@@ -544,6 +544,7 @@ router.get("/check", checkPlace);
  */
 router.get("/reviews", getAllReviews);
 
+
 /**
  * @swagger
  * /api/places/{id}:
@@ -592,6 +593,8 @@ router.get("/reviews", getAllReviews);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
+router.get("/favorites", authenticate, getUserFavorites);
+
 router.get("/:id", getPlaceById);
 
 /**
@@ -1122,104 +1125,6 @@ router.get("/reviews/:reviewId/reaction", authenticate, getReactionStatus);
 router.post("/:placeId/favorite", authenticate, toggleFavorite);
 router.get("/:placeId/favorite", authenticate, getFavoriteStatus);
 
-/**
- * @swagger
- * /api/places/favorites:
- *   get:
- *     summary: Get all favorite places for the authenticated user
- *     description: Retrieve all places that have been favorited by the authenticated user, ordered by most recently favorited first.
- *     tags: [Places]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Favorites retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                         example: "123e4567-e89b-12d3-a456-426614174000"
- *                       name:
- *                         type: string
- *                         example: "Eiffel Tower"
- *                       address:
- *                         type: string
- *                         example: "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France"
- *                       latitude:
- *                         type: number
- *                         format: float
- *                         example: 48.8584
- *                       longitude:
- *                         type: number
- *                         format: float
- *                         example: 2.2945
- *                       image:
- *                         type: string
- *                         nullable: true
- *                         example: "https://example.com/image.jpg"
- *                       rating:
- *                         type: number
- *                         format: float
- *                         nullable: true
- *                         example: 4.5
- *                       createdAt:
- *                         type: string
- *                         format: date-time
- *                         example: "2023-10-24T21:26:10.748Z"
- *                       updatedAt:
- *                         type: string
- *                         format: date-time
- *                         example: "2023-10-24T21:26:10.748Z"
- *                       description:
- *                         type: string
- *                         nullable: true
- *                         example: "This is a beautiful historical monument..."
- *                       city:
- *                         type: string
- *                         nullable: true
- *                         example: "Paris"
- *                 message:
- *                   type: string
- *                   example: "Favorites retrieved successfully"
- *       401:
- *         description: Not authenticated
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Authentication required"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Error retrieving favorites"
- */
-router.get("/favorites", authenticate, getUserFavorites);
 
 /**
  * @swagger

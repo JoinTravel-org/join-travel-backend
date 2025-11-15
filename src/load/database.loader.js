@@ -1,3 +1,4 @@
+import logger from "../config/logger.js";
 import { AppDataSource } from "./typeorm.loader.js";
 import { createDatabase } from "typeorm-extension";
 import seedDatabase from "./seed.loader.js";

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import logger from "./config/logger.js";
 import routes from "./routes/index.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 import { swaggerUi, specs } from "./config/swagger.js";
