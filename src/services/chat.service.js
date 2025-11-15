@@ -6,6 +6,7 @@ import chatMessageRepository from "../repository/chatMessage.repository.js";
 import reviewRepository from "../repository/review.repository.js";
 import placeRepository from "../repository/place.repository.js";
 import UserRepository from "../repository/user.repository.js";
+import itineraryRepository from "../repository/itinerary.repository.js";
 import logger from "../config/logger.js";
 
 
@@ -15,6 +16,7 @@ class ChatService {
 Tienes acceso a información detallada sobre los lugares disponibles y a reseñas y valoraciones de usuarios.
 
 Usuario: {user_email}
+Hora actual (UTC-3): {current_time}
 
 Lugares:
 {places_context}
@@ -30,6 +32,9 @@ Instrucciones:
 - Si falta información, reconoce la limitación de forma natural y ofrece alternativas o formas de obtener más detalles.
 - Manten los mensajes de respuesta cortos, entre 50 y 100 palabras. No hace falta que menciones la cantidad de palabras.
 - Si el usuario pregunta por el clima o condiciones meteorológicas, debes llamar la herramienta get_weather.
+- Si el usuario pide crear un itinerario o ruta con lugares específicos, utiliza la herramienta propose_itinerary para crear una propuesta organizada por días.
+- Si el usuario está de acuerdo con la propuesta, utiliza la herramienta create_itinerary para guardarlo en la base de datos.
+- También puedes crear un itinerario directamente usando la herramienta create_itinerary con nombres de lugares y el email del usuario.
 `;
 
     const model = new ChatXAI({
@@ -39,7 +44,7 @@ Instrucciones:
 
     this.agent = createAgent({
       model: model,
-      tools: this.build_tools()
+      tools: this.buildTools()
     });
   }
 
@@ -58,7 +63,175 @@ Instrucciones:
     return "Extreme storms with certain death 10°C";
   }
 
-  build_tools() {
+  static async propose_itinerary(params) {
+    const { placeNames, itineraryName } = params;
+    logger.info(
+      `Tool called: propose_itinerary(placeNames: ${JSON.stringify(placeNames)}, itineraryName: ${itineraryName})`
+    );
+
+    try {
+      // Look up places by name using search
+      logger.info(`Searching for ${placeNames.length} places for proposal: ${JSON.stringify(placeNames)}`);
+      const places = [];
+      for (const placeName of placeNames) {
+        try {
+          const searchResult = await placeRepository.searchPlaces(placeName, null, undefined, undefined, 1, 5);
+          if (searchResult.places && searchResult.places.length > 0) {
+            // Take the first (best) match
+            places.push(searchResult.places[0]);
+            logger.info(`Found place "${placeName}" -> "${searchResult.places[0].name}" (ID: ${searchResult.places[0].id})`);
+          } else {
+            logger.warn(`No places found for search term: "${placeName}"`);
+          }
+        } catch (placeError) {
+          logger.error(`Error searching for place "${placeName}": ${placeError.message}`);
+        }
+      }
+
+      if (places.length === 0) {
+        logger.error(`No valid places found for proposal. Searched terms: ${JSON.stringify(placeNames)}`);
+        return "No se encontraron lugares con esos nombres. Por favor verifica los nombres de los lugares.";
+      }
+      logger.info(`Created proposal with ${places.length} places out of ${placeNames.length} searched terms`);
+
+      // Create a simple itinerary proposal with dates starting from tomorrow
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() + 1); // Start tomorrow
+
+      const items = places.map((place, index) => {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + Math.floor(index / 2)); // 2 places per day
+        return {
+          placeName: place.name,
+          placeId: place.id,
+          date: date.toISOString().split('T')[0], // YYYY-MM-DD format
+          description: place.description || 'Sin descripción disponible'
+        };
+      });
+
+      // Group by date for display
+      const groupedByDate = items.reduce((acc, item) => {
+        if (!acc[item.date]) {
+          acc[item.date] = [];
+        }
+        acc[item.date].push(item);
+        return acc;
+      }, {});
+
+      // Create formatted text response
+      let response = `¡He creado una propuesta de itinerario para ti!\n\n`;
+      response += `**Itinerario: ${itineraryName}**\n\n`;
+
+      Object.keys(groupedByDate).sort().forEach(date => {
+        const dateObj = new Date(date);
+        const dayName = dateObj.toLocaleDateString('es-ES', { weekday: 'long' });
+        const formattedDate = dateObj.toLocaleDateString('es-ES');
+        response += `**${dayName} ${formattedDate}:**\n`;
+
+        groupedByDate[date].forEach((item, index) => {
+          response += `${index + 1}. ${item.placeName} - ${item.description}\n`;
+        });
+        response += '\n';
+      });
+
+      response += `¿Te gusta esta propuesta? Si estás de acuerdo, puedo guardarla como tu itinerario.\n\n`;
+
+      // Add metadata for frontend parsing
+      const metadata = {
+        name: itineraryName,
+        items: items.map(item => ({
+          placeName: item.placeName,
+          placeId: item.placeId,
+          date: item.date
+        }))
+      };
+
+      response += `[ITINERARY_PROPOSAL:${JSON.stringify(metadata)}]`;
+
+      return response;
+    } catch (error) {
+      logger.error(`Error in propose_itinerary: ${error.message}`);
+      return "Lo siento, hubo un error al crear la propuesta de itinerario. Por favor intenta de nuevo.";
+    }
+  }
+
+  static async create_itinerary(params) {
+    const { name, places, userEmail } = params;
+    logger.info(
+      `Tool called: create_itinerary(name: ${name}, places: ${JSON.stringify(places)}, userEmail: ${userEmail})`
+    );
+
+    try {
+      // Validate that we have the required data
+      if (!name || !places || !Array.isArray(places) || places.length === 0 || !userEmail) {
+        return "Datos incompletos para crear el itinerario.";
+      }
+
+      // Look up user by email
+      logger.info(`Looking up user by email: ${userEmail}`);
+      const userRepository = new UserRepository();
+      const user = await userRepository.findByEmail(userEmail);
+      if (!user) {
+        logger.error(`User not found with email: ${userEmail}`);
+        return "No se encontró el usuario con ese email.";
+      }
+      logger.info(`Found user: ${user.id} for email: ${userEmail}`);
+
+      // Look up places by name using fuzzy search and pair with provided dates
+      logger.info(`Searching for ${places.length} places with dates`);
+      const itineraryItems = [];
+      for (const placeData of places) {
+        const { placeName, date } = placeData;
+        try {
+          const searchResult = await placeRepository.searchPlaces(placeName, null, undefined, undefined, 1, 5);
+          if (searchResult.places && searchResult.places.length > 0) {
+            const foundPlace = searchResult.places[0]; // Take the best match
+            itineraryItems.push({
+              placeId: foundPlace.id,
+              date: date
+            });
+            logger.info(`Found place "${placeName}" -> "${foundPlace.name}" (ID: ${foundPlace.id}) for date: ${date}`);
+          } else {
+            logger.warn(`No places found for search term: "${placeName}"`);
+          }
+        } catch (placeError) {
+          logger.error(`Error searching for place "${placeName}": ${placeError.message}`);
+        }
+      }
+
+      if (itineraryItems.length === 0) {
+        logger.error(`No valid places found for itinerary. Searched places: ${JSON.stringify(places)}`);
+        return "No se encontraron lugares válidos para crear el itinerario.";
+      }
+      logger.info(`Created ${itineraryItems.length} itinerary items out of ${places.length} requested places`);
+
+      // Create the itinerary
+      const itineraryData = {
+        name,
+        userId: user.id,
+        items: itineraryItems
+      };
+
+      logger.info(`Creating itinerary "${name}" for user ${user.id} with ${itineraryItems.length} items`);
+      logger.debug(`Itinerary data: ${JSON.stringify(itineraryData)}`);
+
+      const result = await itineraryRepository.createItinerary(itineraryData);
+      logger.info(`Successfully created itinerary "${name}" with ID: ${result.data.id}`);
+      return `¡Perfecto! He creado el itinerario "${name}" con ${itineraryItems.length} lugares. Ya está disponible en tu lista de itinerarios.\n\nPuedes verlo en: [Colecciones > Itinerarios](http://localhost:3003/collections)`;
+    
+    } catch (error) {
+      logger.error(`Unexpected error in create_itinerary: ${error.message}`, {
+        stack: error.stack,
+        name,
+        userEmail,
+        places: JSON.stringify(places),
+        userId: user?.id
+      });
+      return `Lo siento, hubo un error al guardar el itinerario: ${error.message}`;
+    }
+  }
+
+  buildTools() {
     const weatherTool = tool(ChatService.get_weather, {
       name: "get_weather",
       description: "Get the current weather for a given city",
@@ -67,7 +240,29 @@ Instrucciones:
       }),
     });
 
-    return [weatherTool];
+    const proposeItineraryTool = tool(ChatService.propose_itinerary, {
+      name: "propose_itinerary",
+      description: "Create a proposed itinerary from a list of place names",
+      schema: z.object({
+        placeNames: z.array(z.string()).describe("Array of place names to include in the itinerary"),
+        itineraryName: z.string().describe("Name for the proposed itinerary"),
+      }),
+    });
+
+    const createItineraryTool = tool(ChatService.create_itinerary, {
+      name: "create_itinerary",
+      description: "Create and save an itinerary in the database using place names with dates and user email",
+      schema: z.object({
+        name: z.string().describe("Name of the itinerary"),
+        places: z.array(z.object({
+          placeName: z.string().describe("Name of the place"),
+          date: z.string().describe("Date for this place in YYYY-MM-DD format"),
+        })).describe("Array of places with their names and dates"),
+        userEmail: z.string().describe("Email of the user who owns the itinerary"),
+      }),
+    });
+
+    return [weatherTool, proposeItineraryTool, createItineraryTool];
   }
 
   /**
@@ -119,6 +314,7 @@ Instrucciones:
     const { userId, message, conversationId, timestamp } = messageData;
 
     try {
+
       // Load user info
       const userRepository = new UserRepository();
       const user = await userRepository.findById(userId);
@@ -128,9 +324,26 @@ Instrucciones:
       const placesContext = await this.loadPlacesContext();
       const reviewsContext = await this.loadReviewsContext();
 
+      // Get current time in UTC-3
+      const now = new Date();
+      const utcMinus3 = new Date(now.getTime() - (3 * 60 * 60 * 1000)); // Subtract 3 hours
+      const currentTime = utcMinus3.toLocaleString('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
       // Build messages array
       const messages = [
-        new SystemMessage(this.systemPrompt.replace('{user_email}', userEmail).replace('{places_context}', placesContext).replace('{reviews_context}', reviewsContext)),
+        new SystemMessage(this.systemPrompt
+          .replace('{user_email}', userEmail)
+          .replace('{current_time}', currentTime)
+          .replace('{places_context}', placesContext)
+          .replace('{reviews_context}', reviewsContext)),
       ];
       // Load entire chat history for the user from all conversations
       logger.info(`Loading entire chat history for userId: ${userId}`);
@@ -256,6 +469,7 @@ Instrucciones:
       };
     }
   }
+
 
   /**
     * Get chat history for a user
