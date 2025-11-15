@@ -24,6 +24,9 @@ Lugares:
 Reseñas:
 {reviews_context}
 
+Información de la página:
+- Los itinerarios se pueden acceder en [Colecciones > Itinerarios](${process.env.FRONTEND_URL}/collections?type=itineraries)
+
 Instrucciones:
 - Ofrece una respuesta clara, útil y precisa basada en la información de los lugares, las reseñas y tu conocimiento general sobre viajes.
 - Si la pregunta se refiere a un lugar específico, utiliza la información disponible y las opiniones relevantes para enriquecer tu respuesta.
@@ -33,8 +36,9 @@ Instrucciones:
 - Manten los mensajes de respuesta cortos, entre 50 y 100 palabras. No hace falta que menciones la cantidad de palabras.
 - Si el usuario pregunta por el clima o condiciones meteorológicas, debes llamar la herramienta get_weather.
 - Si el usuario pide crear un itinerario o ruta con lugares específicos, utiliza la herramienta propose_itinerary para crear una propuesta organizada por días.
-- Si el usuario está de acuerdo con la propuesta, utiliza la herramienta create_itinerary para guardarlo en la base de datos.
+- Si el usuario está de acuerdo con la propuesta, utiliza la herramienta create_itinerary para guardarlo en la base de datos. SIEMPRE PRIMERO PROPONE, ESPERA INPUT DEL USUARIO Y DESPUÉS CREA ÚNICAMENTE CUANDO EL USUARIO LO APRUEBE.
 - También puedes crear un itinerario directamente usando la herramienta create_itinerary con nombres de lugares y el email del usuario.
+- Una vez creado exitosamente el itinerario le dices al usuario dónde puede acceder a él.
 `;
 
     const model = new ChatXAI({
@@ -46,21 +50,6 @@ Instrucciones:
       model: model,
       tools: this.buildTools()
     });
-  }
-
-  static async get_weather(params) {
-    const city = params.city;
-    logger.info(
-      `Tool called: get_weather(city: ${city}); full params: ${JSON.stringify(
-        params
-      )}`
-    );
-
-    if (city === "LA" || city === "Los Angeles") {
-      return "Sunny 24.3°C";
-    }
-
-    return "Extreme storms with certain death 10°C";
   }
 
   static async propose_itinerary(params) {
@@ -146,7 +135,10 @@ Instrucciones:
         }))
       };
 
+      response += "Información de propuesta de itinerario:"
       response += `[ITINERARY_PROPOSAL:${JSON.stringify(metadata)}]`;
+
+      response += "\n Ahora puedes proponer este itinerario al usuario dandole un formato mas amigable para el humano! Preguntale si le parece bien."
 
       return response;
     } catch (error) {
@@ -217,7 +209,7 @@ Instrucciones:
 
       const result = await itineraryRepository.createItinerary(itineraryData);
       logger.info(`Successfully created itinerary "${name}" with ID: ${result.data.id}`);
-      return `¡Perfecto! He creado el itinerario "${name}" con ${itineraryItems.length} lugares. Ya está disponible en tu lista de itinerarios.\n\nPuedes verlo en: [Colecciones > Itinerarios](http://localhost:3003/collections)`;
+      return `¡Perfecto! He creado el itinerario "${name}" con ${itineraryItems.length} lugares.`;
     
     } catch (error) {
       logger.error(`Unexpected error in create_itinerary: ${error.message}`, {
@@ -232,14 +224,6 @@ Instrucciones:
   }
 
   buildTools() {
-    const weatherTool = tool(ChatService.get_weather, {
-      name: "get_weather",
-      description: "Get the current weather for a given city",
-      schema: z.object({
-        city: z.string().describe("The name of the city to get weather for"),
-      }),
-    });
-
     const proposeItineraryTool = tool(ChatService.propose_itinerary, {
       name: "propose_itinerary",
       description: "Create a proposed itinerary from a list of place names",
@@ -262,7 +246,7 @@ Instrucciones:
       }),
     });
 
-    return [weatherTool, proposeItineraryTool, createItineraryTool];
+    return [proposeItineraryTool, createItineraryTool];
   }
 
   /**
