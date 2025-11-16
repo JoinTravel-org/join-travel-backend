@@ -8,6 +8,12 @@ import {
   getUserMedia,
   getUserReviews,
   getUserReviewStats,
+  followUser,
+  unfollowUser,
+  isFollowingUser,
+  getUserFollowStats,
+  getUserFollowers,
+  getUserFollowing,
 } from "../controllers/users.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -895,5 +901,169 @@ router.get("/:userId/reviews", authenticate, getUserReviews);
  *                   example: "Error interno del servidor"
  */
 router.get("/:userId/reviews/stats", authenticate, getUserReviewStats);
+
+/**
+ * @swagger
+ * /api/users/{userId}/follow:
+ *   post:
+ *     summary: Follow a user
+ *     description: Follow another user. Cannot follow yourself.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user to follow
+ *     responses:
+ *       201:
+ *         description: User followed successfully
+ *       400:
+ *         description: Bad request (already following or trying to follow yourself)
+ *       404:
+ *         description: User not found
+ */
+router.post("/:userId/follow", authenticate, followUser);
+
+/**
+ * @swagger
+ * /api/users/{userId}/follow:
+ *   delete:
+ *     summary: Unfollow a user
+ *     description: Stop following a user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user to unfollow
+ *     responses:
+ *       200:
+ *         description: User unfollowed successfully
+ *       404:
+ *         description: Not following this user
+ */
+router.delete("/:userId/follow", authenticate, unfollowUser);
+
+/**
+ * @swagger
+ * /api/users/{userId}/is-following:
+ *   get:
+ *     summary: Check if current user is following another user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user to check
+ *     responses:
+ *       200:
+ *         description: Check completed successfully
+ */
+router.get("/:userId/is-following", authenticate, isFollowingUser);
+
+/**
+ * @swagger
+ * /api/users/{userId}/follow-stats:
+ *   get:
+ *     summary: Get follower/following statistics for a user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ *       404:
+ *         description: User not found
+ */
+router.get("/:userId/follow-stats", authenticate, getUserFollowStats);
+
+/**
+ * @swagger
+ * /api/users/{userId}/followers:
+ *   get:
+ *     summary: Get list of users following this user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Maximum number of results to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Number of results to skip for pagination
+ *     responses:
+ *       200:
+ *         description: Followers retrieved successfully
+ *       404:
+ *         description: User not found
+ */
+router.get("/:userId/followers", authenticate, getUserFollowers);
+
+/**
+ * @swagger
+ * /api/users/{userId}/following:
+ *   get:
+ *     summary: Get list of users that this user is following
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Maximum number of results to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Number of results to skip for pagination
+ *     responses:
+ *       200:
+ *         description: Following list retrieved successfully
+ *       404:
+ *         description: User not found
+ */
+router.get("/:userId/following", authenticate, getUserFollowing);
 
 export default router;
