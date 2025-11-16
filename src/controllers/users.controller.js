@@ -3,6 +3,7 @@ import userFavoriteRepository from "../repository/userFavorite.repository.js";
 import reviewMediaRepository from "../repository/reviewMedia.repository.js";
 import reviewRepository from "../repository/review.repository.js";
 import reviewLikeRepository from "../repository/reviewLike.repository.js";
+import listRepository from "../repository/list.repository.js";
 import gamificationService from "../services/gamification.service.js";
 import logger from "../config/logger.js";
 import { ValidationError } from "../utils/customErrors.js";
@@ -206,6 +207,79 @@ export const getUserFavorites = async (req, res, next) => {
     });
   } catch (err) {
     logger.error(`Get user favorites endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Obtiene las listas de lugares de un usuario específico
+ * GET /api/users/{userId}/lists
+ */
+export const getUserLists = async (req, res, next) => {
+  logger.info(
+    `Get user lists endpoint called for userId: ${req.params.userId}`
+  );
+
+  try {
+    const { userId } = req.params;
+    const requestingUserId = req.user.id;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Verificar que el usuario existe
+    const userRepo = new UserRepository();
+    const targetUser = await userRepo.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Nota: Cualquier usuario autenticado puede ver las listas de otros usuarios
+    // según los requisitos de la especificación
+
+    // Obtener las listas del usuario
+    const lists = await listRepository.findByUserId(userId);
+
+    // Formatear la respuesta con los datos de las listas
+    const formattedLists = lists.map((list) => ({
+      id: list.id,
+      title: list.title,
+      description: list.description,
+      userId: list.userId,
+      createdAt: list.createdAt.toISOString(),
+      updatedAt: list.updatedAt.toISOString(),
+      places: list.places.map(place => ({
+        id: place.id,
+        name: place.name,
+        address: place.address,
+        latitude: parseFloat(place.latitude),
+        longitude: parseFloat(place.longitude),
+        image: place.image,
+        rating: place.rating,
+        description: place.description,
+        city: place.city,
+      })),
+    }));
+
+    logger.info(
+      `Get user lists endpoint completed successfully, found ${formattedLists.length} lists`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: formattedLists,
+      message: null,
+    });
+  } catch (err) {
+    logger.error(`Get user lists endpoint failed: ${err.message}`);
     next(err);
   }
 };

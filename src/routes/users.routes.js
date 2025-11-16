@@ -4,6 +4,7 @@ import {
   searchUsers,
   getUserByEmail,
   getUserFavorites,
+  getUserLists,
   getUserById,
   getUserMedia,
   getUserReviews,
@@ -522,6 +523,171 @@ router.get("/:userId", authenticate, getUserById);
  *                   example: "Error interno del servidor"
  */
 router.get("/:userId/favorites", authenticate, getUserFavorites);
+
+/**
+ * @swagger
+ * /api/users/{userId}/lists:
+ *   get:
+ *     summary: Get lists of places created by a specific user
+ *     description: Retrieve all lists created by a specific user. Requires authentication and permission to view the target user's lists.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user whose lists to retrieve
+ *         example: "123e4567-e89b-12d3-a456-426614174000"
+ *     responses:
+ *       200:
+ *         description: Lists retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       title:
+ *                         type: string
+ *                         example: "Favorite Restaurants"
+ *                       description:
+ *                         type: string
+ *                         nullable: true
+ *                         example: "My favorite places to eat"
+ *                       userId:
+ *                         type: string
+ *                         example: "123e4567-e89b-12d3-a456-426614174000"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-01-15T10:30:00Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-01-15T10:30:00Z"
+ *                       places:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: string
+ *                               example: "123e4567-e89b-12d3-a456-426614174000"
+ *                             name:
+ *                               type: string
+ *                               example: "Central Park"
+ *                             address:
+ *                               type: string
+ *                               example: "New York, NY"
+ *                             latitude:
+ *                               type: number
+ *                               format: float
+ *                               example: 40.7829
+ *                             longitude:
+ *                               type: number
+ *                               format: float
+ *                               example: -73.9654
+ *                             image:
+ *                               type: string
+ *                               nullable: true
+ *                               example: "/uploads/central-park.jpg"
+ *                             city:
+ *                               type: string
+ *                               nullable: true
+ *                               example: "New York"
+ *                             description:
+ *                               type: string
+ *                               nullable: true
+ *                               example: "Beautiful urban park"
+ *                             rating:
+ *                               type: number
+ *                               format: float
+ *                               nullable: true
+ *                               example: 4.5
+ *                 message:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *       400:
+ *         description: Invalid user ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "ID de usuario inválido"
+ *       401:
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Authentication required"
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Usuario no encontrado"
+ *       429:
+ *         description: Too many requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Demasiadas solicitudes, por favor intenta de nuevo más tarde."
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
+router.get("/:userId/lists", authenticate, getUserLists);
 
 /**
  * @swagger
