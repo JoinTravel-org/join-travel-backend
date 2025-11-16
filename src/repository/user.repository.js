@@ -71,7 +71,7 @@ class UserRepository {
     // Primero obtener todos los usuarios (limitado para performance)
     const allUsers = await this.getRepository()
       .createQueryBuilder("user")
-      .select(["user.id", "user.email", "user.isEmailConfirmed", "user.createdAt", "user.updatedAt"])
+      .select(["user.id", "user.email", "user.name", "user.age", "user.profilePicture", "user.isEmailConfirmed", "user.createdAt", "user.updatedAt"])
       .orderBy("user.email", "ASC")
       .limit(1000) // Limitar para evitar cargar demasiados usuarios
       .getMany();
