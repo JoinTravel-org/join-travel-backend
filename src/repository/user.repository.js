@@ -96,6 +96,25 @@ class UserRepository {
     return matchedUsers;
   }
 
+  /**
+   * Alias para findById - Busca un usuario por ID
+   * @param {string} id - ID del usuario
+   * @returns {Promise<User|null>} - Usuario encontrado o null
+   */
+  async findUserById(id) {
+    return await this.findById(id);
+  }
+
+  /**
+   * Alias para update - Actualiza un usuario
+   * @param {string} id - ID del usuario
+   * @param {Object} updateData - Datos a actualizar
+   * @returns {Promise<User>} - Usuario actualizado
+   */
+  async updateUser(id, updateData) {
+    return await this.update(id, updateData);
+  }
+
   async findAtus() {
     return {
       "atus?": "yes, atus",

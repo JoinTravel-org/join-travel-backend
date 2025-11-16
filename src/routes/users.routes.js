@@ -14,8 +14,12 @@ import {
   getUserFollowStats,
   getUserFollowers,
   getUserFollowing,
+  updateUserProfile,
+  uploadUserAvatar,
+  deleteUserAvatar,
 } from "../controllers/users.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
+import { uploadAvatar } from "../utils/fileUpload.js";
 
 const router = Router();
 
@@ -1065,5 +1069,81 @@ router.get("/:userId/followers", authenticate, getUserFollowers);
  *         description: User not found
  */
 router.get("/:userId/following", authenticate, getUserFollowing);
+
+/**
+ * @swagger
+ * /api/users/profile:
+ *   put:
+ *     summary: Update user profile (name and age)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 maxLength: 30
+ *                 example: "John Doe"
+ *               age:
+ *                 type: integer
+ *                 minimum: 13
+ *                 maximum: 120
+ *                 nullable: true
+ *                 example: 25
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Validation error
+ */
+router.put("/profile", authenticate, updateUserProfile);
+
+/**
+ * @swagger
+ * /api/users/profile/avatar:
+ *   post:
+ *     summary: Upload or update user avatar
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *                 description: Avatar image file (max 5MB, JPG/PNG/GIF/WEBP only)
+ *     responses:
+ *       200:
+ *         description: Avatar uploaded successfully
+ *       400:
+ *         description: Invalid file or validation error
+ */
+router.post("/profile/avatar", authenticate, uploadAvatar.single("avatar"), uploadUserAvatar);
+
+/**
+ * @swagger
+ * /api/users/profile/avatar:
+ *   delete:
+ *     summary: Delete user avatar
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Avatar deleted successfully
+ *       400:
+ *         description: No avatar to delete
+ */
+router.delete("/profile/avatar", authenticate, deleteUserAvatar);
 
 export default router;

@@ -18,6 +18,19 @@ export default new EntitySchema({
       type: "varchar",
       nullable: false,
     },
+    name: {
+      type: "varchar",
+      length: 30,
+      nullable: true,
+    },
+    age: {
+      type: "integer",
+      nullable: true,
+    },
+    profilePicture: {
+      type: "varchar",
+      nullable: true,
+    },
     isEmailConfirmed: {
       type: "boolean",
       default: false,

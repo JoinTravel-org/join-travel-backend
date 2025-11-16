@@ -58,6 +58,37 @@ export const uploadReviewMedia = multer({
   },
 });
 
+// Filtro de archivos para avatares (solo imágenes)
+const avatarFileFilter = (req, file, cb) => {
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
+
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        `Tipo de archivo no permitido: ${file.mimetype}. Solo se permiten: JPG, PNG, GIF, WEBP`
+      ),
+      false
+    );
+  }
+};
+
+// Configuración de multer para avatares
+export const uploadAvatar = multer({
+  storage: memoryStorage,
+  fileFilter: avatarFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB máximo para avatares
+    files: 1, // Solo un archivo
+  },
+});
+
 // Función para validar archivos después del upload
 export const validateUploadedFiles = (files) => {
   const errors = [];
@@ -95,9 +126,59 @@ export const validateUploadedFiles = (files) => {
   };
 };
 
+// Función para validar archivo de avatar
+export const validateAvatarFile = (file) => {
+  const errors = [];
+
+  if (!file) {
+    return { isValid: false, errors: ["No se proporcionó ningún archivo"] };
+  }
+
+  // Verificar tamaño del archivo (5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    errors.push("El tamaño del archivo excede 5MB");
+  }
+
+  // Verificar tipo MIME
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+  if (!allowedTypes.includes(file.mimetype)) {
+    errors.push(`Tipo de archivo no permitido (${file.mimetype}). Solo se permiten: JPG, PNG, GIF, WEBP`);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+// Función para guardar avatar en disco
+export const saveAvatarFile = (file) => {
+  const uploadDir = path.join(process.cwd(), "uploads", "avatars");
+
+  // Crear directorio si no existe
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
+  // Generar nombre único para el archivo
+  const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
+  const filePath = path.join(uploadDir, uniqueName);
+
+  // Guardar archivo
+  fs.writeFileSync(filePath, file.buffer);
+
+  return uniqueName;
+};
+
 // Función para generar URL del archivo
 export const getFileUrl = (filename) => {
   return `${process.env.BASE_URL || "http://localhost:3000"}/uploads/reviews/${filename}`;
+};
+
+// Función para generar URL del avatar
+export const getAvatarUrl = (filename) => {
+  return `${process.env.BASE_URL || "http://localhost:3000"}/uploads/avatars/${filename}`;
 };
 
 // Función para eliminar archivo del sistema de archivos
