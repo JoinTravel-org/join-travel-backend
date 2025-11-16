@@ -82,7 +82,7 @@ class UserRepository {
     // Primero obtener todos los usuarios (limitado para performance)
     const allUsers = await this.getRepository()
       .createQueryBuilder("user")
-      .select(["user.id", "user.email", "user.isEmailConfirmed", "user.createdAt", "user.updatedAt"])
+      .select(["user.id", "user.email", "user.name", "user.age", "user.profilePicture", "user.isEmailConfirmed", "user.createdAt", "user.updatedAt"])
       .orderBy("user.email", "ASC")
       .limit(1000) // Limitar para evitar cargar demasiados usuarios
       .getMany();
@@ -105,6 +105,25 @@ class UserRepository {
       .map(result => result.item);
 
     return matchedUsers;
+  }
+
+  /**
+   * Alias para findById - Busca un usuario por ID
+   * @param {string} id - ID del usuario
+   * @returns {Promise<User|null>} - Usuario encontrado o null
+   */
+  async findUserById(id) {
+    return await this.findById(id);
+  }
+
+  /**
+   * Alias para update - Actualiza un usuario
+   * @param {string} id - ID del usuario
+   * @param {Object} updateData - Datos a actualizar
+   * @returns {Promise<User>} - Usuario actualizado
+   */
+  async updateUser(id, updateData) {
+    return await this.update(id, updateData);
   }
 
   async findAtus() {

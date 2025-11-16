@@ -5,8 +5,11 @@ import reviewRepository from "../repository/review.repository.js";
 import reviewLikeRepository from "../repository/reviewLike.repository.js";
 import listRepository from "../repository/list.repository.js";
 import gamificationService from "../services/gamification.service.js";
+import UserFollowerRepository from "../repository/userFollower.repository.js";
 import logger from "../config/logger.js";
 import { ValidationError } from "../utils/customErrors.js";
+import { validateAvatarFile, saveAvatarFile, getAvatarUrl, deleteFile } from "../utils/fileUpload.js";
+import path from "path";
 
 /**
  * Busca usuarios por email
@@ -53,6 +56,9 @@ export const searchUsers = async (req, res, next) => {
         return {
           id: user.id,
           email: user.email,
+          name: user.name,
+          age: user.age,
+          profilePicture: user.profilePicture,
           isEmailConfirmed: user.isEmailConfirmed,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
@@ -121,7 +127,9 @@ export const getUserByEmail = async (req, res, next) => {
     const formattedUser = {
       id: user.id,
       email: user.email,
-      name: user.name || null,
+      name: user.name,
+      age: user.age,
+      profilePicture: user.profilePicture,
       isEmailConfirmed: user.isEmailConfirmed,
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
@@ -330,6 +338,9 @@ export const getUserById = async (req, res, next) => {
     const formattedUser = {
       id: user.id,
       email: user.email,
+      name: user.name,
+      age: user.age,
+      profilePicture: user.profilePicture,
       isEmailConfirmed: user.isEmailConfirmed,
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
@@ -534,6 +545,477 @@ export const getUserReviewStats = async (req, res, next) => {
     });
   } catch (err) {
     logger.error(`Get user review stats endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Seguir a un usuario
+ * POST /api/users/{userId}/follow
+ */
+export const followUser = async (req, res, next) => {
+  logger.info(
+    `Follow user endpoint called - follower: ${req.user.id}, followed: ${req.params.userId}`
+  );
+
+  try {
+    const followerId = req.user.id;
+    const followedId = req.params.userId;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(followedId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Verificar que el usuario a seguir existe
+    const userRepo = new UserRepository();
+    const targetUser = await userRepo.findById(followedId);
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Crear la relación de seguimiento
+    const followerRepo = new UserFollowerRepository();
+    const follow = await followerRepo.follow(followerId, followedId);
+
+    logger.info(
+      `Follow user endpoint completed successfully - follower: ${followerId}, followed: ${followedId}`
+    );
+
+    res.status(201).json({
+      success: true,
+      data: follow,
+      message: "Usuario seguido exitosamente",
+    });
+  } catch (err) {
+    if (err.message === "Ya sigues a este usuario") {
+      return res.status(400).json({
+        success: false,
+        data: null,
+        message: err.message,
+      });
+    }
+    if (err.message === "No puedes seguirte a ti mismo") {
+      return res.status(400).json({
+        success: false,
+        data: null,
+        message: err.message,
+      });
+    }
+    logger.error(`Follow user endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Dejar de seguir a un usuario
+ * DELETE /api/users/{userId}/follow
+ */
+export const unfollowUser = async (req, res, next) => {
+  logger.info(
+    `Unfollow user endpoint called - follower: ${req.user.id}, unfollowed: ${req.params.userId}`
+  );
+
+  try {
+    const followerId = req.user.id;
+    const followedId = req.params.userId;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(followedId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Eliminar la relación de seguimiento
+    const followerRepo = new UserFollowerRepository();
+    const success = await followerRepo.unfollow(followerId, followedId);
+
+    if (!success) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "No sigues a este usuario",
+      });
+    }
+
+    logger.info(
+      `Unfollow user endpoint completed successfully - follower: ${followerId}, unfollowed: ${followedId}`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: null,
+      message: "Has dejado de seguir al usuario",
+    });
+  } catch (err) {
+    logger.error(`Unfollow user endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Verificar si el usuario actual sigue a otro usuario
+ * GET /api/users/{userId}/is-following
+ */
+export const isFollowingUser = async (req, res, next) => {
+  logger.info(
+    `Is following user endpoint called - follower: ${req.user.id}, target: ${req.params.userId}`
+  );
+
+  try {
+    const followerId = req.user.id;
+    const followedId = req.params.userId;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(followedId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Verificar la relación de seguimiento
+    const followerRepo = new UserFollowerRepository();
+    const isFollowing = await followerRepo.isFollowing(followerId, followedId);
+
+    logger.info(
+      `Is following user endpoint completed - follower: ${followerId}, target: ${followedId}, result: ${isFollowing}`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: { isFollowing },
+      message: null,
+    });
+  } catch (err) {
+    logger.error(`Is following user endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Obtener estadísticas de seguimiento de un usuario
+ * GET /api/users/{userId}/follow-stats
+ */
+export const getUserFollowStats = async (req, res, next) => {
+  logger.info(
+    `Get user follow stats endpoint called for userId: ${req.params.userId}`
+  );
+
+  try {
+    const { userId } = req.params;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Verificar que el usuario existe
+    const userRepo = new UserRepository();
+    const targetUser = await userRepo.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Obtener estadísticas de seguimiento
+    const followerRepo = new UserFollowerRepository();
+    const stats = await followerRepo.getUserFollowStats(userId);
+
+    logger.info(
+      `Get user follow stats endpoint completed successfully for user: ${userId}`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: stats,
+      message: null,
+    });
+  } catch (err) {
+    logger.error(`Get user follow stats endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Obtener lista de seguidores de un usuario
+ * GET /api/users/{userId}/followers
+ */
+export const getUserFollowers = async (req, res, next) => {
+  logger.info(
+    `Get user followers endpoint called for userId: ${req.params.userId}`
+  );
+
+  try {
+    const { userId } = req.params;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = parseInt(req.query.offset) || 0;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Verificar que el usuario existe
+    const userRepo = new UserRepository();
+    const targetUser = await userRepo.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Obtener lista de seguidores
+    const followerRepo = new UserFollowerRepository();
+    const followers = await followerRepo.getFollowers(userId, limit, offset);
+
+    // Formatear respuesta
+    const formattedFollowers = followers.map((follow) => ({
+      id: follow.follower.id,
+      email: follow.follower.email,
+      name: follow.follower.name,
+      age: follow.follower.age,
+      profilePicture: follow.follower.profilePicture,
+      isEmailConfirmed: follow.follower.isEmailConfirmed,
+      followedAt: follow.createdAt,
+    }));
+
+    logger.info(
+      `Get user followers endpoint completed successfully, found ${formattedFollowers.length} followers`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: formattedFollowers,
+      message: null,
+    });
+  } catch (err) {
+    logger.error(`Get user followers endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Obtener lista de usuarios seguidos por un usuario
+ * GET /api/users/{userId}/following
+ */
+export const getUserFollowing = async (req, res, next) => {
+  logger.info(
+    `Get user following endpoint called for userId: ${req.params.userId}`
+  );
+
+  try {
+    const { userId } = req.params;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = parseInt(req.query.offset) || 0;
+
+    // Validar que el userId sea un UUID válido
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      throw new ValidationError("ID de usuario inválido");
+    }
+
+    // Verificar que el usuario existe
+    const userRepo = new UserRepository();
+    const targetUser = await userRepo.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Obtener lista de usuarios seguidos
+    const followerRepo = new UserFollowerRepository();
+    const following = await followerRepo.getFollowing(userId, limit, offset);
+
+    // Formatear respuesta
+    const formattedFollowing = following.map((follow) => ({
+      id: follow.followed.id,
+      email: follow.followed.email,
+      name: follow.followed.name,
+      age: follow.followed.age,
+      profilePicture: follow.followed.profilePicture,
+      isEmailConfirmed: follow.followed.isEmailConfirmed,
+      followedAt: follow.createdAt,
+    }));
+
+    logger.info(
+      `Get user following endpoint completed successfully, found ${formattedFollowing.length} following`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: formattedFollowing,
+      message: null,
+    });
+  } catch (err) {
+    logger.error(`Get user following endpoint failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Actualiza el perfil del usuario (nombre y edad)
+ * PUT /api/users/profile
+ */
+export const updateUserProfile = async (req, res, next) => {
+  const userId = req.user.id;
+  logger.info(`Update user profile endpoint called for user: ${userId}`);
+
+  try {
+    const { name, age } = req.body;
+
+    // Validaciones
+    if (name !== undefined) {
+      if (typeof name !== "string" || name.trim().length === 0) {
+        throw new ValidationError("El nombre debe ser una cadena no vacía");
+      }
+      if (name.length > 30) {
+        throw new ValidationError("El nombre no puede exceder 30 caracteres");
+      }
+    }
+
+    if (age !== undefined && age !== null) {
+      const ageNum = parseInt(age);
+      if (isNaN(ageNum) || ageNum < 13 || ageNum > 120) {
+        throw new ValidationError("La edad debe estar entre 13 y 120 años");
+      }
+    }
+
+    // Actualizar usuario
+    const userRepo = new UserRepository();
+    const updateData = {};
+    if (name !== undefined) updateData.name = name.trim();
+    if (age !== undefined) updateData.age = age === null ? null : parseInt(age);
+
+    await userRepo.updateUser(userId, updateData);
+
+    // Obtener usuario actualizado
+    const updatedUser = await userRepo.findUserById(userId);
+
+    logger.info(`User profile updated successfully for user: ${userId}`);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        age: updatedUser.age,
+        profilePicture: updatedUser.profilePicture,
+      },
+      message: "Perfil actualizado correctamente",
+    });
+  } catch (err) {
+    logger.error(`Update user profile failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Sube o actualiza el avatar del usuario
+ * POST /api/users/profile/avatar
+ */
+export const uploadUserAvatar = async (req, res, next) => {
+  const userId = req.user.id;
+  logger.info(`Upload user avatar endpoint called for user: ${userId}`);
+
+  try {
+    // Validar que se subió un archivo
+    if (!req.file) {
+      throw new ValidationError("No se proporcionó ningún archivo");
+    }
+
+    // Validar el archivo
+    const validation = validateAvatarFile(req.file);
+    if (!validation.isValid) {
+      throw new ValidationError(validation.errors.join(", "));
+    }
+
+    const userRepo = new UserRepository();
+    
+    // Obtener usuario actual para eliminar avatar anterior si existe
+    const user = await userRepo.findUserById(userId);
+    if (user.profilePicture) {
+      const oldAvatarPath = path.join(process.cwd(), "uploads", "avatars", user.profilePicture);
+      deleteFile(oldAvatarPath);
+    }
+
+    // Guardar nuevo avatar
+    const filename = saveAvatarFile(req.file);
+    const avatarUrl = getAvatarUrl(filename);
+
+    // Actualizar usuario con nuevo avatar
+    await userRepo.updateUser(userId, { profilePicture: filename });
+
+    logger.info(`User avatar uploaded successfully for user: ${userId}`);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        profilePicture: filename,
+        url: avatarUrl,
+      },
+      message: "Avatar actualizado correctamente",
+    });
+  } catch (err) {
+    logger.error(`Upload user avatar failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Elimina el avatar del usuario
+ * DELETE /api/users/profile/avatar
+ */
+export const deleteUserAvatar = async (req, res, next) => {
+  const userId = req.user.id;
+  logger.info(`Delete user avatar endpoint called for user: ${userId}`);
+
+  try {
+    const userRepo = new UserRepository();
+    
+    // Obtener usuario actual
+    const user = await userRepo.findUserById(userId);
+    
+    if (!user.profilePicture) {
+      throw new ValidationError("El usuario no tiene avatar para eliminar");
+    }
+
+    // Eliminar archivo del sistema
+    const avatarPath = path.join(process.cwd(), "uploads", "avatars", user.profilePicture);
+    deleteFile(avatarPath);
+
+    // Actualizar usuario removiendo avatar
+    await userRepo.updateUser(userId, { profilePicture: null });
+
+    logger.info(`User avatar deleted successfully for user: ${userId}`);
+
+    res.status(200).json({
+      success: true,
+      data: null,
+      message: "Avatar eliminado correctamente",
+    });
+  } catch (err) {
+    logger.error(`Delete user avatar failed: ${err.message}`);
     next(err);
   }
 };
