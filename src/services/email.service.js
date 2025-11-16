@@ -157,6 +157,77 @@ class EmailService {
       throw new ExternalServiceError("Error al enviar la notificación de insignia");
     }
   }
+
+  /**
+   * Envía un correo de recuperación de contraseña
+   * @param {string} email - Email del destinatario
+   * @param {string} token - Token de reseteo de contraseña
+   * @returns {Promise<boolean>} - true si se envió correctamente
+   */
+  async sendPasswordResetEmail(email, token) {
+    try {
+      const resetUrl = `${config.frontendUrl}/reset-password?token=${token}`;
+
+      // Preparar attachments
+      const attachments = [
+        {
+          filename: 'logo-32x32.png',
+          path: './src/assets/logo-32x32.png',
+          cid: 'logo'
+        }
+      ];
+
+      const mailOptions = {
+        from: `${config.email.from}`,
+        to: email,
+        subject: "Recuperación de contraseña - JoinTravel",
+        html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h1 style="color: #333;">Recuperación de contraseña</h1>
+                        <p>Has solicitado restablecer tu contraseña en JoinTravel.</p>
+                        <p>Para crear una nueva contraseña, haz clic en el siguiente enlace:</p>
+                        <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">
+                            Restablecer mi contraseña
+                        </a>
+                        <p style="color: #d9534f; font-weight: bold;">Este enlace expirará en 24 horas.</p>
+                        <p>Si no solicitaste restablecer tu contraseña, puedes ignorar este correo de forma segura. Tu contraseña no será cambiada.</p>
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+                        <p style="color: #666; font-size: 12px;">JoinTravel - Tu compañero de viajes</p>
+                        <img src="cid:logo" alt="JoinTravel Logo" style="max-width: 32px;">
+                    </div>
+                `,
+        text: `
+                    Recuperación de contraseña - JoinTravel
+
+                    Has solicitado restablecer tu contraseña en JoinTravel.
+
+                    Para crear una nueva contraseña, visita el siguiente enlace:
+
+                    ${resetUrl}
+
+                    Este enlace expirará en 24 horas.
+
+                    Si no solicitaste restablecer tu contraseña, puedes ignorar este correo de forma segura. Tu contraseña no será cambiada.
+                `,
+        attachments: attachments
+      };
+
+      // Add timeout to email sending (30 seconds)
+      const emailPromise = this.transporter.sendMail(mailOptions);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new ExternalServiceError("Email service timeout")), 30000)
+      );
+
+      await Promise.race([emailPromise, timeoutPromise]);
+      return true;
+    } catch (error) {
+      console.error("Error detallado al enviar correo de recuperación:", error);
+      if (error instanceof ExternalServiceError) {
+        throw error;
+      }
+      throw new ExternalServiceError("Error al enviar el correo de recuperación");
+    }
+  }
 }
 
 export default new EmailService();
