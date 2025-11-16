@@ -105,7 +105,7 @@ router.get("/", authenticate, getUserLists);
  * /api/lists/{id}:
  *   get:
  *     summary: Get a specific list by ID
- *     description: Retrieves a specific list by its ID, including all places in the list. Only accessible by the list owner.
+ *     description: Retrieves a specific list by its ID, including all places in the list. Accessible by any authenticated user.
  *     tags: [Lists]
  *     security:
  *       - bearerAuth: []
@@ -132,12 +132,6 @@ router.get("/", authenticate, getUserLists);
  *                   $ref: '#/components/schemas/ListWithPlaces'
  *       404:
  *         description: List not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       403:
- *         description: Access denied
  *         content:
  *           application/json:
  *             schema:

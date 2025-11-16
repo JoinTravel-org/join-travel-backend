@@ -72,13 +72,6 @@ class ListService {
         throw error;
       }
 
-      // Verificar que la lista pertenece al usuario
-      if (list.userId !== userId) {
-        const error = new Error("Access denied");
-        error.status = 403;
-        throw error;
-      }
-
       logger.info(`Retrieved list by ID: ${id}`);
 
       return list;
