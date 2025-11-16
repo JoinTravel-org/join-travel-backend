@@ -30,6 +30,14 @@ export default new EntitySchema({
       type: "timestamp", // timestamp se almacena en UTC en PostgreSQL
       nullable: true,
     },
+    passwordResetToken: {
+      type: "varchar",
+      nullable: true,
+    },
+    passwordResetExpires: {
+      type: "timestamp",
+      nullable: true,
+    },
     // Gamification fields
     points: {
       type: "integer",

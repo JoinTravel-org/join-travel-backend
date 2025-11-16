@@ -256,6 +256,96 @@ class AuthService {
     const revoked = await revokedTokenRepo.findOne({ where: { token } });
     return !!revoked;
   }
+
+  /**
+   * Solicita recuperación de contraseña
+   * @param {string} email - Email del usuario
+   * @returns {Promise<Object>} - { message }
+   */
+  async forgotPassword(email) {
+    // 1. Validar formato de email
+    if (!isValidEmail(email)) {
+      throw new ValidationError("Formato de correo inválido.");
+    }
+
+    // 2. Buscar usuario por email
+    const user = await this.userRepository.findByEmail(email);
+    
+    // Criterio de aceptación 2: Si no existe el correo, mostrar mensaje específico
+    if (!user) {
+      throw new ValidationError("No existe una cuenta con este correo.");
+    }
+
+    // 3. Generar token de reseteo de contraseña
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    
+    // Criterio de aceptación 4: El token debe durar 24 horas
+    const tokenExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+
+    // 4. Guardar token en la base de datos
+    await this.userRepository.update(user.id, {
+      passwordResetToken: resetToken,
+      passwordResetExpires: tokenExpiration,
+    });
+
+    // 5. Enviar correo de recuperación
+    try {
+      await this.emailService.sendPasswordResetEmail(email, resetToken);
+    } catch (error) {
+      console.error("Error al enviar correo de recuperación:", error);
+      throw new ValidationError("Error al enviar el correo de recuperación. Por favor intenta de nuevo.");
+    }
+
+    return {
+      message: "Se ha enviado un enlace de recuperación a tu correo electrónico.",
+    };
+  }
+
+  /**
+   * Restablece la contraseña usando un token
+   * @param {string} token - Token de reseteo
+   * @param {string} newPassword - Nueva contraseña
+   * @returns {Promise<Object>} - { message }
+   */
+  async resetPassword(token, newPassword) {
+    // 1. Validar que se proporcione el token y la nueva contraseña
+    if (!token || !newPassword) {
+      throw new ValidationError("Token y contraseña son requeridos.");
+    }
+
+    // 2. Buscar usuario por token de reseteo
+    const user = await this.userRepository.findByPasswordResetToken(token);
+
+    if (!user) {
+      throw new ValidationError("Token de recuperación inválido o expirado.");
+    }
+
+    // 3. Verificar que el token no haya expirado
+    const now = new Date();
+    if (now > user.passwordResetExpires) {
+      throw new ValidationError("El token de recuperación ha expirado. Por favor solicita uno nuevo.");
+    }
+
+    // 4. Validar requisitos de la nueva contraseña
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      throw new ValidationError("La contraseña no cumple con los requisitos.", passwordValidation.errors);
+    }
+
+    // 5. Hash de la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 6. Actualizar contraseña y limpiar tokens de reseteo
+    await this.userRepository.update(user.id, {
+      password: hashedPassword,
+      passwordResetToken: null,
+      passwordResetExpires: null,
+    });
+
+    return {
+      message: "Contraseña restablecida exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.",
+    };
+  }
 }
 
 export default new AuthService();

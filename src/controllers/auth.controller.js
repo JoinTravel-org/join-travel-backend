@@ -162,3 +162,57 @@ export const refreshToken = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * Solicita recuperación de contraseña
+ * POST /api/auth/forgot-password
+ * Body: { email }
+ */
+export const forgotPassword = async (req, res, next) => {
+  logger.info(`Forgot password endpoint called with email: ${req.body.email}`);
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new ValidationError("El email es requerido.");
+    }
+
+    const result = await authService.forgotPassword(email);
+
+    logger.info(`Forgot password endpoint completed successfully for email: ${req.body.email}`);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (err) {
+    logger.error(`Forgot password endpoint failed for email: ${req.body.email}, error: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Restablece la contraseña usando un token
+ * POST /api/auth/reset-password
+ * Body: { token, password }
+ */
+export const resetPassword = async (req, res, next) => {
+  logger.info(`Reset password endpoint called`);
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      throw new ValidationError("Token y contraseña son requeridos.");
+    }
+
+    const result = await authService.resetPassword(token, password);
+
+    logger.info(`Reset password endpoint completed successfully`);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (err) {
+    logger.error(`Reset password endpoint failed, error: ${err.message}`);
+    next(err);
+  }
+};

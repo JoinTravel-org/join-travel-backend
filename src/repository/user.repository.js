@@ -41,6 +41,17 @@ class UserRepository {
   }
 
   /**
+   * Busca un usuario por token de reseteo de contraseña
+   * @param {string} token - Token de reseteo
+   * @returns {Promise<User|null>} - Usuario encontrado o null
+   */
+  async findByPasswordResetToken(token) {
+    return await this.getRepository().findOne({
+      where: { passwordResetToken: token },
+    });
+  }
+
+  /**
    * Crea un nuevo usuario
    * @param {Object} userData - Datos del usuario
    * @returns {Promise<User>} - Usuario creado
