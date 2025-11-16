@@ -7,6 +7,7 @@ import {
   deleteList,
   addPlaceToList,
   removePlaceFromList,
+  getPublicListsByAuthor,
 } from "../controllers/list.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -399,5 +400,8 @@ router.delete("/:id", authenticate, deleteList);
  */
 router.post("/:listId/places/:placeId", authenticate, addPlaceToList);
 router.delete("/:listId/places/:placeId", authenticate, removePlaceFromList);
+
+// Public route to get lists by author (no authentication required)
+router.get("/author/:authorId", getPublicListsByAuthor);
 
 export default router;

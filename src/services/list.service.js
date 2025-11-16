@@ -57,6 +57,24 @@ class ListService {
   }
 
   /**
+   * Obtiene las listas públicas de un autor (para uso público)
+   * @param {string} authorId
+   * @returns {Promise<Array>} listas ordenadas por createdAt desc
+   */
+  async getListsByAuthor(authorId) {
+    try {
+      const lists = await listRepository.findByUserId(authorId);
+
+      logger.info(`Retrieved ${lists.length} lists for author ${authorId}`);
+
+      return lists;
+    } catch (err) {
+      logger.error(`Error getting lists for author ${authorId}: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
    * Obtiene una lista por ID
    * @param {string} id - ID de la lista
    * @param {string} userId - ID del usuario (para verificar propiedad)
