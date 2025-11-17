@@ -136,6 +136,34 @@ class ListRepository {
     }
     return list.places.some(place => place.id === placeId);
   }
+
+  /**
+   * Busca listas públicamente por título o por ciudad/nombre de los lugares contenidos
+   * @param {string} query - término para buscar por título de la lista
+   * @param {string} city - término para buscar por ciudad o nombre del place
+   * @returns {Promise<Array>} - listas encontradas
+   */
+  async searchPublic(query, city) {
+    const qb = this.getRepository()
+      .createQueryBuilder("list")
+      .leftJoinAndSelect("list.places", "place")
+      .leftJoinAndSelect("list.user", "user");
+
+    if (query) {
+      const q = `%${query.toLowerCase()}%`;
+      qb.andWhere("LOWER(list.title) LIKE :q", { q });
+    }
+
+    if (city) {
+      const c = `%${city.toLowerCase()}%`;
+      qb.andWhere("(LOWER(place.city) LIKE :c OR LOWER(place.name) LIKE :c)", { c });
+    }
+
+    qb.orderBy("list.createdAt", "DESC");
+    qb.distinct(true);
+
+    return await qb.getMany();
+  }
 }
 
 export default new ListRepository();

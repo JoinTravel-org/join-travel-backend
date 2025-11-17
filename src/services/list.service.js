@@ -289,6 +289,23 @@ class ListService {
       throw err;
     }
   }
+
+  /**
+   * Busca listas públicas por título o ciudad (usa repository.searchPublic)
+   * @param {string} query
+   * @param {string} city
+   * @returns {Promise<Array>} listas encontradas
+   */
+  async searchPublicLists(query, city) {
+    try {
+      const lists = await listRepository.searchPublic(query, city);
+      logger.info(`searchPublicLists returned ${lists.length} lists`);
+      return lists;
+    } catch (err) {
+      logger.error(`Error in searchPublicLists: ${err.message}`);
+      throw err;
+    }
+  }
 }
 
 export default new ListService();
