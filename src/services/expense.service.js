@@ -163,12 +163,18 @@ export const getGroupExpenses = async (groupId, userId) => {
       order: { createdAt: "DESC" },
     });
   } else {
-    // Get all expenses for the user across all groups
-    expenses = await expenseRepository.find({
-      where: { userId },
-      relations: ["user", "group", "paidBy"],
-      order: { createdAt: "DESC" },
-    });
+    // Get all expenses assigned to the user across all groups
+    // Only show expenses where the user is the one who has to pay (paidById)
+    // OR expenses created by the user that haven't been assigned yet (paidById is null)
+    expenses = await expenseRepository
+      .createQueryBuilder("expense")
+      .leftJoinAndSelect("expense.user", "user")
+      .leftJoinAndSelect("expense.group", "group")
+      .leftJoinAndSelect("expense.paidBy", "paidBy")
+      .where("expense.paidById = :userId", { userId })
+      .orWhere("expense.userId = :userId AND expense.paidById IS NULL", { userId })
+      .orderBy("expense.createdAt", "DESC")
+      .getMany();
   }
 
   // Convert amounts back to decimal and calculate total

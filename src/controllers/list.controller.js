@@ -2,6 +2,44 @@ import listService from "../services/list.service.js";
 import logger from "../config/logger.js";
 
 /**
+ * Busca listas públicamente por título o por ciudad/nombre del lugar
+ * GET /api/lists/search?q=...&city=...
+ */
+export const searchPublicLists = async (req, res, next) => {
+  logger.info(`Search public lists endpoint called with q=${req.query.q || ''} city=${req.query.city || ''}`);
+  try {
+    const { q, city } = req.query;
+    const lists = await listService.searchPublicLists(q, city);
+
+    res.status(200).json({
+      success: true,
+      data: lists.map(list => ({
+        id: list.id,
+        title: list.title,
+        description: list.description,
+        userId: list.userId,
+        createdAt: list.createdAt,
+        updatedAt: list.updatedAt,
+        places: (list.places || []).map(place => ({
+          id: place.id,
+          name: place.name,
+          address: place.address,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          image: place.image,
+          rating: place.rating,
+          description: place.description,
+          city: place.city,
+        })),
+      })),
+    });
+  } catch (err) {
+    logger.error(`Search public lists failed: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
  * Crea una nueva lista
  * POST /api/lists
  * Body: { title, description? }
@@ -384,6 +422,50 @@ export const removePlaceFromList = async (req, res, next) => {
         errors: err.details,
       });
     }
+    next(err);
+  }
+};
+
+/**
+ * Obtiene listas públicas de un autor por su ID
+ * GET /api/lists/author/:authorId
+ */
+export const getPublicListsByAuthor = async (req, res, next) => {
+  logger.info(`Get public lists by author endpoint called with authorId: ${req.params.authorId}`);
+  try {
+    const { authorId } = req.params;
+
+    if (!authorId) {
+      return res.status(400).json({ success: false, message: 'Author ID is required' });
+    }
+
+    const lists = await listService.getListsByAuthor(authorId);
+
+    logger.info(`Get public lists by author completed successfully, returned ${lists.length} lists`);
+    res.status(200).json({
+      success: true,
+      data: lists.map(list => ({
+        id: list.id,
+        title: list.title,
+        description: list.description,
+        userId: list.userId,
+        createdAt: list.createdAt,
+        updatedAt: list.updatedAt,
+        places: list.places.map(place => ({
+          id: place.id,
+          name: place.name,
+          address: place.address,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          image: place.image,
+          rating: place.rating,
+          description: place.description,
+          city: place.city,
+        })),
+      })),
+    });
+  } catch (err) {
+    logger.error(`Get public lists by author failed for authorId: ${req.params.authorId}, error: ${err.message}`);
     next(err);
   }
 };

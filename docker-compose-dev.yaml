@@ -32,8 +32,11 @@ services:
       - ./src:/usr/src/app/src
       - ./package.json:/usr/src/app/package.json
       - ./pnpm-lock.yaml:/usr/src/app/pnpm-lock.yaml
+      - uploads_data:/usr/src/app/uploads
     depends_on:
       - postgres_db
 
 volumes:
   postgres_data:
+  uploads_data:
+    driver: local

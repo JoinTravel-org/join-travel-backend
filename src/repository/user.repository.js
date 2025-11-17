@@ -82,7 +82,7 @@ class UserRepository {
     // Primero obtener todos los usuarios (limitado para performance)
     const allUsers = await this.getRepository()
       .createQueryBuilder("user")
-      .select(["user.id", "user.email", "user.isEmailConfirmed", "user.createdAt", "user.updatedAt"])
+      .select(["user.id", "user.email", "user.name", "user.age", "user.profilePicture", "user.isEmailConfirmed", "user.createdAt", "user.updatedAt"])
       .orderBy("user.email", "ASC")
       .limit(1000) // Limitar para evitar cargar demasiados usuarios
       .getMany();
@@ -105,6 +105,60 @@ class UserRepository {
       .map(result => result.item);
 
     return matchedUsers;
+  }
+
+  /**
+   * Busca usuarios por query (nombre o email) con búsqueda fuzzy
+   * @param {string} query - Query a buscar (puede ser nombre o email)
+   * @param {number} limit - Límite de resultados (default: 20)
+   * @returns {Promise<User[]>} - Lista de usuarios encontrados
+   */
+  async searchByQuery(query, limit = 20) {
+    // Primero obtener todos los usuarios (limitado para performance)
+    const allUsers = await this.getRepository()
+      .createQueryBuilder("user")
+      .select(["user.id", "user.email", "user.name", "user.age", "user.profilePicture", "user.isEmailConfirmed", "user.createdAt", "user.updatedAt"])
+      .orderBy("user.email", "ASC")
+      .limit(1000) // Limitar para evitar cargar demasiados usuarios
+      .getMany();
+
+    // Configurar Fuse.js para búsqueda fuzzy en nombre y email
+    const fuse = new Fuse(allUsers, {
+      keys: ['email', 'name'], // Buscar en ambos campos
+      threshold: 0.4, // Umbral de similitud (0.0 = exacto, 1.0 = muy permisivo)
+      includeScore: true,
+      shouldSort: true,
+    });
+
+    // Realizar búsqueda fuzzy
+    const results = fuse.search(query);
+
+    // Filtrar y limitar resultados
+    const matchedUsers = results
+      .filter(result => result.score < 0.6) // Solo resultados con buena similitud
+      .slice(0, limit)
+      .map(result => result.item);
+
+    return matchedUsers;
+  }
+
+  /**
+   * Alias para findById - Busca un usuario por ID
+   * @param {string} id - ID del usuario
+   * @returns {Promise<User|null>} - Usuario encontrado o null
+   */
+  async findUserById(id) {
+    return await this.findById(id);
+  }
+
+  /**
+   * Alias para update - Actualiza un usuario
+   * @param {string} id - ID del usuario
+   * @param {Object} updateData - Datos a actualizar
+   * @returns {Promise<User>} - Usuario actualizado
+   */
+  async updateUser(id, updateData) {
+    return await this.update(id, updateData);
   }
 
   async findAtus() {

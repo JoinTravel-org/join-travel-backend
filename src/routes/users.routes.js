@@ -9,8 +9,18 @@ import {
   getUserMedia,
   getUserReviews,
   getUserReviewStats,
+  followUser,
+  unfollowUser,
+  isFollowingUser,
+  getUserFollowStats,
+  getUserFollowers,
+  getUserFollowing,
+  updateUserProfile,
+  uploadUserAvatar,
+  deleteUserAvatar,
 } from "../controllers/users.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
+import { uploadAvatar } from "../utils/fileUpload.js";
 
 const router = Router();
 
@@ -1061,5 +1071,245 @@ router.get("/:userId/reviews", authenticate, getUserReviews);
  *                   example: "Error interno del servidor"
  */
 router.get("/:userId/reviews/stats", authenticate, getUserReviewStats);
+
+/**
+ * @swagger
+ * /api/users/{userId}/follow:
+ *   post:
+ *     summary: Follow a user
+ *     description: Follow another user. Cannot follow yourself.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user to follow
+ *     responses:
+ *       201:
+ *         description: User followed successfully
+ *       400:
+ *         description: Bad request (already following or trying to follow yourself)
+ *       404:
+ *         description: User not found
+ */
+router.post("/:userId/follow", authenticate, followUser);
+
+/**
+ * @swagger
+ * /api/users/{userId}/follow:
+ *   delete:
+ *     summary: Unfollow a user
+ *     description: Stop following a user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user to unfollow
+ *     responses:
+ *       200:
+ *         description: User unfollowed successfully
+ *       404:
+ *         description: Not following this user
+ */
+router.delete("/:userId/follow", authenticate, unfollowUser);
+
+/**
+ * @swagger
+ * /api/users/{userId}/is-following:
+ *   get:
+ *     summary: Check if current user is following another user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user to check
+ *     responses:
+ *       200:
+ *         description: Check completed successfully
+ */
+router.get("/:userId/is-following", authenticate, isFollowingUser);
+
+/**
+ * @swagger
+ * /api/users/{userId}/follow-stats:
+ *   get:
+ *     summary: Get follower/following statistics for a user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ *       404:
+ *         description: User not found
+ */
+router.get("/:userId/follow-stats", authenticate, getUserFollowStats);
+
+/**
+ * @swagger
+ * /api/users/{userId}/followers:
+ *   get:
+ *     summary: Get list of users following this user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Maximum number of results to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Number of results to skip for pagination
+ *     responses:
+ *       200:
+ *         description: Followers retrieved successfully
+ *       404:
+ *         description: User not found
+ */
+router.get("/:userId/followers", authenticate, getUserFollowers);
+
+/**
+ * @swagger
+ * /api/users/{userId}/following:
+ *   get:
+ *     summary: Get list of users that this user is following
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Maximum number of results to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Number of results to skip for pagination
+ *     responses:
+ *       200:
+ *         description: Following list retrieved successfully
+ *       404:
+ *         description: User not found
+ */
+router.get("/:userId/following", authenticate, getUserFollowing);
+
+/**
+ * @swagger
+ * /api/users/profile:
+ *   put:
+ *     summary: Update user profile (name and age)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 maxLength: 30
+ *                 example: "John Doe"
+ *               age:
+ *                 type: integer
+ *                 minimum: 13
+ *                 maximum: 120
+ *                 nullable: true
+ *                 example: 25
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Validation error
+ */
+router.put("/profile", authenticate, updateUserProfile);
+
+/**
+ * @swagger
+ * /api/users/profile/avatar:
+ *   post:
+ *     summary: Upload or update user avatar
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *                 description: Avatar image file (max 5MB, JPG/PNG/GIF/WEBP only)
+ *     responses:
+ *       200:
+ *         description: Avatar uploaded successfully
+ *       400:
+ *         description: Invalid file or validation error
+ */
+router.post("/profile/avatar", authenticate, uploadAvatar.single("avatar"), uploadUserAvatar);
+
+/**
+ * @swagger
+ * /api/users/profile/avatar:
+ *   delete:
+ *     summary: Delete user avatar
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Avatar deleted successfully
+ *       400:
+ *         description: No avatar to delete
+ */
+router.delete("/profile/avatar", authenticate, deleteUserAvatar);
 
 export default router;

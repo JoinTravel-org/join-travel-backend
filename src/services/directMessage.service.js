@@ -142,6 +142,10 @@ class DirectMessageService {
             createdAt: msg.createdAt,
             senderEmail: msg.sender?.email,
             receiverEmail: msg.receiver?.email,
+            senderName: msg.sender?.name,
+            senderProfilePicture: msg.sender?.profilePicture,
+            receiverName: msg.receiver?.name,
+            receiverProfilePicture: msg.receiver?.profilePicture,
           })),
         },
       };
@@ -178,6 +182,8 @@ class DirectMessageService {
             otherUser: {
               id: conv.otherUser.id,
               email: conv.otherUser.email,
+              name: conv.otherUser.name,
+              profilePicture: conv.otherUser.profilePicture,
             },
             lastMessage: {
               content: conv.lastMessage.content,
