@@ -5,19 +5,19 @@ import { ValidationError, AuthenticationError } from "../utils/customErrors.js";
 /**
  * Registra un nuevo usuario
  * POST /api/auth/register
- * Body: { email, password }
+ * Body: { email, password, name (optional), age (optional) }
  */
 export const register = async (req, res, next) => {
   logger.info(`Register endpoint called with email: ${req.body.email}`);
   try {
-    const { email, password } = req.body;
+    const { email, password, name, age } = req.body;
 
     // Validar que se envíen los campos requeridos
     if (!email || !password) {
       throw new ValidationError("Email y contraseña son requeridos.");
     }
 
-    const result = await authService.register({ email, password });
+    const result = await authService.register({ email, password, name, age });
 
     logger.info(`Register endpoint completed successfully for email: ${req.body.email}`);
     res.status(201).json({
