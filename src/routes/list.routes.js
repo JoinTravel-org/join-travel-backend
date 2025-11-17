@@ -7,6 +7,8 @@ import {
   deleteList,
   addPlaceToList,
   removePlaceFromList,
+  getPublicListsByAuthor,
+  searchPublicLists,
 } from "../controllers/list.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
@@ -99,6 +101,9 @@ const router = Router();
  */
 router.post("/", authenticate, createList);
 router.get("/", authenticate, getUserLists);
+
+// Public route to search lists (must be registered before /:id to avoid param collisions)
+router.get("/search", searchPublicLists);
 
 /**
  * @swagger
@@ -399,5 +404,11 @@ router.delete("/:id", authenticate, deleteList);
  */
 router.post("/:listId/places/:placeId", authenticate, addPlaceToList);
 router.delete("/:listId/places/:placeId", authenticate, removePlaceFromList);
+
+// Public route to get lists by author (no authentication required)
+router.get("/author/:authorId", getPublicListsByAuthor);
+
+// Public route to search lists (must be registered before /:id to avoid param collisions)
+router.get("/search", searchPublicLists);
 
 export default router;
