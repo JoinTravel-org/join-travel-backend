@@ -12,32 +12,32 @@ import { validateAvatarFile, saveAvatarFile, getAvatarUrl, deleteFile } from "..
 import path from "path";
 
 /**
- * Busca usuarios por email
- * GET /api/users/search?email=<email>
+ * Busca usuarios por query (nombre o email)
+ * GET /api/users/search?query=<query>
  */
 export const searchUsers = async (req, res, next) => {
-  logger.info(`Search users endpoint called with email: ${req.query.email}`);
+  logger.info(`Search users endpoint called with query: ${req.query.query}`);
 
   try {
-    const { email } = req.query;
+    const { query } = req.query;
 
-    // Validar que se proporcione el parámetro email
-    if (!email || typeof email !== "string" || email.trim().length === 0) {
+    // Validar que se proporcione el parámetro query
+    if (!query || typeof query !== "string" || query.trim().length === 0) {
       throw new ValidationError(
-        "El parámetro 'email' es requerido y debe ser una cadena no vacía."
+        "El parámetro 'query' es requerido y debe ser una cadena no vacía."
       );
     }
 
-    // Limitar la longitud del email para prevenir búsquedas demasiado amplias
-    if (email.length < 2) {
+    // Limitar la longitud del query para prevenir búsquedas demasiado amplias
+    if (query.length < 2) {
       throw new ValidationError(
-        "El email debe tener al menos 2 caracteres para la búsqueda."
+        "El query debe tener al menos 2 caracteres para la búsqueda."
       );
     }
 
-    // Buscar usuarios
+    // Buscar usuarios por nombre o email
     const userRepo = new UserRepository();
-    const users = await userRepo.searchByEmail(email.trim(), 20);
+    const users = await userRepo.searchByQuery(query.trim(), 20);
 
     // Formatear respuesta con stats si están disponibles
     const formattedUsers = await Promise.all(
