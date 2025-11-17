@@ -22,6 +22,7 @@ import Question from "../models/question.model.js";
 import Answer from "../models/answer.model.js";
 import QuestionVote from "../models/questionVote.model.js";
 import AnswerVote from "../models/answerVote.model.js";
+import Notification from "../models/notification.model.js";
 import config from "../config/index.js";
 
 export const AppDataSource = new DataSource({
@@ -58,6 +59,7 @@ export const AppDataSource = new DataSource({
     Answer,
     QuestionVote,
     AnswerVote,
+    Notification,
   ],
   migrations: ["./src/migrations/*.js"],
   timezone: "UTC", // Usar UTC para consistencia global
