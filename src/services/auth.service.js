@@ -17,10 +17,10 @@ class AuthService {
   }
   /**
    * Registra un nuevo usuario
-   * @param {Object} userData - { email, password }
+   * @param {Object} userData - { email, password, name (optional), age (optional) }
    * @returns {Promise<Object>} - { user, message }
    */
-  async register({ email, password }) {
+  async register({ email, password, name, age }) {
     // 1. Validar formato de email
     if (!isValidEmail(email)) {
       throw new ValidationError("Formato de correo inválido.");
@@ -32,31 +32,57 @@ class AuthService {
       throw new ValidationError("La contraseña no cumple con los requisitos.", passwordValidation.errors);
     }
 
-    // 3. Verificar que el email no exista
+    // 3. Validar nombre si se proporciona
+    if (name !== undefined && name !== null && name.trim().length > 30) {
+      throw new ValidationError("El nombre no puede tener más de 30 caracteres.");
+    }
+
+    // 4. Validar edad si se proporciona
+    if (age !== undefined && age !== null) {
+      const ageNum = Number(age);
+      if (isNaN(ageNum) || ageNum < 13 || ageNum > 120) {
+        throw new ValidationError("La edad debe estar entre 13 y 120 años.");
+      }
+    }
+
+    // 5. Verificar que el email no exista
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
       throw new ValidationError("El email ya está en uso. Intente iniciar sesión.");
     }
 
-    // 4. Hash de la contraseña
+    // 6. Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 5. Generar token de confirmación
+    // 7. Generar token de confirmación
     const confirmationToken = crypto.randomBytes(32).toString("hex");
     logger.info("CONFIRMATION TOKEN: ", confirmationToken);
     // Date.now() retorna timestamp en UTC, la fecha se guarda en UTC en PostgreSQL
     const tokenExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas desde ahora (UTC)
 
-    // 6. Crear usuario
-    const user = await this.userRepository.create({
+    // 8. Preparar datos del usuario
+    const userData = {
       email,
       password: hashedPassword,
       emailConfirmationToken: confirmationToken,
       emailConfirmationExpires: tokenExpiration,
       isEmailConfirmed: false,
-    });
+    };
 
-    // 7. Enviar correo de confirmación (en segundo plano con timeout de 30 segundos)
+    // Agregar nombre si se proporciona
+    if (name && name.trim()) {
+      userData.name = name.trim();
+    }
+
+    // Agregar edad si se proporciona
+    if (age !== undefined && age !== null) {
+      userData.age = Number(age);
+    }
+
+    // 9. Crear usuario
+    const user = await this.userRepository.create(userData);
+
+    // 10. Enviar correo de confirmación (en segundo plano con timeout de 30 segundos)
     let emailPromise;
     if (process.env.NODE_ENV === 'test') {
       // En tests, no enviar email, solo simular
@@ -81,7 +107,7 @@ class AuthService {
       // Podríamos marcar el usuario para reenviar el correo después
     }
 
-    // 8. Retornar usuario (sin la contraseña)
+    // 11. Retornar usuario (sin la contraseña)
     const {
       password: _,
       emailConfirmationToken: __,

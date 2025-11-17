@@ -906,12 +906,16 @@ export const updateUserProfile = async (req, res, next) => {
     if (name !== undefined) updateData.name = name.trim();
     if (age !== undefined) updateData.age = age === null ? null : parseInt(age);
 
+    logger.info(`Updating user ${userId} with data:`, updateData);
     await userRepo.updateUser(userId, updateData);
 
     // Obtener usuario actualizado
     const updatedUser = await userRepo.findUserById(userId);
-
-    logger.info(`User profile updated successfully for user: ${userId}`);
+    logger.info(`User profile updated successfully for user: ${userId}, new values:`, {
+      name: updatedUser.name,
+      age: updatedUser.age,
+      profilePicture: updatedUser.profilePicture
+    });
 
     res.status(200).json({
       success: true,
@@ -963,10 +967,14 @@ export const uploadUserAvatar = async (req, res, next) => {
     const filename = saveAvatarFile(req.file);
     const avatarUrl = getAvatarUrl(filename);
 
+    logger.info(`Saving avatar with filename: ${filename} for user: ${userId}`);
+    
     // Actualizar usuario con nuevo avatar
     await userRepo.updateUser(userId, { profilePicture: filename });
 
-    logger.info(`User avatar uploaded successfully for user: ${userId}`);
+    // Verificar que se guardó correctamente
+    const updatedUser = await userRepo.findUserById(userId);
+    logger.info(`User avatar uploaded successfully for user: ${userId}, saved filename: ${updatedUser.profilePicture}`);
 
     res.status(200).json({
       success: true,
