@@ -2,6 +2,7 @@ import groupRepository from "../repository/group.repository.js";
 import itineraryRepository from "../repository/itinerary.repository.js";
 import UserRepository from "../repository/user.repository.js";
 import logger from "../config/logger.js";
+import { createAndEmitNotification } from "../socket/notification.emitter.js";
 
 class GroupService {
   constructor() {
@@ -113,6 +114,46 @@ class GroupService {
         throw error;
       }
       const updatedGroup = await groupRepository.addMembers(groupId, userIds);
+
+      // Send notifications to newly added members
+      try {
+        const admin = group.members.find((m) => m.id === requesterId);
+
+        logger.info(
+          `[Group Service] Sending notifications to ${userIds.length} new members`
+        );
+
+        for (const userId of userIds) {
+          logger.info(
+            `[Group Service] Sending GROUP_INVITE notification to: ${userId}`
+          );
+          await createAndEmitNotification({
+            userId: userId,
+            type: "GROUP_INVITE",
+            title: `Invitación a grupo`,
+            message: `${admin?.email || "Alguien"} te ha agregado al grupo "${
+              group.name
+            }"`,
+            data: {
+              groupId,
+              groupName: group.name,
+              adminId: requesterId,
+              adminEmail: admin?.email,
+            },
+          });
+        }
+
+        logger.info(
+          `[Group Service] ✓ All member invitation notifications sent`
+        );
+      } catch (notifError) {
+        logger.error(
+          `[Group Service] ✗ Error sending notifications for new members: ${notifError.message}`,
+          notifError
+        );
+        // Don't fail the add members if notifications fail
+      }
+
       return {
         success: true,
         data: updatedGroup,
@@ -220,7 +261,9 @@ class GroupService {
 
       // Validate requester is admin
       if (group.adminId !== requesterId) {
-        const error = new Error("Solo el administrador puede asignar itinerarios");
+        const error = new Error(
+          "Solo el administrador puede asignar itinerarios"
+        );
         error.status = 403;
         throw error;
       }
@@ -254,19 +297,53 @@ class GroupService {
       }
 
       // Assign itinerary
-      const updatedGroup = await groupRepository.assignItinerary(groupId, itineraryId);
+      const updatedGroup = await groupRepository.assignItinerary(
+        groupId,
+        itineraryId
+      );
 
-      // TODO: Send notifications to all members (except admin)
-      // Note: In-app notification system not yet implemented
-      // When implemented, notify members: `${adminName} ha asignado el itinerario "${itinerary.name}" al grupo "${group.name}"`
-      logger.info(`Itinerary ${itineraryId} assigned to group ${groupId} by user ${requesterId}`);
+      // Send notifications to all members (except admin)
+      try {
+        const admin = group.members.find((m) => m.id === requesterId);
+        const otherMembers = group.members.filter((m) => m.id !== requesterId);
+
+        for (const member of otherMembers) {
+          await createAndEmitNotification({
+            userId: member.id,
+            type: "NEW_ITINERARY",
+            title: `Nuevo itinerario en ${group.name}`,
+            message: `${
+              admin?.email || "El administrador"
+            } ha asignado el itinerario "${itinerary.name}"`,
+            data: {
+              groupId,
+              groupName: group.name,
+              itineraryId,
+              itineraryName: itinerary.name,
+              adminId: requesterId,
+              adminEmail: admin?.email,
+            },
+          });
+        }
+      } catch (notifError) {
+        logger.error(
+          `Error sending notifications for itinerary assignment: ${notifError.message}`
+        );
+        // Don't fail the assignment if notifications fail
+      }
+
+      logger.info(
+        `Itinerary ${itineraryId} assigned to group ${groupId} by user ${requesterId}`
+      );
       return {
         success: true,
         data: updatedGroup,
         message: "Itinerario asignado exitosamente",
       };
     } catch (err) {
-      logger.error(`Error assigning itinerary to group ${groupId}: ${err.message}`);
+      logger.error(
+        `Error assigning itinerary to group ${groupId}: ${err.message}`
+      );
       throw err;
     }
   }
@@ -287,7 +364,9 @@ class GroupService {
       }
 
       if (group.adminId !== requesterId) {
-        const error = new Error("Solo el administrador puede desasignar itinerarios");
+        const error = new Error(
+          "Solo el administrador puede desasignar itinerarios"
+        );
         error.status = 403;
         throw error;
       }
@@ -306,7 +385,9 @@ class GroupService {
         message: "Itinerario desasignado exitosamente",
       };
     } catch (err) {
-      logger.error(`Error removing itinerary from group ${groupId}: ${err.message}`);
+      logger.error(
+        `Error removing itinerary from group ${groupId}: ${err.message}`
+      );
       throw err;
     }
   }

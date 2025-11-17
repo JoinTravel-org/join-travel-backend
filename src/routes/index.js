@@ -16,6 +16,7 @@ import expenseRoutes from "./expense.routes.js";
 import answerRoutes from "./answer.routes.js";
 import listRoutes from "./list.routes.js";
 import questionRoutes from "./question.routes.js";
+import notificationRoutes from "./notification.routes.js";
 
 const router = Router();
 
@@ -36,6 +37,7 @@ router.use("", answerRoutes);
 router.use("/lists", listRoutes);
 router.use("/groups", groupMessageRoutes);
 router.use("", questionRoutes);
+router.use("/notifications", notificationRoutes);
 
 const apiRouter = Router();
 apiRouter.use("/api", router);

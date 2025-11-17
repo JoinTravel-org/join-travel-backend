@@ -1,6 +1,7 @@
 import directMessageRepository from "../repository/directMessage.repository.js";
 import UserRepository from "../repository/user.repository.js";
 import logger from "../config/logger.js";
+import { createAndEmitNotification } from "../socket/notification.emitter.js";
 
 class DirectMessageService {
   /**
@@ -60,6 +61,27 @@ class DirectMessageService {
       logger.info(
         `Direct message sent from ${senderId} to ${receiverId} in conversation ${conversationId}`
       );
+
+      // Send notification to receiver
+      try {
+        await createAndEmitNotification({
+          userId: receiverId,
+          type: "NEW_MESSAGE",
+          title: "Nuevo mensaje",
+          message: `${sender.email} te ha enviado un mensaje`,
+          data: {
+            senderId,
+            senderEmail: sender.email,
+            messageId: message.id,
+            conversationId,
+          },
+        });
+      } catch (notifError) {
+        logger.error(
+          `Error sending notification for direct message: ${notifError.message}`
+        );
+        // Don't fail the message send if notification fails
+      }
 
       return {
         success: true,
@@ -197,55 +219,55 @@ class DirectMessageService {
    * @returns {Promise<Object>} Unread count
    */
   async getUnreadCount(userId) {
-      try {
-        const count = await directMessageRepository.countUnreadByUserId(userId);
-  
-        return {
-          success: true,
-          data: { unreadCount: count },
-        };
-      } catch (error) {
-        logger.error(`Error getting unread count: ${error.message}`);
-        throw {
-          status: 500,
-          message: "Error retrieving unread count",
-          details: [error.message],
-        };
-      }
-    }
-  
-    /**
-     * Mark messages as read in a conversation
-     * @param {string} userId - Current user ID
-     * @param {string} otherUserId - Other user ID
-     * @returns {Promise<Object>} Success response
-     */
-    async markAsRead(userId, otherUserId) {
-      try {
-        const conversationId = directMessageRepository.createConversationId(
-          userId,
-          otherUserId
-        );
-  
-        await directMessageRepository.markAsRead(conversationId, userId);
-  
-        logger.info(
-          `Marked messages as read for conversation ${conversationId} by user ${userId}`
-        );
-  
-        return {
-          success: true,
-          message: "Messages marked as read successfully",
-        };
-      } catch (error) {
-        logger.error(`Error marking messages as read: ${error.message}`);
-        throw {
-          status: 500,
-          message: "Error marking messages as read",
-          details: [error.message],
-        };
-      }
+    try {
+      const count = await directMessageRepository.countUnreadByUserId(userId);
+
+      return {
+        success: true,
+        data: { unreadCount: count },
+      };
+    } catch (error) {
+      logger.error(`Error getting unread count: ${error.message}`);
+      throw {
+        status: 500,
+        message: "Error retrieving unread count",
+        details: [error.message],
+      };
     }
   }
-  
-  export default new DirectMessageService();
+
+  /**
+   * Mark messages as read in a conversation
+   * @param {string} userId - Current user ID
+   * @param {string} otherUserId - Other user ID
+   * @returns {Promise<Object>} Success response
+   */
+  async markAsRead(userId, otherUserId) {
+    try {
+      const conversationId = directMessageRepository.createConversationId(
+        userId,
+        otherUserId
+      );
+
+      await directMessageRepository.markAsRead(conversationId, userId);
+
+      logger.info(
+        `Marked messages as read for conversation ${conversationId} by user ${userId}`
+      );
+
+      return {
+        success: true,
+        message: "Messages marked as read successfully",
+      };
+    } catch (error) {
+      logger.error(`Error marking messages as read: ${error.message}`);
+      throw {
+        status: 500,
+        message: "Error marking messages as read",
+        details: [error.message],
+      };
+    }
+  }
+}
+
+export default new DirectMessageService();
