@@ -5,19 +5,19 @@ import { ValidationError, AuthenticationError } from "../utils/customErrors.js";
 /**
  * Registra un nuevo usuario
  * POST /api/auth/register
- * Body: { email, password }
+ * Body: { email, password, name (optional), age (optional) }
  */
 export const register = async (req, res, next) => {
   logger.info(`Register endpoint called with email: ${req.body.email}`);
   try {
-    const { email, password } = req.body;
+    const { email, password, name, age } = req.body;
 
     // Validar que se envíen los campos requeridos
     if (!email || !password) {
       throw new ValidationError("Email y contraseña son requeridos.");
     }
 
-    const result = await authService.register({ email, password });
+    const result = await authService.register({ email, password, name, age });
 
     logger.info(`Register endpoint completed successfully for email: ${req.body.email}`);
     res.status(201).json({
@@ -159,6 +159,60 @@ export const refreshToken = async (req, res, next) => {
     });
   } catch (err) {
     logger.error(`Refresh token endpoint failed, error: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Solicita recuperación de contraseña
+ * POST /api/auth/forgot-password
+ * Body: { email }
+ */
+export const forgotPassword = async (req, res, next) => {
+  logger.info(`Forgot password endpoint called with email: ${req.body.email}`);
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new ValidationError("El email es requerido.");
+    }
+
+    const result = await authService.forgotPassword(email);
+
+    logger.info(`Forgot password endpoint completed successfully for email: ${req.body.email}`);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (err) {
+    logger.error(`Forgot password endpoint failed for email: ${req.body.email}, error: ${err.message}`);
+    next(err);
+  }
+};
+
+/**
+ * Restablece la contraseña usando un token
+ * POST /api/auth/reset-password
+ * Body: { token, password }
+ */
+export const resetPassword = async (req, res, next) => {
+  logger.info(`Reset password endpoint called`);
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      throw new ValidationError("Token y contraseña son requeridos.");
+    }
+
+    const result = await authService.resetPassword(token, password);
+
+    logger.info(`Reset password endpoint completed successfully`);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (err) {
+    logger.error(`Reset password endpoint failed, error: ${err.message}`);
     next(err);
   }
 };

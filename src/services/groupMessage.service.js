@@ -1,6 +1,7 @@
 import groupMessageRepository from "../repository/groupMessage.repository.js";
 import groupRepository from "../repository/group.repository.js";
 import logger from "../config/logger.js";
+import { createAndEmitNotification } from "../socket/notification.emitter.js";
 
 class GroupMessageService {
   /**
@@ -34,6 +35,42 @@ class GroupMessageService {
       });
 
       logger.info(`Group message sent: ${message.id} to group ${groupId}`);
+
+      // Enviar notificaciones a todos los miembros excepto el remitente
+      try {
+        const sender = group.members.find((m) => m.id === senderId);
+        const otherMembers = group.members.filter((m) => m.id !== senderId);
+
+        logger.info(
+          `[Group Message] Sending notifications to ${otherMembers.length} members`
+        );
+
+        for (const member of otherMembers) {
+          logger.info(
+            `[Group Message] Sending notification to member: ${member.id}`
+          );
+          await createAndEmitNotification({
+            userId: member.id,
+            type: "NEW_GROUP_MESSAGE",
+            title: `Nuevo mensaje en ${group.name}`,
+            message: `${sender?.email || "Alguien"} ha enviado un mensaje`,
+            data: {
+              groupId,
+              groupName: group.name,
+              senderId,
+              senderEmail: sender?.email,
+              messageId: message.id,
+            },
+          });
+        }
+        logger.info(`[Group Message] ✓ All notifications sent successfully`);
+      } catch (notifError) {
+        logger.error(
+          `[Group Message] ✗ Error sending notifications for group message: ${notifError.message}`,
+          notifError
+        );
+        // Don't fail the message send if notifications fail
+      }
 
       return {
         success: true,

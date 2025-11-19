@@ -89,9 +89,13 @@ class QuestionService {
         createdAt: question.createdAt,
         updatedAt: question.updatedAt,
         userEmail: question.user?.email,
+        userName: question.user?.name,
+        userProfilePicture: question.user?.profilePicture,
         user: question.user ? {
           id: question.user.id,
           email: question.user.email,
+          name: question.user.name,
+          profilePicture: question.user.profilePicture,
         } : null,
         place: question.place ? {
           id: question.place.id,

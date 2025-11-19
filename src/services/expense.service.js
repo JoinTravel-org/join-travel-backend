@@ -7,6 +7,7 @@ import {
   NotFoundError,
   AuthorizationError,
 } from "../utils/customErrors.js";
+import { createAndEmitNotification } from "../socket/notification.emitter.js";
 
 const expenseRepository = AppDataSource.getRepository(Expense);
 const groupRepository = AppDataSource.getRepository(Group);
@@ -61,9 +62,7 @@ export const createExpense = async (expenseData, userId) => {
 
   // Only group admin can create expenses
   if (group.adminId !== userId) {
-    throw new AuthorizationError(
-      "Only the group admin can add expenses"
-    );
+    throw new AuthorizationError("Only the group admin can add expenses");
   }
 
   // Create expense without paidById
@@ -76,6 +75,38 @@ export const createExpense = async (expenseData, userId) => {
   });
 
   await expenseRepository.save(expense);
+
+  // Send notifications to all group members except the creator
+  try {
+    const creator = group.members.find((m) => m.id === userId);
+    const otherMembers = group.members.filter((m) => m.id !== userId);
+
+    for (const member of otherMembers) {
+      await createAndEmitNotification({
+        userId: member.id,
+        type: "EXPENSE_ADDED",
+        title: `Nuevo gasto en ${group.name}`,
+        message: `${
+          creator?.email || "El administrador"
+        } ha añadido un gasto: ${concept.trim()}`,
+        data: {
+          groupId,
+          groupName: group.name,
+          expenseId: expense.id,
+          concept: concept.trim(),
+          amount: (amountInCents / 100).toFixed(2),
+          creatorId: userId,
+          creatorEmail: creator?.email,
+        },
+      });
+    }
+  } catch (notifError) {
+    console.error(
+      "Error sending notifications for expense creation:",
+      notifError
+    );
+    // Don't fail expense creation if notifications fail
+  }
 
   // Award points for creating expense
   try {
@@ -132,12 +163,18 @@ export const getGroupExpenses = async (groupId, userId) => {
       order: { createdAt: "DESC" },
     });
   } else {
-    // Get all expenses for the user across all groups
-    expenses = await expenseRepository.find({
-      where: { userId },
-      relations: ["user", "group", "paidBy"],
-      order: { createdAt: "DESC" },
-    });
+    // Get all expenses assigned to the user across all groups
+    // Only show expenses where the user is the one who has to pay (paidById)
+    // OR expenses created by the user that haven't been assigned yet (paidById is null)
+    expenses = await expenseRepository
+      .createQueryBuilder("expense")
+      .leftJoinAndSelect("expense.user", "user")
+      .leftJoinAndSelect("expense.group", "group")
+      .leftJoinAndSelect("expense.paidBy", "paidBy")
+      .where("expense.paidById = :userId", { userId })
+      .orWhere("expense.userId = :userId AND expense.paidById IS NULL", { userId })
+      .orderBy("expense.createdAt", "DESC")
+      .getMany();
   }
 
   // Convert amounts back to decimal and calculate total
@@ -203,9 +240,7 @@ export const deleteExpense = async (expenseId, userId) => {
 
   // Only the group admin can delete expenses
   if (expense.group.adminId !== userId) {
-    throw new AuthorizationError(
-      "Only the group admin can delete expenses"
-    );
+    throw new AuthorizationError("Only the group admin can delete expenses");
   }
 
   await expenseRepository.remove(expense);
@@ -242,6 +277,40 @@ export const assignExpense = async (expenseId, paidById, userId) => {
   // Update expense
   expense.paidById = paidById;
   await expenseRepository.save(expense);
+
+  // Send notification to the assigned user (if not the admin)
+  if (paidById !== userId) {
+    try {
+      const admin = expense.group.members.find((m) => m.id === userId);
+      const assignedUser = expense.group.members.find((m) => m.id === paidById);
+
+      await createAndEmitNotification({
+        userId: paidById,
+        type: "EXPENSE_ASSIGNED",
+        title: `Te han asignado un gasto`,
+        message: `${
+          admin?.email || "El administrador"
+        } te ha asignado el gasto "${expense.concept}" en ${
+          expense.group.name
+        }`,
+        data: {
+          groupId: expense.groupId,
+          groupName: expense.group.name,
+          expenseId: expense.id,
+          concept: expense.concept,
+          amount: (expense.amount / 100).toFixed(2),
+          adminId: userId,
+          adminEmail: admin?.email,
+        },
+      });
+    } catch (notifError) {
+      console.error(
+        "Error sending notification for expense assignment:",
+        notifError
+      );
+      // Don't fail assignment if notification fails
+    }
+  }
 
   // Load paidBy relation for response
   const updatedExpense = await expenseRepository.findOne({

@@ -13,8 +13,10 @@ import groupRoutes from "./group.routes.js";
 import groupMessageRoutes from "./groupMessage.routes.js";
 import directMessageRoutes from "./directMessage.routes.js";
 import expenseRoutes from "./expense.routes.js";
-import questionRoutes from "./question.routes.js";
 import answerRoutes from "./answer.routes.js";
+import listRoutes from "./list.routes.js";
+import questionRoutes from "./question.routes.js";
+import notificationRoutes from "./notification.routes.js";
 
 const router = Router();
 
@@ -31,9 +33,11 @@ router.use("", gamificationRoutes);
 router.use("/cron", cronRoutes);
 router.use("/groups", groupRoutes);
 router.use("", expenseRoutes);
+router.use("", answerRoutes);
+router.use("/lists", listRoutes);
 router.use("/groups", groupMessageRoutes);
 router.use("", questionRoutes);
-router.use("", answerRoutes);
+router.use("/notifications", notificationRoutes);
 
 const apiRouter = Router();
 apiRouter.use("/api", router);

@@ -18,6 +18,19 @@ export default new EntitySchema({
       type: "varchar",
       nullable: false,
     },
+    name: {
+      type: "varchar",
+      length: 30,
+      nullable: true,
+    },
+    age: {
+      type: "integer",
+      nullable: true,
+    },
+    profilePicture: {
+      type: "varchar",
+      nullable: true,
+    },
     isEmailConfirmed: {
       type: "boolean",
       default: false,
@@ -28,6 +41,14 @@ export default new EntitySchema({
     },
     emailConfirmationExpires: {
       type: "timestamp", // timestamp se almacena en UTC en PostgreSQL
+      nullable: true,
+    },
+    passwordResetToken: {
+      type: "varchar",
+      nullable: true,
+    },
+    passwordResetExpires: {
+      type: "timestamp",
       nullable: true,
     },
     // Gamification fields

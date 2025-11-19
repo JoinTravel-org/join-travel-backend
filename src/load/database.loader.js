@@ -1,3 +1,4 @@
+import logger from "../config/logger.js";
 import { AppDataSource } from "./typeorm.loader.js";
 import { createDatabase } from "typeorm-extension";
 import seedDatabase from "./seed.loader.js";
@@ -23,7 +24,7 @@ export default async function connectDB(maxRetries = 5, retryDelay = 2000) {
 
       // Now connect to the actual database
       await AppDataSource.initialize();
-      console.log("Database connected successfully");
+      logger.info("Database connected successfully");
 
       // Seed the database with initial data
       await seedDatabase();
@@ -34,7 +35,7 @@ export default async function connectDB(maxRetries = 5, retryDelay = 2000) {
       console.error(`Database connection attempt ${retries}/${maxRetries} failed:`, err.message);
 
       if (retries < maxRetries) {
-        console.log(`Retrying in ${retryDelay}ms...`);
+        logger.info(`Retrying in ${retryDelay}ms...`);
         await new Promise(resolve => setTimeout(resolve, retryDelay));
       } else {
         console.error("Database connection failed after all retries:", err);

@@ -18,7 +18,7 @@ services:
     container_name: jointravel-back-container
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "${APP_HOST_PORT}:8080"
     environment:
@@ -28,8 +28,15 @@ services:
       - POSTGRES_HOST=postgres_db
       - POSTGRES_PORT=5432
       - TZ=UTC
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./package.json:/usr/src/app/package.json
+      - ./pnpm-lock.yaml:/usr/src/app/pnpm-lock.yaml
+      - uploads_data:/usr/src/app/uploads
     depends_on:
       - postgres_db
 
 volumes:
   postgres_data:
+  uploads_data:
+    driver: local

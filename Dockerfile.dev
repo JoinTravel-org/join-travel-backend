@@ -1,0 +1,27 @@
+##############################
+# DEVELOPMENT STAGE
+##############################
+FROM node:22-alpine AS dev
+
+WORKDIR /usr/src/app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy package files first for better caching
+COPY package.json pnpm-lock.yaml* ./
+
+# Install all dependencies including devDependencies
+RUN pnpm install
+
+# Copy source code
+COPY . .
+
+# Expose the development port
+EXPOSE 8080
+
+# Set development environment
+ENV NODE_ENV=development
+
+# Use nodemon for auto-reloading
+CMD ["pnpm", "run", "dev"]

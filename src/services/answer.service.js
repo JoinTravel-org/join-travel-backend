@@ -87,9 +87,13 @@ class AnswerService {
         createdAt: answer.createdAt,
         updatedAt: answer.updatedAt,
         userEmail: answer.user?.email,
+        userName: answer.user?.name,
+        userProfilePicture: answer.user?.profilePicture,
         user: answer.user ? {
           id: answer.user.id,
           email: answer.user.email,
+          name: answer.user.name,
+          profilePicture: answer.user.profilePicture,
         } : null,
         question: answer.question ? {
           id: answer.question.id,

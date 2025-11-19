@@ -8,6 +8,7 @@ import { AppDataSource } from "./load/typeorm.loader.js";
 import directMessageService from "./services/directMessage.service.js";
 import groupMessageService from "./services/groupMessage.service.js";
 import groupRepository from "./repository/group.repository.js";
+import { setIoInstance } from "./socket/socket.instance.js";
 
 import connectDB from "./load/database.loader.js";
 const server = createServer(app);
@@ -194,12 +195,15 @@ io.on("connection", (socket) => {
   });
 });
 
+// Set io instance for use in other modules (to avoid circular dependencies)
+setIoInstance(io);
+
 const PORT = config.port;
 
 (async () => {
   await connectDB();
   server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    logger.info(`Server running on http://localhost:${PORT}`);
     logger.info(`Socket.io server initialized on port ${PORT}`);
   });
 

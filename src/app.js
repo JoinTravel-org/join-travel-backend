@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import path from "path";
+import logger from "./config/logger.js";
 import routes from "./routes/index.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 import { swaggerUi, specs } from "./config/swagger.js";
@@ -13,8 +15,14 @@ app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(cors());
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(morgan("dev"));
+
+// Serve static files for uploads
+app.use('/uploads/avatars', express.static(path.join(process.cwd(), 'uploads', 'avatars')));
+app.use('/uploads/reviews', express.static(path.join(process.cwd(), 'uploads', 'reviews')));
 
 // Swagger documentation
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));

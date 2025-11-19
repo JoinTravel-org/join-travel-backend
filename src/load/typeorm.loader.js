@@ -8,6 +8,7 @@ import RevokedToken from "../models/revokedToken.model.js";
 import Place from "../models/place.model.js";
 import UserFavorite from "../models/userFavorite.model.js";
 import Itinerary, { ItineraryItemSchema } from "../models/itinerary.model.js";
+import List from "../models/list.model.js";
 import Review from "../models/review.model.js";
 import ReviewMedia from "../models/reviewMedia.model.js";
 import ReviewLike from "../models/reviewLike.model.js";
@@ -21,6 +22,9 @@ import Question from "../models/question.model.js";
 import Answer from "../models/answer.model.js";
 import QuestionVote from "../models/questionVote.model.js";
 import AnswerVote from "../models/answerVote.model.js";
+import Notification from "../models/notification.model.js";
+import UserFollower from "../models/userFollower.model.js";
+
 import config from "../config/index.js";
 
 export const AppDataSource = new DataSource({
@@ -42,9 +46,11 @@ export const AppDataSource = new DataSource({
     Badge,
     RevokedToken,
     Place,
-    UserFavorite,
     Itinerary,
     ItineraryItemSchema,
+    List,
+    UserFavorite,
+    UserFollower,
     Review,
     ReviewMedia,
     ReviewLike,
@@ -56,6 +62,7 @@ export const AppDataSource = new DataSource({
     Answer,
     QuestionVote,
     AnswerVote,
+    Notification,
   ],
   migrations: ["./src/migrations/*.js"],
   timezone: "UTC", // Usar UTC para consistencia global

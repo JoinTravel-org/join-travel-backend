@@ -1,3 +1,4 @@
+import logger from "../config/logger.js";
 import UserRepository from "../repository/user.repository.js";
 import emailService from "./email.service.js";
 import bcrypt from "bcrypt";
@@ -16,10 +17,10 @@ class AuthService {
   }
   /**
    * Registra un nuevo usuario
-   * @param {Object} userData - { email, password }
+   * @param {Object} userData - { email, password, name (optional), age (optional) }
    * @returns {Promise<Object>} - { user, message }
    */
-  async register({ email, password }) {
+  async register({ email, password, name, age }) {
     // 1. Validar formato de email
     if (!isValidEmail(email)) {
       throw new ValidationError("Formato de correo inválido.");
@@ -31,31 +32,57 @@ class AuthService {
       throw new ValidationError("La contraseña no cumple con los requisitos.", passwordValidation.errors);
     }
 
-    // 3. Verificar que el email no exista
+    // 3. Validar nombre si se proporciona
+    if (name !== undefined && name !== null && name.trim().length > 30) {
+      throw new ValidationError("El nombre no puede tener más de 30 caracteres.");
+    }
+
+    // 4. Validar edad si se proporciona
+    if (age !== undefined && age !== null) {
+      const ageNum = Number(age);
+      if (isNaN(ageNum) || ageNum < 13 || ageNum > 120) {
+        throw new ValidationError("La edad debe estar entre 13 y 120 años.");
+      }
+    }
+
+    // 5. Verificar que el email no exista
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
       throw new ValidationError("El email ya está en uso. Intente iniciar sesión.");
     }
 
-    // 4. Hash de la contraseña
+    // 6. Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 5. Generar token de confirmación
+    // 7. Generar token de confirmación
     const confirmationToken = crypto.randomBytes(32).toString("hex");
-    console.log("CONFIRMATION TOKEN: ", confirmationToken);
+    logger.info("CONFIRMATION TOKEN: ", confirmationToken);
     // Date.now() retorna timestamp en UTC, la fecha se guarda en UTC en PostgreSQL
     const tokenExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas desde ahora (UTC)
 
-    // 6. Crear usuario
-    const user = await this.userRepository.create({
+    // 8. Preparar datos del usuario
+    const userData = {
       email,
       password: hashedPassword,
       emailConfirmationToken: confirmationToken,
       emailConfirmationExpires: tokenExpiration,
       isEmailConfirmed: false,
-    });
+    };
 
-    // 7. Enviar correo de confirmación (en segundo plano con timeout de 30 segundos)
+    // Agregar nombre si se proporciona
+    if (name && name.trim()) {
+      userData.name = name.trim();
+    }
+
+    // Agregar edad si se proporciona
+    if (age !== undefined && age !== null) {
+      userData.age = Number(age);
+    }
+
+    // 9. Crear usuario
+    const user = await this.userRepository.create(userData);
+
+    // 10. Enviar correo de confirmación (en segundo plano con timeout de 30 segundos)
     let emailPromise;
     if (process.env.NODE_ENV === 'test') {
       // En tests, no enviar email, solo simular
@@ -80,7 +107,7 @@ class AuthService {
       // Podríamos marcar el usuario para reenviar el correo después
     }
 
-    // 8. Retornar usuario (sin la contraseña)
+    // 11. Retornar usuario (sin la contraseña)
     const {
       password: _,
       emailConfirmationToken: __,
@@ -157,7 +184,7 @@ class AuthService {
     try {
       const gamificationService = (await import('./gamification.service.js')).default;
       await gamificationService.awardPoints(user.id, 'profile_completed', {}, false);
-      console.log(`Profile completed action awarded to user ${user.id} after email confirmation`);
+      logger.info(`Profile completed action awarded to user ${user.id} after email confirmation`);
     } catch (gamificationError) {
       console.error(`Failed to award profile_completed action for user ${user.id}:`, gamificationError);
       // Don't fail email confirmation if gamification fails
@@ -254,6 +281,96 @@ class AuthService {
     const revokedTokenRepo = AppDataSource.getRepository(RevokedToken);
     const revoked = await revokedTokenRepo.findOne({ where: { token } });
     return !!revoked;
+  }
+
+  /**
+   * Solicita recuperación de contraseña
+   * @param {string} email - Email del usuario
+   * @returns {Promise<Object>} - { message }
+   */
+  async forgotPassword(email) {
+    // 1. Validar formato de email
+    if (!isValidEmail(email)) {
+      throw new ValidationError("Formato de correo inválido.");
+    }
+
+    // 2. Buscar usuario por email
+    const user = await this.userRepository.findByEmail(email);
+    
+    // Criterio de aceptación 2: Si no existe el correo, mostrar mensaje específico
+    if (!user) {
+      throw new ValidationError("No existe una cuenta con este correo.");
+    }
+
+    // 3. Generar token de reseteo de contraseña
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    
+    // Criterio de aceptación 4: El token debe durar 24 horas
+    const tokenExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+
+    // 4. Guardar token en la base de datos
+    await this.userRepository.update(user.id, {
+      passwordResetToken: resetToken,
+      passwordResetExpires: tokenExpiration,
+    });
+
+    // 5. Enviar correo de recuperación
+    try {
+      await this.emailService.sendPasswordResetEmail(email, resetToken);
+    } catch (error) {
+      console.error("Error al enviar correo de recuperación:", error);
+      throw new ValidationError("Error al enviar el correo de recuperación. Por favor intenta de nuevo.");
+    }
+
+    return {
+      message: "Se ha enviado un enlace de recuperación a tu correo electrónico.",
+    };
+  }
+
+  /**
+   * Restablece la contraseña usando un token
+   * @param {string} token - Token de reseteo
+   * @param {string} newPassword - Nueva contraseña
+   * @returns {Promise<Object>} - { message }
+   */
+  async resetPassword(token, newPassword) {
+    // 1. Validar que se proporcione el token y la nueva contraseña
+    if (!token || !newPassword) {
+      throw new ValidationError("Token y contraseña son requeridos.");
+    }
+
+    // 2. Buscar usuario por token de reseteo
+    const user = await this.userRepository.findByPasswordResetToken(token);
+
+    if (!user) {
+      throw new ValidationError("Token de recuperación inválido o expirado.");
+    }
+
+    // 3. Verificar que el token no haya expirado
+    const now = new Date();
+    if (now > user.passwordResetExpires) {
+      throw new ValidationError("El token de recuperación ha expirado. Por favor solicita uno nuevo.");
+    }
+
+    // 4. Validar requisitos de la nueva contraseña
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      throw new ValidationError("La contraseña no cumple con los requisitos.", passwordValidation.errors);
+    }
+
+    // 5. Hash de la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 6. Actualizar contraseña y limpiar tokens de reseteo
+    await this.userRepository.update(user.id, {
+      password: hashedPassword,
+      passwordResetToken: null,
+      passwordResetExpires: null,
+    });
+
+    return {
+      message: "Contraseña restablecida exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.",
+    };
   }
 }
 
