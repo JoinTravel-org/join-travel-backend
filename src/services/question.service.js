@@ -24,7 +24,9 @@ class QuestionService {
 
       // Validar longitud del contenido
       if (content.trim().length < 10 || content.trim().length > 500) {
-        const error = new Error("El contenido debe tener entre 10 y 500 caracteres");
+        const error = new Error(
+          "El contenido debe tener entre 10 y 500 caracteres"
+        );
         error.status = 400;
         throw error;
       }
@@ -37,24 +39,38 @@ class QuestionService {
         content: content.trim(),
       });
 
-      logger.info(`Question created: ${question.id} by user ${userId} for place ${placeId}`);
+      logger.info(
+        `Question created: ${question.id} by user ${userId} for place ${placeId}`
+      );
+
+      // Convertir fecha UTC a GMT-3
+      const createdAtGMT3 = new Date(
+        question.createdAt.getTime() - 3 * 60 * 60 * 1000
+      );
+      const updatedAtGMT3 = new Date(
+        question.updatedAt.getTime() - 3 * 60 * 60 * 1000
+      );
 
       return {
         id: question.id,
         placeId: question.placeId,
         userId: question.userId,
         content: question.content,
-        createdAt: question.createdAt,
-        updatedAt: question.updatedAt,
+        createdAt: createdAtGMT3.toISOString(),
+        updatedAt: updatedAtGMT3.toISOString(),
         userEmail: question.user?.email,
-        user: question.user ? {
-          id: question.user.id,
-          email: question.user.email,
-        } : null,
-        place: question.place ? {
-          id: question.place.id,
-          name: question.place.name,
-        } : null,
+        user: question.user
+          ? {
+              id: question.user.id,
+              email: question.user.email,
+            }
+          : null,
+        place: question.place
+          ? {
+              id: question.place.id,
+              name: question.place.name,
+            }
+          : null,
         voteCount: 0,
       };
     } catch (error) {
@@ -78,37 +94,59 @@ class QuestionService {
         throw error;
       }
 
-      const questions = await this.questionRepository.findByPlaceId(placeId, limit, offset);
+      const questions = await this.questionRepository.findByPlaceId(
+        placeId,
+        limit,
+        offset
+      );
 
       // Procesar el resultado para incluir información del usuario
-      const questionsWithUserInfo = questions.map((question) => ({
-        id: question.id,
-        placeId: question.placeId,
-        userId: question.userId,
-        content: question.content,
-        createdAt: question.createdAt,
-        updatedAt: question.updatedAt,
-        userEmail: question.user?.email,
-        userName: question.user?.name,
-        userProfilePicture: question.user?.profilePicture,
-        user: question.user ? {
-          id: question.user.id,
-          email: question.user.email,
-          name: question.user.name,
-          profilePicture: question.user.profilePicture,
-        } : null,
-        place: question.place ? {
-          id: question.place.id,
-          name: question.place.name,
-        } : null,
-        voteCount: question.voteCount || 0,
-      }));
+      const questionsWithUserInfo = questions.map((question) => {
+        // Convertir fecha UTC a GMT-3
+        const createdAtGMT3 = new Date(
+          question.createdAt.getTime() - 3 * 60 * 60 * 1000
+        );
+        const updatedAtGMT3 = new Date(
+          question.updatedAt.getTime() - 3 * 60 * 60 * 1000
+        );
 
-      logger.info(`Retrieved ${questionsWithUserInfo.length} questions for place ${placeId}`);
+        return {
+          id: question.id,
+          placeId: question.placeId,
+          userId: question.userId,
+          content: question.content,
+          createdAt: createdAtGMT3.toISOString(),
+          updatedAt: updatedAtGMT3.toISOString(),
+          userEmail: question.user?.email,
+          userName: question.user?.name,
+          userProfilePicture: question.user?.profilePicture,
+          user: question.user
+            ? {
+                id: question.user.id,
+                email: question.user.email,
+                name: question.user.name,
+                profilePicture: question.user.profilePicture,
+              }
+            : null,
+          place: question.place
+            ? {
+                id: question.place.id,
+                name: question.place.name,
+              }
+            : null,
+          voteCount: question.voteCount || 0,
+        };
+      });
+
+      logger.info(
+        `Retrieved ${questionsWithUserInfo.length} questions for place ${placeId}`
+      );
 
       return questionsWithUserInfo;
     } catch (error) {
-      logger.error(`Error getting questions for place ${placeId}: ${error.message}`);
+      logger.error(
+        `Error getting questions for place ${placeId}: ${error.message}`
+      );
       throw error;
     }
   }
@@ -136,12 +174,17 @@ class QuestionService {
       }
 
       // Verificar si el usuario ya votó
-      const hasVoted = await this.questionVoteRepository.hasUserVoted(questionId, userId);
+      const hasVoted = await this.questionVoteRepository.hasUserVoted(
+        questionId,
+        userId
+      );
 
       if (hasVoted) {
         // Remover voto
         await this.questionVoteRepository.delete(questionId, userId);
-        const voteCount = await this.questionVoteRepository.countVotes(questionId);
+        const voteCount = await this.questionVoteRepository.countVotes(
+          questionId
+        );
 
         logger.info(`User ${userId} removed vote from question ${questionId}`);
 
@@ -155,7 +198,9 @@ class QuestionService {
           questionId,
           userId,
         });
-        const voteCount = await this.questionVoteRepository.countVotes(questionId);
+        const voteCount = await this.questionVoteRepository.countVotes(
+          questionId
+        );
 
         logger.info(`User ${userId} voted for question ${questionId}`);
 
@@ -184,15 +229,22 @@ class QuestionService {
         throw error;
       }
 
-      const hasVoted = await this.questionVoteRepository.hasUserVoted(questionId, userId);
-      const voteCount = await this.questionVoteRepository.countVotes(questionId);
+      const hasVoted = await this.questionVoteRepository.hasUserVoted(
+        questionId,
+        userId
+      );
+      const voteCount = await this.questionVoteRepository.countVotes(
+        questionId
+      );
 
       return {
         hasVoted,
         voteCount,
       };
     } catch (error) {
-      logger.error(`Error getting vote status for question ${questionId}: ${error.message}`);
+      logger.error(
+        `Error getting vote status for question ${questionId}: ${error.message}`
+      );
       throw error;
     }
   }
