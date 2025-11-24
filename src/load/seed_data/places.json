@@ -178,5 +178,165 @@
     "rating": null,
     "city": "El Calafate",
     "description": "Glaciar masivo en la Patagonia, conocido por sus formaciones de hielo en avance y paisajes espectaculares."
+  },
+  {
+    "name": "Cerro Catedral",
+    "address": "Av. Exequiel Bustillo Km 12, San Carlos de Bariloche, Río Negro, Argentina",
+    "latitude": -41.15,
+    "longitude": -71.4,
+    "image": "https://bariloche.org/wp-content/uploads/2015/06/cerro-catedral-excursion.jpg",
+    "rating": null,
+    "city": "San Carlos de Bariloche",
+    "description": "Centro de esquí más importante de América del Sur, con pistas para todos los niveles y vistas panorámicas espectaculares del lago Nahuel Huapi."
+  },
+  {
+    "name": "Centro Cívico Bariloche",
+    "address": "Centro Cívico, San Carlos de Bariloche, Río Negro, Argentina",
+    "latitude": -41.1335,
+    "longitude": -71.3103,
+    "image": "https://barilocheturismo.gob.ar/images/actividades/paseos/centro-civico/centro-civico-03.jpg",
+    "rating": null,
+    "city": "San Carlos de Bariloche",
+    "description": "Plaza central de estilo alpino suizo con arquitectura de piedra y madera, rodeada de tiendas de chocolate y artesanías regionales."
+  },
+  {
+    "name": "Cerro Aconcagua",
+    "address": "Parque Provincial Aconcagua, Mendoza, Argentina",
+    "latitude": -32.6532,
+    "longitude": -70.0109,
+    "image": "https://001e6926.delivery.rocketcdn.me/wp-content/uploads/2025/05/aconcagua-1536x1024-1-1024x683.jpg",
+    "rating": null,
+    "city": "Mendoza",
+    "description": "La montaña más alta de América con 6,961 metros, destino de montañistas de todo el mundo y símbolo del andinismo argentino."
+  },
+  {
+    "name": "Parque General San Martín",
+    "address": "Av. del Libertador, Mendoza, Argentina",
+    "latitude": -32.8908,
+    "longitude": -68.8753,
+    "image": "https://cloudfront-us-east-1.images.arcpublishing.com/artear/WNWI7VPE3RCWBCG6BYB2S7ZMLU.jpg",
+    "rating": null,
+    "city": "Mendoza",
+    "description": "Extenso parque urbano con lago artificial, jardín zoológico, rosedal y espacios deportivos, ideal para actividades al aire libre."
+  },
+  {
+    "name": "Quebrada de Humahuaca",
+    "address": "Ruta Nacional 9, Jujuy, Argentina",
+    "latitude": -23.2033,
+    "longitude": -65.3486,
+    "image": "https://millasxelmundo.com/wp-content/uploads/2025/09/Quebrada-de-Humahuaca-Photo-by-Ossian-Lindholm.jpg",
+    "rating": null,
+    "city": "Humahuaca",
+    "description": "Valle montañoso declarado Patrimonio de la Humanidad por la UNESCO, famoso por el Cerro de los Siete Colores y pueblos prehispánicos."
+  },
+  {
+    "name": "Salinas Grandes",
+    "address": "Ruta Nacional 52, Jujuy, Argentina",
+    "latitude": -23.6419,
+    "longitude": -65.8831,
+    "image": "https://cdn.prod.website-files.com/5edaacd12cbafceef29a5a9d/661012d239f60f07fcf6c2f9_salinas-grandes-despejado.jpg",
+    "rating": null,
+    "city": "Jujuy",
+    "description": "Extenso desierto de sal a 3,450 metros de altura con paisajes surrealistas de blancura infinita, uno de los más grandes de Sudamérica."
+  },
+  {
+    "name": "Península Valdés",
+    "address": "Puerto Pirámides, Chubut, Argentina",
+    "latitude": -42.5114,
+    "longitude": -64.27,
+    "image": "https://keltturismo.tur.ar/wp-content/uploads/2023/01/Peninsula-Valdes-2.jpg",
+    "rating": null,
+    "city": "Puerto Madryn",
+    "description": "Reserva natural protegida Patrimonio de la Humanidad, famosa por la observación de ballenas francas, pingüinos y lobos marinos."
+  },
+  {
+    "name": "Parque Nacional Talampaya",
+    "address": "Ruta Provincial 26, La Rioja, Argentina",
+    "latitude": -29.8342,
+    "longitude": -67.8258,
+    "image": "https://www.suteba.org.ar/files/86119_6365.jpg",
+    "rating": null,
+    "city": "Villa Unión",
+    "description": "Cañón de paredes rojas con formaciones geológicas únicas y petroglifos ancestrales, Patrimonio de la Humanidad por la UNESCO."
+  },
+  {
+    "name": "Parque Nacional Tierra del Fuego",
+    "address": "Ruta Nacional 3, Ushuaia, Tierra del Fuego, Argentina",
+    "latitude": -54.8333,
+    "longitude": -68.5,
+    "image": "https://best-tourpatagonia.tur.ar/wp-content/uploads/2023/06/IMG_2454Edited-scaled.jpg",
+    "rating": null,
+    "city": "Ushuaia",
+    "description": "Parque nacional más austral del mundo con bosques, lagos, montañas y fauna patagónica, ideal para trekking y naturaleza."
+  },
+  {
+    "name": "Faro del Fin del Mundo",
+    "address": "Isla de los Estados, Tierra del Fuego, Argentina",
+    "latitude": -54.8737,
+    "longitude": -63.8,
+    "image": "https://www.patagoniaadvent.com.ar/fotos/faro/slides/faro.jpg",
+    "rating": null,
+    "city": "Ushuaia",
+    "description": "Faro icónico que inspiró la novela de Julio Verne, símbolo del fin del mundo y atracción turística imperdible en Ushuaia."
+  },
+  {
+    "name": "Laguna de los Tres",
+    "address": "Parque Nacional Los Glaciares, Santa Cruz, Argentina",
+    "latitude": -49.2736,
+    "longitude": -73.0486,
+    "image": "https://www.wikiexplora.com/images/b/b2/Mt_Fitz_Roy_desde_Mirador_Laguna_de_los_Tres_By_JohanSjolander.jpg",
+    "rating": null,
+    "city": "El Chaltén",
+    "description": "Laguna glaciar al pie del Cerro Fitz Roy, destino emblemático para trekking con vistas panorámicas de las agujas de granito."
+  },
+  {
+    "name": "Cuevas de las Manos",
+    "address": "Ruta Provincial 41, Santa Cruz, Argentina",
+    "latitude": -47.1548,
+    "longitude": -70.6611,
+    "image": "https://upload.wikimedia.org/wikipedia/commons/f/f4/SantaCruz-CuevaManos-P2210651b.jpg",
+    "rating": null,
+    "city": "Perito Moreno",
+    "description": "Sitio arqueológico con pinturas rupestres de más de 9,000 años de antigüedad, Patrimonio de la Humanidad con arte prehistórico único."
+  },
+  {
+    "name": "Parque Nacional Los Alerces",
+    "address": "Ruta Provincial 71, Chubut, Argentina",
+    "latitude": -42.8667,
+    "longitude": -71.7667,
+    "image": "https://chubutpatagonia.gob.ar/wp-content/uploads/2019/11/PLA-Por.jpg",
+    "rating": null,
+    "city": "Esquel",
+    "description": "Bosque andino patagónico con alerces milenarios, lagos cristalinos y senderos de trekking en un entorno prístino y protegido."
+  },
+  {
+    "name": "Cerro de los Siete Colores",
+    "address": "Purmamarca, Jujuy, Argentina",
+    "latitude": -23.745,
+    "longitude": -65.5,
+    "image": "https://upload.wikimedia.org/wikipedia/commons/4/40/Jujuy-Purmamarca-P3120100.JPG",
+    "rating": null,
+    "city": "Purmamarca",
+    "description": "Cerro multicolor icónico con estratos minerales que crean una paleta de siete tonalidades, símbolo de la Quebrada de Humahuaca."
+  },
+  {
+    "name": "Dique Potrerillos",
+    "address": "Ruta Provincial 7, Mendoza, Argentina",
+    "latitude": -32.9667,
+    "longitude": -69.2333,
+    "image": "https://upload.wikimedia.org/wikipedia/commons/4/42/Embalse_Potrerillos_y_dique.JPG",
+    "rating": null,
+    "city": "Potrerillos",
+    "description": "Embalse artificial rodeado de montañas andinas, ideal para deportes acuáticos, rafting y paisajes impresionantes en la Cordillera."
+  },
+  {
+    "name": "Ruinas de Quilmes",
+    "address": "Ruta Provincial 357, Tucumán, Argentina",
+    "latitude": -26.4558,
+    "longitude": -66.0442,
+    "image": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Ruinas_de_quilmes_costado.jpg",
+    "rating": null,
+    "city": "Quilmes",
+    "description": "Asentamiento precolombino de los diaguitas, ciudad fortificada con ruinas arqueológicas que testimonian la resistencia indígena."
   }
 ]
