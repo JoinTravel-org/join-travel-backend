@@ -65,7 +65,7 @@ export const AppDataSource = new DataSource({
     Notification,
   ],
   migrations: ["./src/migrations/*.js"],
-  timezone: "UTC", // Usar UTC para consistencia global
+  timezone: "America/Argentina/Buenos_Aires", // Usar zona horaria de Argentina
   // Create database if it doesn't exist
   extra: {
     connectionLimit: 10,

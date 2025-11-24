@@ -24,7 +24,9 @@ class AnswerService {
 
       // Validar longitud del contenido
       if (content.trim().length < 10 || content.trim().length > 1000) {
-        const error = new Error("El contenido debe tener entre 10 y 1000 caracteres");
+        const error = new Error(
+          "El contenido debe tener entre 10 y 1000 caracteres"
+        );
         error.status = 400;
         throw error;
       }
@@ -37,24 +39,38 @@ class AnswerService {
         content: content.trim(),
       });
 
-      logger.info(`Answer created: ${answer.id} by user ${userId} for question ${questionId}`);
+      logger.info(
+        `Answer created: ${answer.id} by user ${userId} for question ${questionId}`
+      );
+
+      // Convertir fecha UTC a GMT-3
+      const createdAtGMT3 = new Date(
+        answer.createdAt.getTime() - 3 * 60 * 60 * 1000
+      );
+      const updatedAtGMT3 = new Date(
+        answer.updatedAt.getTime() - 3 * 60 * 60 * 1000
+      );
 
       return {
         id: answer.id,
         questionId: answer.questionId,
         userId: answer.userId,
         content: answer.content,
-        createdAt: answer.createdAt,
-        updatedAt: answer.updatedAt,
+        createdAt: createdAtGMT3.toISOString(),
+        updatedAt: updatedAtGMT3.toISOString(),
         userEmail: answer.user?.email,
-        user: answer.user ? {
-          id: answer.user.id,
-          email: answer.user.email,
-        } : null,
-        question: answer.question ? {
-          id: answer.question.id,
-          content: answer.question.content,
-        } : null,
+        user: answer.user
+          ? {
+              id: answer.user.id,
+              email: answer.user.email,
+            }
+          : null,
+        question: answer.question
+          ? {
+              id: answer.question.id,
+              content: answer.question.content,
+            }
+          : null,
         voteCount: 0,
       };
     } catch (error) {
@@ -79,34 +95,52 @@ class AnswerService {
       const answers = await this.answerRepository.findByQuestionId(questionId);
 
       // Procesar el resultado para incluir información del usuario
-      const answersWithUserInfo = answers.map((answer) => ({
-        id: answer.id,
-        questionId: answer.questionId,
-        userId: answer.userId,
-        content: answer.content,
-        createdAt: answer.createdAt,
-        updatedAt: answer.updatedAt,
-        userEmail: answer.user?.email,
-        userName: answer.user?.name,
-        userProfilePicture: answer.user?.profilePicture,
-        user: answer.user ? {
-          id: answer.user.id,
-          email: answer.user.email,
-          name: answer.user.name,
-          profilePicture: answer.user.profilePicture,
-        } : null,
-        question: answer.question ? {
-          id: answer.question.id,
-          content: answer.question.content,
-        } : null,
-        voteCount: answer.voteCount || 0,
-      }));
+      const answersWithUserInfo = answers.map((answer) => {
+        // Convertir fecha UTC a GMT-3
+        const createdAtGMT3 = new Date(
+          answer.createdAt.getTime() - 3 * 60 * 60 * 1000
+        );
+        const updatedAtGMT3 = new Date(
+          answer.updatedAt.getTime() - 3 * 60 * 60 * 1000
+        );
 
-      logger.info(`Retrieved ${answersWithUserInfo.length} answers for question ${questionId}`);
+        return {
+          id: answer.id,
+          questionId: answer.questionId,
+          userId: answer.userId,
+          content: answer.content,
+          createdAt: createdAtGMT3.toISOString(),
+          updatedAt: updatedAtGMT3.toISOString(),
+          userEmail: answer.user?.email,
+          userName: answer.user?.name,
+          userProfilePicture: answer.user?.profilePicture,
+          user: answer.user
+            ? {
+                id: answer.user.id,
+                email: answer.user.email,
+                name: answer.user.name,
+                profilePicture: answer.user.profilePicture,
+              }
+            : null,
+          question: answer.question
+            ? {
+                id: answer.question.id,
+                content: answer.question.content,
+              }
+            : null,
+          voteCount: answer.voteCount || 0,
+        };
+      });
+
+      logger.info(
+        `Retrieved ${answersWithUserInfo.length} answers for question ${questionId}`
+      );
 
       return answersWithUserInfo;
     } catch (error) {
-      logger.error(`Error getting answers for question ${questionId}: ${error.message}`);
+      logger.error(
+        `Error getting answers for question ${questionId}: ${error.message}`
+      );
       throw error;
     }
   }
@@ -134,7 +168,10 @@ class AnswerService {
       }
 
       // Verificar si el usuario ya votó
-      const hasVoted = await this.answerVoteRepository.hasUserVoted(answerId, userId);
+      const hasVoted = await this.answerVoteRepository.hasUserVoted(
+        answerId,
+        userId
+      );
 
       if (hasVoted) {
         // Remover voto
@@ -182,7 +219,10 @@ class AnswerService {
         throw error;
       }
 
-      const hasVoted = await this.answerVoteRepository.hasUserVoted(answerId, userId);
+      const hasVoted = await this.answerVoteRepository.hasUserVoted(
+        answerId,
+        userId
+      );
       const voteCount = await this.answerVoteRepository.countVotes(answerId);
 
       return {
@@ -190,7 +230,9 @@ class AnswerService {
         voteCount,
       };
     } catch (error) {
-      logger.error(`Error getting vote status for answer ${answerId}: ${error.message}`);
+      logger.error(
+        `Error getting vote status for answer ${answerId}: ${error.message}`
+      );
       throw error;
     }
   }

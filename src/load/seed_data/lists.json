@@ -1,0 +1,219 @@
+[
+  {
+    "name": "Mejores lugares de Buenos Aires",
+    "description": "Una colección de los lugares más icónicos y visitados de la capital argentina",
+    "userEmail": "walter@gmail.com",
+    "places": [
+      "Obelisco",
+      "Plaza de Mayo",
+      "La Boca",
+      "Palermo",
+      "Puerto Madero",
+      "San Telmo",
+      "Caminito"
+    ]
+  },
+  {
+    "name": "Patagonia imperdible",
+    "description": "Los destinos más espectaculares de la Patagonia argentina",
+    "userEmail": "damian@yahoo.com.ar",
+    "places": [
+      "Glaciar Perito Moreno",
+      "Cerro Catedral",
+      "Parque Nacional Tierra del Fuego",
+      "Faro del Fin del Mundo",
+      "Laguna de los Tres",
+      "Parque Nacional Los Alerces"
+    ]
+  },
+  {
+    "name": "Ruta del Norte Argentino",
+    "description": "Lugares mágicos del noroeste argentino con paisajes únicos",
+    "userEmail": "sebas@hotmail.com",
+    "places": [
+      "Quebrada de Humahuaca",
+      "Salinas Grandes",
+      "Cerro de los Siete Colores",
+      "Ruinas de Quilmes"
+    ]
+  },
+  {
+    "name": "Museos y cultura en CABA",
+    "description": "Los mejores museos y espacios culturales de Buenos Aires",
+    "userEmail": "walter@gmail.com",
+    "places": [
+      "Museo Nacional de Bellas Artes",
+      "El Ateneo Grand Splendid",
+      "Teatro Colón"
+    ]
+  },
+  {
+    "name": "Aventura y naturaleza",
+    "description": "Destinos para los amantes del trekking y la naturaleza salvaje",
+    "userEmail": "juan@outlook.com",
+    "places": [
+      "Cataratas del Iguazú",
+      "Glaciar Perito Moreno",
+      "Cerro Aconcagua",
+      "Parque Nacional Talampaya",
+      "Parque Nacional Tierra del Fuego",
+      "Laguna de los Tres",
+      "Cuevas de las Manos",
+      "Parque Nacional Los Alerces"
+    ]
+  },
+  {
+    "name": "Buenos Aires romántico",
+    "description": "Lugares perfectos para una cita o paseo en pareja",
+    "userEmail": "kim@gmail.com",
+    "places": [
+      "Palermo",
+      "Cementerio de la Recoleta",
+      "Rosedal de Palermo",
+      "Jardín Japonés"
+    ]
+  },
+  {
+    "name": "Argentina Patrimonio de la Humanidad",
+    "description": "Sitios declarados Patrimonio de la Humanidad por la UNESCO",
+    "userEmail": "silvia@arnet.com.ar",
+    "places": [
+      "Cataratas del Iguazú",
+      "Quebrada de Humahuaca",
+      "Parque Nacional Talampaya",
+      "Cuevas de las Manos"
+    ]
+  },
+  {
+    "name": "Deportes y actividades al aire libre",
+    "description": "Lugares ideales para practicar deportes y actividades outdoor",
+    "userEmail": "maria@gmail.com",
+    "places": [
+      "Cerro Catedral",
+      "Cerro Aconcagua",
+      "Parque General San Martín",
+      "Península Valdés",
+      "Parque Nacional Tierra del Fuego",
+      "Dique Potrerillos"
+    ]
+  },
+  {
+    "name": "Arquitectura argentina",
+    "description": "Edificios y construcciones emblemáticas del país",
+    "userEmail": "carlos@hotmail.com",
+    "places": [
+      "Obelisco",
+      "Cementerio de la Recoleta",
+      "El Ateneo Grand Splendid",
+      "Casa Rosada",
+      "Teatro Colón",
+      "Centro Cívico Bariloche"
+    ]
+  },
+  {
+    "name": "Barrios porteños imperdibles",
+    "description": "Los barrios más característicos de Buenos Aires",
+    "userEmail": "laura@yahoo.com",
+    "places": [
+      "La Boca",
+      "Palermo",
+      "Puerto Madero",
+      "San Telmo",
+      "Barrio Chino"
+    ]
+  },
+  {
+    "name": "Mendoza y sus alrededores",
+    "description": "Lo mejor de la provincia cuyana y su región",
+    "userEmail": "diego@outlook.com",
+    "places": [
+      "Cerro Aconcagua",
+      "Parque General San Martín",
+      "Dique Potrerillos"
+    ]
+  },
+  {
+    "name": "Fin del Mundo",
+    "description": "Experiencias únicas en Tierra del Fuego y Ushuaia",
+    "userEmail": "walter@gmail.com",
+    "places": ["Parque Nacional Tierra del Fuego", "Faro del Fin del Mundo"]
+  },
+  {
+    "name": "Glaciares y hielo eterno",
+    "description": "Los glaciares más impresionantes de Argentina",
+    "userEmail": "damian@yahoo.com.ar",
+    "places": ["Glaciar Perito Moreno", "Laguna de los Tres"]
+  },
+  {
+    "name": "Vida nocturna y gastronomía",
+    "description": "Lugares para disfrutar de la noche porteña y buena comida",
+    "userEmail": "sebas@hotmail.com",
+    "places": ["Palermo", "Puerto Madero", "San Telmo", "Barrio Chino"]
+  },
+  {
+    "name": "Bariloche completo",
+    "description": "Todo lo que no te podés perder en San Carlos de Bariloche",
+    "userEmail": "juan@outlook.com",
+    "places": ["Cerro Catedral", "Centro Cívico Bariloche"]
+  },
+  {
+    "name": "Parques Nacionales argentinos",
+    "description": "Los parques nacionales más espectaculares del país",
+    "userEmail": "kim@gmail.com",
+    "places": [
+      "Cataratas del Iguazú",
+      "Parque Nacional Talampaya",
+      "Parque Nacional Tierra del Fuego",
+      "Parque Nacional Los Alerces"
+    ]
+  },
+  {
+    "name": "Jujuy multicolor",
+    "description": "Los colores increíbles de la provincia de Jujuy",
+    "userEmail": "silvia@arnet.com.ar",
+    "places": [
+      "Quebrada de Humahuaca",
+      "Salinas Grandes",
+      "Cerro de los Siete Colores"
+    ]
+  },
+  {
+    "name": "Historia argentina viva",
+    "description": "Lugares históricos que cuentan la historia del país",
+    "userEmail": "maria@gmail.com",
+    "places": [
+      "Plaza de Mayo",
+      "Cementerio de la Recoleta",
+      "Casa Rosada",
+      "Cuevas de las Manos",
+      "Ruinas de Quilmes"
+    ]
+  },
+  {
+    "name": "Buenos Aires clásico",
+    "description": "Los lugares tradicionales que definen a Buenos Aires",
+    "userEmail": "carlos@hotmail.com",
+    "places": [
+      "Obelisco",
+      "Plaza de Mayo",
+      "La Boca",
+      "San Telmo",
+      "Caminito",
+      "Museo Nacional de Bellas Artes",
+      "Cementerio de la Recoleta"
+    ]
+  },
+  {
+    "name": "Rutas escénicas patagónicas",
+    "description": "Los caminos más hermosos de la Patagonia argentina",
+    "userEmail": "laura@yahoo.com",
+    "places": [
+      "Glaciar Perito Moreno",
+      "Cerro Catedral",
+      "Península Valdés",
+      "Parque Nacional Tierra del Fuego",
+      "Laguna de los Tres",
+      "Parque Nacional Los Alerces"
+    ]
+  }
+]

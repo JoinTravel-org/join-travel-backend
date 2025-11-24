@@ -1,0 +1,948 @@
+[
+  {
+    "question": {
+      "title": "¿Cuál es la mejor época para visitar las Cataratas del Iguazú?",
+      "content": "Estoy planeando mi viaje y no sé en qué mes ir. ¿Cuándo tienen más caudal las cataratas?",
+      "placeName": "Cataratas del Iguazú",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "La mejor época es entre marzo y mayo, después de las lluvias de verano. El caudal es impresionante pero no hay tanto turismo como en enero.",
+        "userEmail": "damian@yahoo.com.ar"
+      },
+      {
+        "content": "Yo fui en junio y estaba perfecto. Menos gente y temperaturas más suaves. El caudal sigue siendo muy bueno.",
+        "userEmail": "sebas@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Es necesario contratar guía para el Glaciar Perito Moreno?",
+      "content": "Voy a ir en enero y quiero saber si vale la pena contratar un tour guiado o puedo ir por mi cuenta.",
+      "placeName": "Glaciar Perito Moreno",
+      "userEmail": "juan@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "No es necesario para ver el glaciar desde las pasarelas, pero si querés hacer trekking sobre el hielo sí o sí necesitás un tour.",
+        "userEmail": "kim@gmail.com"
+      },
+      {
+        "content": "Las pasarelas están muy bien señalizadas. Si querés solo ver el glaciar, podés ir solo. Pero el trekking Big Ice es una experiencia increíble que recomiendo.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuánto tiempo lleva recorrer el Obelisco?",
+      "content": "Es la primera vez que voy a Buenos Aires. ¿Cuánto tiempo debería dedicarle al Obelisco?",
+      "placeName": "Obelisco",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Es solo para fotos, con 20-30 minutos está bien. Está en una avenida muy transitada.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "Como dice el otro comentario, es rápido. Aprovechá para caminar por la 9 de Julio y ver otros monumentos cercanos.",
+        "userEmail": "laura@yahoo.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿La Boca es segura para turistas?",
+      "content": "He escuchado opiniones mixtas sobre la seguridad en La Boca. ¿Es seguro ir?",
+      "placeName": "La Boca",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Caminito es seguro durante el día, hay mucha policía turística. No te alejes de la zona turística principal y andá de día.",
+        "userEmail": "walter@gmail.com"
+      },
+      {
+        "content": "Yo fui en la tarde y estuvo todo bien. Eso sí, no saques el celular en cualquier lado y mantené tus cosas cerca.",
+        "userEmail": "damian@yahoo.com.ar"
+      },
+      {
+        "content": "Es seguro en la zona turística. Evitá ir de noche y alejarte de Caminito. Con sentido común no hay problema.",
+        "userEmail": "sebas@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuándo es temporada de ballenas en Península Valdés?",
+      "content": "Quiero ver ballenas francas. ¿En qué meses puedo verlas?",
+      "placeName": "Península Valdés",
+      "userEmail": "juan@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "De junio a diciembre. Los mejores meses son septiembre y octubre cuando hay más ejemplares.",
+        "userEmail": "kim@gmail.com"
+      },
+      {
+        "content": "Yo fui en septiembre y vi decenas de ballenas con crías. Es espectacular. No vayas antes de junio porque no hay ballenas.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué circuito de las Cataratas es mejor?",
+      "content": "Solo tengo un día en Iguazú. ¿Superior o inferior?",
+      "placeName": "Cataratas del Iguazú",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Hacé los dos si podés. El inferior es más impactante porque estás al nivel del agua. El superior tiene vistas panorámicas increíbles.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "Definitivamente el inferior. Podés hacer ambos en un día, empezá temprano. Dejá la Garganta del Diablo para el final.",
+        "userEmail": "laura@yahoo.com"
+      },
+      {
+        "content": "Los dos valen la pena. En un día podés hacer inferior, superior y Garganta del Diablo sin problema.",
+        "userEmail": "diego@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuántos días necesito para El Chaltén?",
+      "content": "Quiero hacer trekking a Laguna de los Tres y Laguna Torre. ¿Con cuántos días me alcanza?",
+      "placeName": "Laguna de los Tres",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Mínimo 3 días completos. Un día para cada laguna y uno de descanso. Si podés quedate más, hay otros senderos hermosos.",
+        "userEmail": "damian@yahoo.com.ar"
+      },
+      {
+        "content": "Yo estuve 4 días y fue perfecto. Dos trekkings principales y tiempo para recorrer el pueblo.",
+        "userEmail": "sebas@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Conviene hospedarse en Palermo o Recoleta?",
+      "content": "Primera vez en Buenos Aires. ¿Qué barrio recomiendan para alojarse?",
+      "placeName": "Palermo",
+      "userEmail": "juan@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Palermo es más movido, con más bares y restaurantes. Recoleta es más tranquilo y elegante. Depende de lo que busques.",
+        "userEmail": "kim@gmail.com"
+      },
+      {
+        "content": "Palermo Hollywood o Soho son geniales si querés vida nocturna. Recoleta si preferís algo más cultural y tranquilo.",
+        "userEmail": "silvia@arnet.com.ar"
+      },
+      {
+        "content": "Yo prefiero Palermo Soho. Excelentes restaurantes, cafés y muy bien ubicado para moverse por la ciudad.",
+        "userEmail": "maria@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Se puede subir al Cerro Catedral sin esquiar?",
+      "content": "Vamos en verano. ¿Vale la pena subir al cerro fuera de temporada de esquí?",
+      "placeName": "Cerro Catedral",
+      "userEmail": "carlos@hotmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí! En verano podés subir en teleférico y las vistas son espectaculares. Hay senderos para caminar.",
+        "userEmail": "laura@yahoo.com"
+      },
+      {
+        "content": "Totalmente. Nosotros fuimos en febrero e hicimos trekking. Las vistas del lago Nahuel Huapi son increíbles.",
+        "userEmail": "diego@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Dónde comprar los mejores chocolates en Bariloche?",
+      "content": "¿Qué chocolatería recomiendan? Hay tantas en el Centro Cívico.",
+      "placeName": "Centro Cívico Bariloche",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Mamusia y Rapa Nui son clásicos. Fenoglio también es excelente. Probá en varias, cada una tiene su estilo.",
+        "userEmail": "damian@yahoo.com.ar"
+      },
+      {
+        "content": "Mamuschka es imperdible, el local es hermoso. Pero honestamente, todos los chocolates artesanales son buenos.",
+        "userEmail": "sebas@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Es difícil el trekking a Laguna de los Tres?",
+      "content": "No tengo mucha experiencia en trekking. ¿Es muy exigente?",
+      "placeName": "Laguna de los Tres",
+      "userEmail": "juan@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Son 20km ida y vuelta con bastante desnivel. No es técnico pero sí exigente. Empezá temprano y llevá buen calzado.",
+        "userEmail": "kim@gmail.com"
+      },
+      {
+        "content": "La última parte antes de la laguna es dura, pero el resto es moderado. Si tenés condición física básica lo podés hacer.",
+        "userEmail": "silvia@arnet.com.ar"
+      },
+      {
+        "content": "La subida final es empinada pero corta. Tomate tu tiempo y llevá agua y snacks. Las vistas valen cada esfuerzo.",
+        "userEmail": "maria@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué llevar para visitar las Salinas Grandes?",
+      "content": "Voy la próxima semana. ¿Qué recomiendan llevar?",
+      "placeName": "Salinas Grandes",
+      "userEmail": "carlos@hotmail.com"
+    },
+    "answers": [
+      {
+        "content": "Protector solar factor 50+, lentes de sol muy buenos (el reflejo es tremendo), gorro y agua. Hace calor y sol intenso.",
+        "userEmail": "laura@yahoo.com"
+      },
+      {
+        "content": "Como dice el otro, protección solar a full. Y llevá una bolsa de plástico para poner el celular si lo sacás, la sal puede dañarlo.",
+        "userEmail": "diego@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Puerto Madero es lindo para caminar de noche?",
+      "content": "¿Es seguro caminar de noche por Puerto Madero? ¿Está iluminado?",
+      "placeName": "Puerto Madero",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, es muy seguro y está muy bien iluminado. De hecho, de noche es hermoso con las luces reflejadas en el agua.",
+        "userEmail": "damian@yahoo.com.ar"
+      },
+      {
+        "content": "Es uno de los barrios más seguros de Buenos Aires. Ideal para cenar y caminar de noche.",
+        "userEmail": "sebas@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuál es el horario de visita de Plaza de Mayo?",
+      "content": "¿A qué hora abre y cierra la plaza? ¿Está abierta todo el día?",
+      "placeName": "Plaza de Mayo",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "La plaza está abierta las 24 horas, pero es más segura durante el día. De noche hay menos gente.",
+        "userEmail": "damian@yahoo.com.ar"
+      },
+      {
+        "content": "Siempre abierta, pero los monumentos alrededor tienen horarios específicos. La Casa Rosada cierra a las 6pm.",
+        "userEmail": "sebas@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay tours guiados en Plaza de Mayo?",
+      "content": "¿Se puede hacer un tour por la historia de la plaza?",
+      "placeName": "Plaza de Mayo",
+      "userEmail": "juan@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay tours históricos que explican la importancia política. Podés contratar en el lugar o online.",
+        "userEmail": "kim@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Caminito es seguro para turistas?",
+      "content": "He oído que La Boca puede ser peligroso. ¿Es Caminito seguro?",
+      "placeName": "Caminito",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Durante el día es muy seguro, hay mucha policía turística. Es uno de los lugares más visitados.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "Sí, pero no te alejes de la zona turística. De noche mejor no ir.",
+        "userEmail": "laura@yahoo.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuánto cuesta la entrada al Museo Nacional de Bellas Artes?",
+      "content": "¿Es gratis o hay que pagar? ¿Hay descuento para estudiantes?",
+      "placeName": "Museo Nacional de Bellas Artes",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "La entrada es gratuita. Abre de martes a viernes de 11am a 7pm, fines de semana hasta 8pm.",
+        "userEmail": "walter@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay que reservar para visitar El Ateneo?",
+      "content": "¿Se puede entrar sin reserva o es mejor reservar?",
+      "placeName": "El Ateneo Grand Splendid",
+      "userEmail": "damian@yahoo.com.ar"
+    },
+    "answers": [
+      {
+        "content": "No hace falta reserva, pero los fines de semana puede haber fila. Es más tranquilo entre semana.",
+        "userEmail": "sebas@hotmail.com"
+      },
+      {
+        "content": "Yo fui sin reserva y entré enseguida. Pero si vas a la hora pico, mejor llegar temprano.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué comer en Barrio Chino?",
+      "content": "Recomendaciones de restaurantes o comida típica.",
+      "placeName": "Barrio Chino",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Hay muchos lugares con dim sum y comida china auténtica. El Mercado Chino es genial para probar diferentes cosas.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cómo llegar al estadio de Boca Juniors?",
+      "content": "¿Qué transporte usar para ir al partido?",
+      "placeName": "Estadio Alberto J Armando",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "En subte línea C hasta San Juan, o colectivo. Para partidos, mejor ir temprano por la multitud.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "Taxi o Uber es seguro. El estadio está en La Boca, cerca de Caminito.",
+        "userEmail": "laura@yahoo.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿El Rosedal está abierto todo el año?",
+      "content": "¿Se puede visitar en invierno?",
+      "placeName": "Rosedal de Palermo",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, está abierto todo el año. En invierno hay menos flores pero sigue siendo hermoso.",
+        "userEmail": "walter@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Se puede visitar el interior de la Casa Rosada?",
+      "content": "¿Hay tours por dentro?",
+      "placeName": "Casa Rosada",
+      "userEmail": "damian@yahoo.com.ar"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay visitas guiadas que incluyen el interior. Hay que reservar con anticipación.",
+        "userEmail": "sebas@hotmail.com"
+      },
+      {
+        "content": "Los tours salen de Plaza de Mayo. Duran alrededor de una hora.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay que pagar entrada al Jardín Japonés?",
+      "content": "¿Es gratis o cuesta?",
+      "placeName": "Jardín Japonés",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "La entrada es gratuita. Abre de 10am a 6pm. Es un lugar muy tranquilo.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué actividades hay en el Parque General San Martín?",
+      "content": "¿Se puede hacer picnic o deportes?",
+      "placeName": "Parque General San Martín",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Hay lago para remar, canchas de deportes, zoológico. Perfecto para picnic y pasear.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "También hay rosedal y espacios para eventos. Muy grande, ideal para un día entero.",
+        "userEmail": "laura@yahoo.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cómo llegar a Talampaya?",
+      "content": "¿Es fácil acceder desde otras ciudades?",
+      "placeName": "Parque Nacional Talampaya",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Desde Villa Unión hay tours. Está en La Rioja, un poco alejado pero vale la pena.",
+        "userEmail": "walter@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Se puede subir al Faro del Fin del Mundo?",
+      "content": "¿Hay tours para subir?",
+      "placeName": "Faro del Fin del Mundo",
+      "userEmail": "damian@yahoo.com.ar"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay tours en barco desde Ushuaia que te llevan a la isla y podés subir.",
+        "userEmail": "sebas@hotmail.com"
+      },
+      {
+        "content": "Es una experiencia única. El faro es histórico, inspiró el libro de Verne.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuánto dura el tour en Cuevas de las Manos?",
+      "content": "¿Cuánto tiempo lleva la visita?",
+      "placeName": "Cuevas de las Manos",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "El tour guiado dura alrededor de 1 hora. Es obligatorio ir con guía.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué senderos hay en Los Alerces?",
+      "content": "¿Hay trekking fácil?",
+      "placeName": "Parque Nacional Los Alerces",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Hay senderos de diferentes dificultades. El más fácil es al Lago Verde, de 2 horas.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "También hay alerces milenarios. Es muy hermoso, pero lleva repelente por mosquitos.",
+        "userEmail": "laura@yahoo.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cómo subir al Cerro de los Siete Colores?",
+      "content": "¿Hay camino o hay que contratar tour?",
+      "placeName": "Cerro de los Siete Colores",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Hay tours desde Purmamarca que te llevan en auto hasta cerca. Luego caminas un poco.",
+        "userEmail": "walter@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Se puede nadar en el Dique Potrerillos?",
+      "content": "¿Es seguro para nadar?",
+      "placeName": "Dique Potrerillos",
+      "userEmail": "damian@yahoo.com.ar"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay áreas para nadar. El agua está fría pero es hermosa. Hay guardavidas.",
+        "userEmail": "sebas@hotmail.com"
+      },
+      {
+        "content": "También se puede hacer kayak o simplemente disfrutar las vistas.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay tours en las Ruinas de Quilmes?",
+      "content": "¿Se puede visitar solo o con guía?",
+      "placeName": "Ruinas de Quilmes",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Hay tours guiados que explican la historia. Es Patrimonio de la Humanidad.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué monumentos hay alrededor de Plaza de Mayo?",
+      "content": "¿Qué se puede ver además de la Casa Rosada?",
+      "placeName": "Plaza de Mayo",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "La Pirámide de Mayo, el Cabildo, Catedral Metropolitana. Todos históricos.",
+        "userEmail": "carlos@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay espectáculos de tango en Caminito?",
+      "content": "¿Se puede ver tango en vivo?",
+      "placeName": "Caminito",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay shows callejeros de tango. También hay milongas por la noche.",
+        "userEmail": "walter@gmail.com"
+      },
+      {
+        "content": "Los fines de semana hay más artistas. Es parte de la cultura tanguera.",
+        "userEmail": "damian@yahoo.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué artistas están expuestos en el museo?",
+      "content": "¿Hay obras de artistas argentinos?",
+      "placeName": "Museo Nacional de Bellas Artes",
+      "userEmail": "sebas@hotmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, mucha colección argentina: Quinquela Martín, Berni, etc. También internacionales como Picasso.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Se puede comprar libros en El Ateneo?",
+      "content": "¿Es solo para ver o también librería?",
+      "placeName": "El Ateneo Grand Splendid",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Es una librería hermosa. Podés comprar libros mientras tomás café.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿El Barrio Chino está abierto de noche?",
+      "content": "¿Hay vida nocturna?",
+      "placeName": "Barrio Chino",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay bares y restaurantes abiertos hasta tarde. Muy animado.",
+        "userEmail": "carlos@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuánto cuesta la entrada a un partido de Boca?",
+      "content": "¿Precios aproximados?",
+      "placeName": "Estadio Alberto J Armando",
+      "userEmail": "laura@yahoo.com"
+    },
+    "answers": [
+      {
+        "content": "Depende de la tribuna, desde 5000 pesos para populares. Mejor comprar online.",
+        "userEmail": "diego@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay jardín botánico en Palermo?",
+      "content": "¿El Rosedal es parte de un jardín más grande?",
+      "placeName": "Rosedal de Palermo",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, está en el Parque Tres de Febrero, que tiene jardín japonés, planetario, etc.",
+        "userEmail": "damian@yahoo.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Por qué la Casa Rosada es rosa?",
+      "content": "¿Historia del color?",
+      "placeName": "Casa Rosada",
+      "userEmail": "sebas@hotmail.com"
+    },
+    "answers": [
+      {
+        "content": "Originalmente era blanca, pero la pintaron rosa mezclando blanco con rojo para ocultar manchas.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay cerezos en el Jardín Japonés?",
+      "content": "¿Se puede ver sakura?",
+      "placeName": "Jardín Japonés",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay cerezos que florecen en primavera. Es hermoso en esa época.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay zoológico en el parque?",
+      "content": "¿Qué animales hay?",
+      "placeName": "Parque General San Martín",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, el Zoológico de Mendoza con animales de la región y exóticos.",
+        "userEmail": "carlos@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué ver en Talampaya además de cañones?",
+      "content": "¿Hay fósiles o petroglifos?",
+      "placeName": "Parque Nacional Talampaya",
+      "userEmail": "laura@yahoo.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay petroglifos antiguos y formaciones geológicas únicas.",
+        "userEmail": "diego@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hace frío en el Faro del Fin del Mundo?",
+      "content": "¿Qué ropa llevar?",
+      "placeName": "Faro del Fin del Mundo",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Muy frío, lleva abrigo grueso, guantes, gorro. El viento es fuerte.",
+        "userEmail": "damian@yahoo.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay que reservar para visitar el Teatro Colón?",
+      "content": "¿Se puede entrar sin reserva o hay que sacar entrada anticipada?",
+      "placeName": "Teatro Colón",
+      "userEmail": "juan@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Para las visitas guiadas conviene reservar con anticipación, se agotan rápido. Podés comprar online en su página oficial.",
+        "userEmail": "kim@gmail.com"
+      },
+      {
+        "content": "Yo compré en el momento pero fue día de semana. Los fines de semana y temporada alta mejor reservá antes.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Vale la pena el tour en lancha en Iguazú?",
+      "content": "Vi que hay paseos en lancha. ¿Se mojan mucho? ¿Vale la pena?",
+      "placeName": "Cataratas del Iguazú",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Te empapás completamente, pero es increíble. Llevá ropa de cambio y protegé la cámara. La adrenalina vale totalmente la pena.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "Es una experiencia única. Te dan bolsas impermeables para las cosas. Sí o sí vas a salir empapado pero es muy divertido.",
+        "userEmail": "laura@yahoo.com"
+      },
+      {
+        "content": "100% recomendado. Es emocionante y te acerca mucho a las cataratas. Andá en ropa que se seque rápido.",
+        "userEmail": "diego@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuánto cuesta la entrada al Glaciar Perito Moreno?",
+      "content": "¿Alguien sabe el precio actualizado de la entrada al parque?",
+      "placeName": "Glaciar Perito Moreno",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Para extranjeros son alrededor de 8000 pesos argentinos. Argentinos pagan menos. Los precios se actualizan seguido.",
+        "userEmail": "damian@yahoo.com.ar"
+      },
+      {
+        "content": "Chequeá la página oficial del Parque Nacional Los Glaciares, ahí tienen los precios actualizados.",
+        "userEmail": "sebas@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿San Telmo es lindo para visitar de día?",
+      "content": "¿Qué hay para hacer en San Telmo aparte del mercado de los domingos?",
+      "placeName": "San Telmo",
+      "userEmail": "juan@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Hay muchos bares y restaurantes con onda. Caminá por Defensa y las callecitas, hay arte urbano y galerías.",
+        "userEmail": "kim@gmail.com"
+      },
+      {
+        "content": "Plaza Dorrego es linda cualquier día. Los domingos está la feria pero entre semana tiene su encanto, más tranquilo.",
+        "userEmail": "silvia@arnet.com.ar"
+      },
+      {
+        "content": "Andá a las tiendas de antigüedades, hay cosas muy interesantes. Y probá en algún bodegón tradicional.",
+        "userEmail": "maria@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué ropa llevar a Ushuaia en verano?",
+      "content": "Voy en enero. ¿Qué tipo de ropa necesito?",
+      "placeName": "Parque Nacional Tierra del Fuego",
+      "userEmail": "carlos@hotmail.com"
+    },
+    "answers": [
+      {
+        "content": "Verano austral es fresco, máximo 15°C. Llevá campera rompevientos, abrigo medio y ropa en capas. Puede cambiar el clima rápido.",
+        "userEmail": "laura@yahoo.com"
+      },
+      {
+        "content": "Impermeable sí o sí, puede llover en cualquier momento. Zapatillas de trekking si vas a hacer senderos.",
+        "userEmail": "diego@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Se puede ver el Aconcagua sin hacer cumbre?",
+      "content": "No soy montañista profesional. ¿Puedo ver la montaña de cerca?",
+      "placeName": "Cerro Aconcagua",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí! Hay miradores en la ruta que te llevan cerca. El parque provincial tiene excelentes vistas sin necesidad de escalar.",
+        "userEmail": "damian@yahoo.com.ar"
+      },
+      {
+        "content": "Podés ir hasta Plaza de Mulas caminando, es un trekking de varios días pero no técnico. O simplemente disfrutarlo desde los miradores.",
+        "userEmail": "sebas@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿El Cementerio de la Recoleta está abierto todos los días?",
+      "content": "¿Cuál es el horario? ¿Hay que pagar entrada?",
+      "placeName": "Cementerio de la Recoleta",
+      "userEmail": "juan@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Está abierto todos los días de 7am a 5:45pm. La entrada es gratuita. Es imperdible.",
+        "userEmail": "kim@gmail.com"
+      },
+      {
+        "content": "Gratis y muy interesante. Recomiendo ir con guía o al menos bajar alguna app que te cuente las historias de las tumbas.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Conviene rentar auto en Bariloche?",
+      "content": "Vamos 4 días. ¿Es necesario alquilar auto o hay buenos tours?",
+      "placeName": "Cerro Catedral",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Con auto tenés más libertad para hacer el circuito chico y grande a tu ritmo. Los tours están bien pero son más apurados.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "Nosotros alquilamos y nos encantó. Podés parar donde quieras para fotos y ajustar los tiempos.",
+        "userEmail": "laura@yahoo.com"
+      },
+      {
+        "content": "Si manejan bien en rutas de montaña, alquilen. Si no, los tours son una buena opción.",
+        "userEmail": "diego@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué es mejor, Quebrada de Humahuaca o Salinas Grandes?",
+      "content": "Tengo tiempo limitado. ¿Cuál me recomiendan más?",
+      "placeName": "Quebrada de Humahuaca",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Son experiencias diferentes. La Quebrada tiene pueblos, cultura y colores variados. Las Salinas son paisaje puro, más surrealista.",
+        "userEmail": "damian@yahoo.com.ar"
+      },
+      {
+        "content": "Si podés hacé las dos, están relativamente cerca. Pero si tengo que elegir, la Quebrada de Humahuaca es más completa.",
+        "userEmail": "sebas@hotmail.com"
+      },
+      {
+        "content": "Quebrada de Humahuaca tiene más diversidad. Salinas Grandes es impactante pero más específico. Yo elegiría la Quebrada.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Dónde comer en Palermo?",
+      "content": "Recomendaciones de restaurantes en Palermo para cenar. Presupuesto medio.",
+      "placeName": "Palermo",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "En Palermo Soho hay muchas opciones: Don Julio para parrilla (caro pero vale la pena), Nola para algo diferente, La Cabrera también es excelente.",
+        "userEmail": "silvia@arnet.com.ar"
+      },
+      {
+        "content": "Sarkis es un clásico de comida armenia, relación precio-calidad excelente. Siempre lleno, eso habla bien.",
+        "userEmail": "maria@gmail.com"
+      },
+      {
+        "content": "Probá los bares en Plaza Serrano, hay mucha variedad y ambiente copado.",
+        "userEmail": "carlos@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Las Cuevas de las Manos están señalizadas?",
+      "content": "¿Se puede ir por cuenta propia o sí o sí hay que ir con tour?",
+      "placeName": "Cuevas de las Manos",
+      "userEmail": "laura@yahoo.com"
+    },
+    "answers": [
+      {
+        "content": "Tenés que ir con guía obligatoriamente, es un sitio protegido. Los tours salen desde el centro de interpretación.",
+        "userEmail": "diego@outlook.com"
+      },
+      {
+        "content": "Es tour guiado sí o sí. El camino es un poco complicado y está bien que lo protejan. Los guías explican muy bien la historia.",
+        "userEmail": "walter@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuándo es la mejor época para esquiar en Catedral?",
+      "content": "Primera vez que voy a esquiar. ¿Julio es buen mes?",
+      "placeName": "Cerro Catedral",
+      "userEmail": "damian@yahoo.com.ar"
+    },
+    "answers": [
+      {
+        "content": "Julio y agosto son los mejores meses. Hay más nieve y las pistas están en excelente condición.",
+        "userEmail": "sebas@hotmail.com"
+      },
+      {
+        "content": "Julio es perfecto. Eso sí, es temporada alta así que hay más gente y es más caro. Principios de septiembre también es bueno y más económico.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  }
+]
