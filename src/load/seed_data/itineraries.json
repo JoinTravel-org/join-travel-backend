@@ -1,0 +1,332 @@
+[
+  {
+    "name": "Buenos Aires en 5 días",
+    "description": "Recorrido completo por los lugares más emblemáticos de la capital argentina",
+    "startDate": "2025-03-01",
+    "endDate": "2025-03-05",
+    "userEmail": "walter@gmail.com",
+    "places": [
+      {
+        "placeName": "Obelisco",
+        "day": 1,
+        "order": 1,
+        "notes": "Comenzar en el Obelisco para orientarse en la ciudad"
+      },
+      {
+        "placeName": "Plaza de Mayo",
+        "day": 1,
+        "order": 2,
+        "notes": "Visitar Plaza de Mayo y Casa Rosada"
+      },
+      {
+        "placeName": "San Telmo",
+        "day": 2,
+        "order": 1,
+        "notes": "Recorrer San Telmo y su feria de antigüedades"
+      },
+      {
+        "placeName": "La Boca",
+        "day": 2,
+        "order": 2,
+        "notes": "Continuar a La Boca por la tarde"
+      },
+      {
+        "placeName": "Palermo",
+        "day": 3,
+        "order": 1,
+        "notes": "Día completo en Palermo, parques y gastronomía"
+      },
+      {
+        "placeName": "Cementerio de la Recoleta",
+        "day": 4,
+        "order": 1,
+        "notes": "Visita al Cementerio de la Recoleta"
+      },
+      {
+        "placeName": "Teatro Colón",
+        "day": 4,
+        "order": 2,
+        "notes": "Noche en el Teatro Colón"
+      },
+      {
+        "placeName": "Puerto Madero",
+        "day": 5,
+        "order": 1,
+        "notes": "Puerto Madero para el último día"
+      }
+    ]
+  },
+  {
+    "name": "Patagonia Austral - 10 días",
+    "description": "Aventura por los glaciares y paisajes más impresionantes de la Patagonia",
+    "startDate": "2025-04-10",
+    "endDate": "2025-04-20",
+    "userEmail": "damian@yahoo.com.ar",
+    "places": [
+      {
+        "placeName": "Glaciar Perito Moreno",
+        "day": 1,
+        "order": 1,
+        "notes": "Llegada a El Calafate y visita al Glaciar Perito Moreno"
+      },
+      {
+        "placeName": "Glaciar Perito Moreno",
+        "day": 2,
+        "order": 1,
+        "notes": "Trekking sobre el glaciar (Big Ice)"
+      },
+      {
+        "placeName": "Laguna de los Tres",
+        "day": 4,
+        "order": 1,
+        "notes": "Traslado a El Chaltén y caminata a Laguna de los Tres"
+      },
+      {
+        "placeName": "Parque Nacional Los Alerces",
+        "day": 7,
+        "order": 1,
+        "notes": "Parque Nacional Los Alerces"
+      },
+      {
+        "placeName": "Parque Nacional Tierra del Fuego",
+        "day": 9,
+        "order": 1,
+        "notes": "Parque Nacional Tierra del Fuego"
+      },
+      {
+        "placeName": "Faro del Fin del Mundo",
+        "day": 10,
+        "order": 1,
+        "notes": "Excursión al Faro del Fin del Mundo"
+      }
+    ]
+  },
+  {
+    "name": "Noroeste Argentino - 7 días",
+    "description": "Colores, cultura y paisajes del NOA",
+    "startDate": "2025-05-15",
+    "endDate": "2025-05-21",
+    "userEmail": "sebas@hotmail.com",
+    "places": [
+      {
+        "placeName": "Cerro de los Siete Colores",
+        "day": 1,
+        "order": 1,
+        "notes": "Purmamarca y el Cerro de los Siete Colores"
+      },
+      {
+        "placeName": "Quebrada de Humahuaca",
+        "day": 2,
+        "order": 1,
+        "notes": "Recorrido por la Quebrada de Humahuaca"
+      },
+      {
+        "placeName": "Salinas Grandes",
+        "day": 3,
+        "order": 1,
+        "notes": "Excursión a las Salinas Grandes"
+      },
+      {
+        "placeName": "Ruinas de Quilmes",
+        "day": 5,
+        "order": 1,
+        "notes": "Visita a las Ruinas de Quilmes"
+      },
+      {
+        "placeName": "Parque Nacional Talampaya",
+        "day": 6,
+        "order": 1,
+        "notes": "Parque Nacional Talampaya"
+      }
+    ]
+  },
+  {
+    "name": "Cataratas del Iguazú - 3 días",
+    "description": "Experiencia completa en las Cataratas del Iguazú",
+    "startDate": "2025-06-01",
+    "endDate": "2025-06-03",
+    "userEmail": "juan@outlook.com",
+    "places": [
+      {
+        "placeName": "Cataratas del Iguazú",
+        "day": 1,
+        "order": 1,
+        "notes": "Circuito Inferior y Superior"
+      },
+      {
+        "placeName": "Cataratas del Iguazú",
+        "day": 2,
+        "order": 1,
+        "notes": "Garganta del Diablo y paseo en lancha"
+      },
+      {
+        "placeName": "Cataratas del Iguazú",
+        "day": 3,
+        "order": 1,
+        "notes": "Lado brasileño de las cataratas"
+      }
+    ]
+  },
+  {
+    "name": "Bariloche y Circuito Chico",
+    "description": "Lo mejor de San Carlos de Bariloche en 4 días",
+    "startDate": "2025-07-15",
+    "endDate": "2025-07-18",
+    "userEmail": "kim@gmail.com",
+    "places": [
+      {
+        "placeName": "Centro Cívico Bariloche",
+        "day": 1,
+        "order": 1,
+        "notes": "Centro Cívico y compras de chocolate"
+      },
+      {
+        "placeName": "Cerro Catedral",
+        "day": 2,
+        "order": 1,
+        "notes": "Día de esquí en Cerro Catedral"
+      },
+      {
+        "placeName": "Cerro Catedral",
+        "day": 3,
+        "order": 1,
+        "notes": "Circuito Chico completo"
+      }
+    ]
+  },
+  {
+    "name": "Mendoza - Vino y Montaña",
+    "description": "Enoturismo y aventura en la provincia de Mendoza",
+    "startDate": "2025-08-01",
+    "endDate": "2025-08-05",
+    "userEmail": "silvia@arnet.com.ar",
+    "places": [
+      {
+        "placeName": "Parque General San Martín",
+        "day": 1,
+        "order": 1,
+        "notes": "Parque General San Martín y ciudad"
+      },
+      {
+        "placeName": "Cerro Aconcagua",
+        "day": 3,
+        "order": 1,
+        "notes": "Excursión al mirador del Aconcagua"
+      },
+      {
+        "placeName": "Dique Potrerillos",
+        "day": 4,
+        "order": 1,
+        "notes": "Rafting en Potrerillos"
+      }
+    ]
+  },
+  {
+    "name": "Península Valdés - Fauna Patagónica",
+    "description": "Observación de ballenas y fauna marina",
+    "startDate": "2025-09-15",
+    "endDate": "2025-09-18",
+    "userEmail": "maria@gmail.com",
+    "places": [
+      {
+        "placeName": "Península Valdés",
+        "day": 1,
+        "order": 1,
+        "notes": "Llegada a Puerto Madryn"
+      },
+      {
+        "placeName": "Península Valdés",
+        "day": 2,
+        "order": 1,
+        "notes": "Avistaje de ballenas francas"
+      },
+      {
+        "placeName": "Península Valdés",
+        "day": 3,
+        "order": 1,
+        "notes": "Pingüinera y lobería"
+      }
+    ]
+  },
+  {
+    "name": "Buenos Aires Cultural",
+    "description": "Arte, cultura y historia en la capital",
+    "startDate": "2025-10-10",
+    "endDate": "2025-10-13",
+    "userEmail": "carlos@hotmail.com",
+    "places": [
+      {
+        "placeName": "Museo Nacional de Bellas Artes",
+        "day": 1,
+        "order": 1,
+        "notes": "Museo Nacional de Bellas Artes"
+      },
+      {
+        "placeName": "El Ateneo Grand Splendid",
+        "day": 2,
+        "order": 1,
+        "notes": "El Ateneo Grand Splendid"
+      },
+      {
+        "placeName": "Teatro Colón",
+        "day": 3,
+        "order": 1,
+        "notes": "Visita guiada al Teatro Colón"
+      },
+      {
+        "placeName": "Casa Rosada",
+        "day": 3,
+        "order": 2,
+        "notes": "Casa Rosada y museo"
+      }
+    ]
+  },
+  {
+    "name": "Ruta de los Siete Lagos",
+    "description": "Camino escénico entre Villa La Angostura y San Martín de los Andes",
+    "startDate": "2025-11-01",
+    "endDate": "2025-11-04",
+    "userEmail": "laura@yahoo.com",
+    "places": [
+      {
+        "placeName": "Cerro Catedral",
+        "day": 1,
+        "order": 1,
+        "notes": "Partida desde Bariloche"
+      },
+      {
+        "placeName": "Parque Nacional Los Alerces",
+        "day": 3,
+        "order": 1,
+        "notes": "Parque Nacional Los Alerces en el camino"
+      }
+    ]
+  },
+  {
+    "name": "Cuevas y Arqueología Patagónica",
+    "description": "Recorrido por sitios arqueológicos únicos",
+    "startDate": "2025-12-01",
+    "endDate": "2025-12-05",
+    "userEmail": "diego@outlook.com",
+    "places": [
+      {
+        "placeName": "Cuevas de las Manos",
+        "day": 1,
+        "order": 1,
+        "notes": "Cuevas de las Manos - Pinturas rupestres"
+      },
+      {
+        "placeName": "Parque Nacional Talampaya",
+        "day": 3,
+        "order": 1,
+        "notes": "Parque Nacional Talampaya"
+      },
+      {
+        "placeName": "Ruinas de Quilmes",
+        "day": 5,
+        "order": 1,
+        "notes": "Ruinas de Quilmes"
+      }
+    ]
+  }
+]
