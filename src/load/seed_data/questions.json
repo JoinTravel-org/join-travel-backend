@@ -251,6 +251,466 @@
   },
   {
     "question": {
+      "title": "¿Cuál es el horario de visita de Plaza de Mayo?",
+      "content": "¿A qué hora abre y cierra la plaza? ¿Está abierta todo el día?",
+      "placeName": "Plaza de Mayo",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "La plaza está abierta las 24 horas, pero es más segura durante el día. De noche hay menos gente.",
+        "userEmail": "damian@yahoo.com.ar"
+      },
+      {
+        "content": "Siempre abierta, pero los monumentos alrededor tienen horarios específicos. La Casa Rosada cierra a las 6pm.",
+        "userEmail": "sebas@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay tours guiados en Plaza de Mayo?",
+      "content": "¿Se puede hacer un tour por la historia de la plaza?",
+      "placeName": "Plaza de Mayo",
+      "userEmail": "juan@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay tours históricos que explican la importancia política. Podés contratar en el lugar o online.",
+        "userEmail": "kim@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Caminito es seguro para turistas?",
+      "content": "He oído que La Boca puede ser peligroso. ¿Es Caminito seguro?",
+      "placeName": "Caminito",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Durante el día es muy seguro, hay mucha policía turística. Es uno de los lugares más visitados.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "Sí, pero no te alejes de la zona turística. De noche mejor no ir.",
+        "userEmail": "laura@yahoo.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuánto cuesta la entrada al Museo Nacional de Bellas Artes?",
+      "content": "¿Es gratis o hay que pagar? ¿Hay descuento para estudiantes?",
+      "placeName": "Museo Nacional de Bellas Artes",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "La entrada es gratuita. Abre de martes a viernes de 11am a 7pm, fines de semana hasta 8pm.",
+        "userEmail": "walter@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay que reservar para visitar El Ateneo?",
+      "content": "¿Se puede entrar sin reserva o es mejor reservar?",
+      "placeName": "El Ateneo Grand Splendid",
+      "userEmail": "damian@yahoo.com.ar"
+    },
+    "answers": [
+      {
+        "content": "No hace falta reserva, pero los fines de semana puede haber fila. Es más tranquilo entre semana.",
+        "userEmail": "sebas@hotmail.com"
+      },
+      {
+        "content": "Yo fui sin reserva y entré enseguida. Pero si vas a la hora pico, mejor llegar temprano.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué comer en Barrio Chino?",
+      "content": "Recomendaciones de restaurantes o comida típica.",
+      "placeName": "Barrio Chino",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Hay muchos lugares con dim sum y comida china auténtica. El Mercado Chino es genial para probar diferentes cosas.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cómo llegar al estadio de Boca Juniors?",
+      "content": "¿Qué transporte usar para ir al partido?",
+      "placeName": "Estadio Alberto J Armando",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "En subte línea C hasta San Juan, o colectivo. Para partidos, mejor ir temprano por la multitud.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "Taxi o Uber es seguro. El estadio está en La Boca, cerca de Caminito.",
+        "userEmail": "laura@yahoo.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿El Rosedal está abierto todo el año?",
+      "content": "¿Se puede visitar en invierno?",
+      "placeName": "Rosedal de Palermo",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, está abierto todo el año. En invierno hay menos flores pero sigue siendo hermoso.",
+        "userEmail": "walter@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Se puede visitar el interior de la Casa Rosada?",
+      "content": "¿Hay tours por dentro?",
+      "placeName": "Casa Rosada",
+      "userEmail": "damian@yahoo.com.ar"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay visitas guiadas que incluyen el interior. Hay que reservar con anticipación.",
+        "userEmail": "sebas@hotmail.com"
+      },
+      {
+        "content": "Los tours salen de Plaza de Mayo. Duran alrededor de una hora.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay que pagar entrada al Jardín Japonés?",
+      "content": "¿Es gratis o cuesta?",
+      "placeName": "Jardín Japonés",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "La entrada es gratuita. Abre de 10am a 6pm. Es un lugar muy tranquilo.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué actividades hay en el Parque General San Martín?",
+      "content": "¿Se puede hacer picnic o deportes?",
+      "placeName": "Parque General San Martín",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Hay lago para remar, canchas de deportes, zoológico. Perfecto para picnic y pasear.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "También hay rosedal y espacios para eventos. Muy grande, ideal para un día entero.",
+        "userEmail": "laura@yahoo.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cómo llegar a Talampaya?",
+      "content": "¿Es fácil acceder desde otras ciudades?",
+      "placeName": "Parque Nacional Talampaya",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Desde Villa Unión hay tours. Está en La Rioja, un poco alejado pero vale la pena.",
+        "userEmail": "walter@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Se puede subir al Faro del Fin del Mundo?",
+      "content": "¿Hay tours para subir?",
+      "placeName": "Faro del Fin del Mundo",
+      "userEmail": "damian@yahoo.com.ar"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay tours en barco desde Ushuaia que te llevan a la isla y podés subir.",
+        "userEmail": "sebas@hotmail.com"
+      },
+      {
+        "content": "Es una experiencia única. El faro es histórico, inspiró el libro de Verne.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuánto dura el tour en Cuevas de las Manos?",
+      "content": "¿Cuánto tiempo lleva la visita?",
+      "placeName": "Cuevas de las Manos",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "El tour guiado dura alrededor de 1 hora. Es obligatorio ir con guía.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué senderos hay en Los Alerces?",
+      "content": "¿Hay trekking fácil?",
+      "placeName": "Parque Nacional Los Alerces",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Hay senderos de diferentes dificultades. El más fácil es al Lago Verde, de 2 horas.",
+        "userEmail": "carlos@hotmail.com"
+      },
+      {
+        "content": "También hay alerces milenarios. Es muy hermoso, pero lleva repelente por mosquitos.",
+        "userEmail": "laura@yahoo.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cómo subir al Cerro de los Siete Colores?",
+      "content": "¿Hay camino o hay que contratar tour?",
+      "placeName": "Cerro de los Siete Colores",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Hay tours desde Purmamarca que te llevan en auto hasta cerca. Luego caminas un poco.",
+        "userEmail": "walter@gmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Se puede nadar en el Dique Potrerillos?",
+      "content": "¿Es seguro para nadar?",
+      "placeName": "Dique Potrerillos",
+      "userEmail": "damian@yahoo.com.ar"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay áreas para nadar. El agua está fría pero es hermosa. Hay guardavidas.",
+        "userEmail": "sebas@hotmail.com"
+      },
+      {
+        "content": "También se puede hacer kayak o simplemente disfrutar las vistas.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay tours en las Ruinas de Quilmes?",
+      "content": "¿Se puede visitar solo o con guía?",
+      "placeName": "Ruinas de Quilmes",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Hay tours guiados que explican la historia. Es Patrimonio de la Humanidad.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué monumentos hay alrededor de Plaza de Mayo?",
+      "content": "¿Qué se puede ver además de la Casa Rosada?",
+      "placeName": "Plaza de Mayo",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "La Pirámide de Mayo, el Cabildo, Catedral Metropolitana. Todos históricos.",
+        "userEmail": "carlos@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay espectáculos de tango en Caminito?",
+      "content": "¿Se puede ver tango en vivo?",
+      "placeName": "Caminito",
+      "userEmail": "diego@outlook.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay shows callejeros de tango. También hay milongas por la noche.",
+        "userEmail": "walter@gmail.com"
+      },
+      {
+        "content": "Los fines de semana hay más artistas. Es parte de la cultura tanguera.",
+        "userEmail": "damian@yahoo.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué artistas están expuestos en el museo?",
+      "content": "¿Hay obras de artistas argentinos?",
+      "placeName": "Museo Nacional de Bellas Artes",
+      "userEmail": "sebas@hotmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, mucha colección argentina: Quinquela Martín, Berni, etc. También internacionales como Picasso.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Se puede comprar libros en El Ateneo?",
+      "content": "¿Es solo para ver o también librería?",
+      "placeName": "El Ateneo Grand Splendid",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Es una librería hermosa. Podés comprar libros mientras tomás café.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿El Barrio Chino está abierto de noche?",
+      "content": "¿Hay vida nocturna?",
+      "placeName": "Barrio Chino",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay bares y restaurantes abiertos hasta tarde. Muy animado.",
+        "userEmail": "carlos@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Cuánto cuesta la entrada a un partido de Boca?",
+      "content": "¿Precios aproximados?",
+      "placeName": "Estadio Alberto J Armando",
+      "userEmail": "laura@yahoo.com"
+    },
+    "answers": [
+      {
+        "content": "Depende de la tribuna, desde 5000 pesos para populares. Mejor comprar online.",
+        "userEmail": "diego@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay jardín botánico en Palermo?",
+      "content": "¿El Rosedal es parte de un jardín más grande?",
+      "placeName": "Rosedal de Palermo",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, está en el Parque Tres de Febrero, que tiene jardín japonés, planetario, etc.",
+        "userEmail": "damian@yahoo.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Por qué la Casa Rosada es rosa?",
+      "content": "¿Historia del color?",
+      "placeName": "Casa Rosada",
+      "userEmail": "sebas@hotmail.com"
+    },
+    "answers": [
+      {
+        "content": "Originalmente era blanca, pero la pintaron rosa mezclando blanco con rojo para ocultar manchas.",
+        "userEmail": "juan@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay cerezos en el Jardín Japonés?",
+      "content": "¿Se puede ver sakura?",
+      "placeName": "Jardín Japonés",
+      "userEmail": "kim@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay cerezos que florecen en primavera. Es hermoso en esa época.",
+        "userEmail": "silvia@arnet.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hay zoológico en el parque?",
+      "content": "¿Qué animales hay?",
+      "placeName": "Parque General San Martín",
+      "userEmail": "maria@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, el Zoológico de Mendoza con animales de la región y exóticos.",
+        "userEmail": "carlos@hotmail.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Qué ver en Talampaya además de cañones?",
+      "content": "¿Hay fósiles o petroglifos?",
+      "placeName": "Parque Nacional Talampaya",
+      "userEmail": "laura@yahoo.com"
+    },
+    "answers": [
+      {
+        "content": "Sí, hay petroglifos antiguos y formaciones geológicas únicas.",
+        "userEmail": "diego@outlook.com"
+      }
+    ]
+  },
+  {
+    "question": {
+      "title": "¿Hace frío en el Faro del Fin del Mundo?",
+      "content": "¿Qué ropa llevar?",
+      "placeName": "Faro del Fin del Mundo",
+      "userEmail": "walter@gmail.com"
+    },
+    "answers": [
+      {
+        "content": "Muy frío, lleva abrigo grueso, guantes, gorro. El viento es fuerte.",
+        "userEmail": "damian@yahoo.com.ar"
+      }
+    ]
+  },
+  {
+    "question": {
       "title": "¿Hay que reservar para visitar el Teatro Colón?",
       "content": "¿Se puede entrar sin reserva o hay que sacar entrada anticipada?",
       "placeName": "Teatro Colón",
