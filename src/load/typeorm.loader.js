@@ -23,6 +23,7 @@ import Answer from "../models/answer.model.js";
 import QuestionVote from "../models/questionVote.model.js";
 import AnswerVote from "../models/answerVote.model.js";
 import Notification from "../models/notification.model.js";
+import UserRateLimit from "../models/userRateLimit.model.js";
 import UserFollower from "../models/userFollower.model.js";
 
 import config from "../config/index.js";
@@ -61,6 +62,7 @@ export const AppDataSource = new DataSource({
     Question,
     Answer,
     QuestionVote,
+    UserRateLimit,
     AnswerVote,
     Notification,
   ],
