@@ -2,9 +2,10 @@ import userRateLimitRepository from "../repository/userRateLimit.repository.js";
 import logger from "../config/logger.js";
 
 // Environment-based configuration
-const getMinuteLimit = () => parseInt(process.env.CHAT_MINUTE_LIMIT) || 15;
-const getDailyLimit = () => parseInt(process.env.CHAT_DAILY_LIMIT) || 300;
-const getBlockDurationMinutes = () => parseInt(process.env.CHAT_BLOCK_DURATION_MINUTES) || 1;
+const getMinuteLimit = () => parseInt(process.env.CHAT_MINUTE_LIMIT);
+const getDailyLimit = () => parseInt(process.env.CHAT_DAILY_LIMIT);
+const getBlockDurationMinutes = () => parseInt(process.env.CHAT_BLOCK_DURATION_MINUTES);
+const getWindowSizeDaily = () => parseInt(process.env.CHAT_WINDOW_SIZE_DAILY_MINUTES);
 
 class RateLimitService {
   // Constants for rate limits
@@ -12,7 +13,7 @@ class RateLimitService {
   static get DAILY_LIMIT() { return getDailyLimit(); }
   static get BLOCK_DURATION_MINUTES() { return getBlockDurationMinutes(); } // 60 seconds = 1 minute
   static get WINDOW_SIZE_MINUTES() { return 1; } // 1 minute window
-  static get WINDOW_SIZE_DAILY() { return 24 * 60; } // 24 hours in minutes
+  static get WINDOW_SIZE_DAILY() { return getWindowSizeDaily(); } // 24 hours in minutes
 
   /**
    * Check if a user can send a message

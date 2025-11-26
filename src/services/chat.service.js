@@ -44,6 +44,7 @@ Instrucciones:
     const model = new ChatXAI({
       model: "grok-code-fast-1",
       apiKey: process.env.XAI_API_KEY,
+      timeout: 60000, // 60 seconds timeout for AI responses
     });
 
     this.agent = createAgent({
@@ -210,7 +211,6 @@ Instrucciones:
       const result = await itineraryRepository.createItinerary(itineraryData);
       logger.info(`Successfully created itinerary "${name}" with ID: ${result.data.id}`);
       return `¡Perfecto! He creado el itinerario "${name}" con ${itineraryItems.length} lugares.`;
-    
     } catch (error) {
       logger.error(`Unexpected error in create_itinerary: ${error.message}`, {
         stack: error.stack,
@@ -371,23 +371,6 @@ Instrucciones:
 
       // Log messages being sent to AI
       logger.info(`Sending ${messages.length} messages to AI model`);
-      
-      // COMMENTED WHEN NEEDED TO DEBUG AGENT MESSAGE HISTORY PROCESSING
-      // DO NOT REMOVE
-
-      // Log the complete chat history array for debugging
-      // logger.info(`Complete Chat History Array: ${JSON.stringify(messages.map((msg, index) => ({
-      //   index,
-      //   type: msg.constructor.name,
-      //   content: msg.content
-      // })), null, 2)}`);
-      
-      // Also log each message individually for detailed inspection
-      // messages.forEach((msg, index) => {
-      //   logger.info(`Message ${index}: ${msg.constructor.name} - ${msg.content ? msg.content.substring(0, 50) : 'No content'}...`);
-      // });
-      
-      // DO NOT REMOVE
 
       // Generate AI response
       let response;
@@ -491,10 +474,10 @@ Instrucciones:
   }
 
   /**
-   * Get user's conversations
-   * @param {string} userId - User ID
-   * @returns {Promise<Array>} List of conversations
-   */
+    * Get user's conversations
+    * @param {string} userId - User ID
+    * @returns {Promise<Array>} List of conversations
+    */
   async getConversations(userId) {
     try {
       const conversations = await conversationRepository.findByUserId(userId);
@@ -528,12 +511,12 @@ Instrucciones:
   }
 
   /**
-   * Create a new conversation
-   * @param {Object} conversationData - Conversation data
-   * @param {string} conversationData.userId - User ID
-   * @param {string} conversationData.title - Conversation title (optional)
-   * @returns {Promise<Object>} Created conversation
-   */
+    * Create a new conversation
+    * @param {Object} conversationData - Conversation data
+    * @param {string} conversationData.userId - User ID
+    * @param {string} conversationData.title - Conversation title (optional)
+    * @returns {Promise<Object>} Created conversation
+    */
   async createConversation(conversationData) {
     const { userId, title } = conversationData;
 
@@ -560,10 +543,10 @@ Instrucciones:
   }
 
   /**
-    * Delete the current conversation for a user
-    * @param {string} userId - User ID
-    * @returns {Promise<Object>} Deletion result
-    */
+     * Delete the current conversation for a user
+     * @param {string} userId - User ID
+     * @returns {Promise<Object>} Deletion result
+     */
   async deleteCurrentConversation(userId) {
     try {
       // Find the most recent conversation for the user
@@ -606,10 +589,10 @@ Instrucciones:
   }
 
   /**
-    * Delete all chat history for a user
-    * @param {string} userId - User ID
-    * @returns {Promise<Object>} Deletion result
-    */
+     * Delete all chat history for a user
+     * @param {string} userId - User ID
+     * @returns {Promise<Object>} Deletion result
+     */
   async deleteAllChatHistory(userId) {
     try {
       // Delete all messages for the user
