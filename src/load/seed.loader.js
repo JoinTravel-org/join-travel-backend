@@ -3,6 +3,10 @@ import placeRepository from "../repository/place.repository.js";
 import UserRepository from "../repository/user.repository.js";
 import reviewRepository from "../repository/review.repository.js";
 import reviewMediaRepository from "../repository/reviewMedia.repository.js";
+import listRepository from "../repository/list.repository.js";
+import itineraryRepository from "../repository/itinerary.repository.js";
+import QuestionRepository from "../repository/question.repository.js";
+import AnswerRepository from "../repository/answer.repository.js";
 import logger from "../config/logger.js";
 import fs from "fs";
 import path from "path";
@@ -10,41 +14,140 @@ import bcrypt from "bcrypt";
 
 // Gamification seed data
 export const LEVELS_DATA = [
-  { levelNumber: 1, name: 'Explorador', minPoints: 0, description: 'Registrarse', rewards: { badge: 'Explorador' }, instructions: ["Registrate en la plataforma"] },
-  { levelNumber: 2, name: 'Viajero Activo', minPoints: 30, description: 'Tener al menos 3 reseñas publicadas', rewards: { badge: 'Viajero Activo', unlock_feature: 'advanced_search' }, instructions: ["Escribe reseñas de calidad sobre lugares que has visitado", "Sé específico sobre tu experiencia", "Incluye detalles útiles para otros usuarios"] },
-  { levelNumber: 3, name: 'Guía Experto', minPoints: 100, description: 'Obtener al menos 10 likes en sus aportes', rewards: { badge: 'Guía Experto', unlock_feature: 'expert_badge_display' }, instructions: ["Recibe votos positivos en tus reseñas", "Interactúa con otros usuarios", "Comparte reseñas detalladas con fotos"] },
-  { levelNumber: 4, name: 'Maestro Viajero', minPoints: 150, description: 'Alcanzar 10 reseñas y 50 likes', rewards: { badge: 'Maestro Viajero', unlock_feature: 'priority_support' }, instructions: ["Continúa escribiendo reseñas de calidad", "Mantén un alto nivel de engagement", "Ayuda a la comunidad con tus experiencias"] },
+  {
+    levelNumber: 1,
+    name: "Explorador",
+    minPoints: 0,
+    description: "Registrarse",
+    rewards: { badge: "Explorador" },
+    instructions: ["Registrate en la plataforma"],
+  },
+  {
+    levelNumber: 2,
+    name: "Viajero Activo",
+    minPoints: 30,
+    description: "Tener al menos 3 reseñas publicadas",
+    rewards: { badge: "Viajero Activo", unlock_feature: "advanced_search" },
+    instructions: [
+      "Escribe reseñas de calidad sobre lugares que has visitado",
+      "Sé específico sobre tu experiencia",
+      "Incluye detalles útiles para otros usuarios",
+    ],
+  },
+  {
+    levelNumber: 3,
+    name: "Guía Experto",
+    minPoints: 100,
+    description: "Obtener al menos 10 likes en sus aportes",
+    rewards: { badge: "Guía Experto", unlock_feature: "expert_badge_display" },
+    instructions: [
+      "Recibe votos positivos en tus reseñas",
+      "Interactúa con otros usuarios",
+      "Comparte reseñas detalladas con fotos",
+    ],
+  },
+  {
+    levelNumber: 4,
+    name: "Maestro Viajero",
+    minPoints: 150,
+    description: "Alcanzar 10 reseñas y 50 likes",
+    rewards: { badge: "Maestro Viajero", unlock_feature: "priority_support" },
+    instructions: [
+      "Continúa escribiendo reseñas de calidad",
+      "Mantén un alto nivel de engagement",
+      "Ayuda a la comunidad con tus experiencias",
+    ],
+  },
 ];
 
 export const BADGES_DATA = [
-  { name: '🌍 Primera Reseña', description: 'Crear tu primera reseña', criteria: { action_type: 'review_created', count: 1 }, iconUrl: '🌍', instructions: ["Navega a la página de un lugar que hayas visitado", "Haz clic en 'Escribir reseña'", "Completa el formulario con tu experiencia", "Publica la reseña"] },
-  { name: '📸 Fotógrafo', description: 'Subir una foto o video en cualquier reseña', criteria: { action_type: 'media_upload', count: 1 }, iconUrl: '📸', instructions: ["Toma fotos de calidad de los lugares que visitas", "Sube imágenes junto con tus reseñas", "Asegúrate de que las fotos sean nítidas y relevantes"] },
-  { name: '⭐ Popular', description: 'Recibir al menos 5 likes en reseñas propias', criteria: { action_type: 'vote_received', count: 5 }, iconUrl: '⭐', instructions: ["Escribe reseñas útiles y detalladas", "Interactúa con la comunidad", "Comparte experiencias auténticas"] },
-  { name: 'Viajero Activo', description: 'Alcanzar nivel 2', criteria: { level: 2 }, iconUrl: '🏆', instructions: [] },
-  { name: 'Guía Experto', description: 'Alcanzar nivel 3', criteria: { level: 3 }, iconUrl: '🎯', instructions: [] },
-  { name: 'Maestro Viajero', description: 'Alcanzar nivel 4', criteria: { level: 4 }, iconUrl: '👑', instructions: [] },
-  { name: 'Super Like', description: 'Recibir 10 likes en una sola reseña', criteria: { action_type: 'vote_received', per_review: 10 }, iconUrl: '🔥', instructions: [] },
+  {
+    name: "🌍 Primera Reseña",
+    description: "Crear tu primera reseña",
+    criteria: { action_type: "review_created", count: 1 },
+    iconUrl: "🌍",
+    instructions: [
+      "Navega a la página de un lugar que hayas visitado",
+      "Haz clic en 'Escribir reseña'",
+      "Completa el formulario con tu experiencia",
+      "Publica la reseña",
+    ],
+  },
+  {
+    name: "📸 Fotógrafo",
+    description: "Subir una foto o video en cualquier reseña",
+    criteria: { action_type: "media_upload", count: 1 },
+    iconUrl: "📸",
+    instructions: [
+      "Toma fotos de calidad de los lugares que visitas",
+      "Sube imágenes junto con tus reseñas",
+      "Asegúrate de que las fotos sean nítidas y relevantes",
+    ],
+  },
+  {
+    name: "⭐ Popular",
+    description: "Recibir al menos 5 likes en reseñas propias",
+    criteria: { action_type: "vote_received", count: 5 },
+    iconUrl: "⭐",
+    instructions: [
+      "Escribe reseñas útiles y detalladas",
+      "Interactúa con la comunidad",
+      "Comparte experiencias auténticas",
+    ],
+  },
+  {
+    name: "Viajero Activo",
+    description: "Alcanzar nivel 2",
+    criteria: { level: 2 },
+    iconUrl: "🏆",
+    instructions: [],
+  },
+  {
+    name: "Guía Experto",
+    description: "Alcanzar nivel 3",
+    criteria: { level: 3 },
+    iconUrl: "🎯",
+    instructions: [],
+  },
+  {
+    name: "Maestro Viajero",
+    description: "Alcanzar nivel 4",
+    criteria: { level: 4 },
+    iconUrl: "👑",
+    instructions: [],
+  },
+  {
+    name: "Super Like",
+    description: "Recibir 10 likes en una sola reseña",
+    criteria: { action_type: "vote_received", per_review: 10 },
+    iconUrl: "🔥",
+    instructions: [],
+  },
 ];
 
 export const POINTS_DATA = {
-  'review_created': 10,
-  'vote_received': 1,
-  'profile_completed': 5,
-  'comment_posted': 2,
-  'media_upload': 5, // Bonus points for uploading media
-  'place_added': 15, // Points for adding a new place
-  'expense_created': 3, // Points for adding expenses to groups
+  review_created: 10,
+  vote_received: 1,
+  profile_completed: 5,
+  comment_posted: 2,
+  media_upload: 5, // Bonus points for uploading media
+  place_added: 15, // Points for adding a new place
+  expense_created: 3, // Points for adding expenses to groups
 };
 
 export default async function seedDatabase() {
   try {
-    logger.info("Seeding database with gamification data, users, places, reviews, and media...");
+    logger.info(
+      "Seeding database with gamification data, users, places, reviews, and media..."
+    );
 
     // Seed levels and badges first (always, regardless of places)
     logger.info("Seeding levels...");
     for (const levelData of LEVELS_DATA) {
       try {
-        const existingLevel = await AppDataSource.getRepository("Level").findOne({ where: { levelNumber: levelData.levelNumber } });
+        const existingLevel = await AppDataSource.getRepository(
+          "Level"
+        ).findOne({ where: { levelNumber: levelData.levelNumber } });
         if (!existingLevel) {
           await AppDataSource.getRepository("Level").save(levelData);
           logger.info(`Seeded level: ${levelData.name}`);
@@ -59,7 +162,9 @@ export default async function seedDatabase() {
     logger.info("Seeding badges...");
     for (const badgeData of BADGES_DATA) {
       try {
-        const existingBadge = await AppDataSource.getRepository("Badge").findOne({ where: { name: badgeData.name } });
+        const existingBadge = await AppDataSource.getRepository(
+          "Badge"
+        ).findOne({ where: { name: badgeData.name } });
         if (!existingBadge) {
           await AppDataSource.getRepository("Badge").save(badgeData);
           logger.info(`Seeded badge: ${badgeData.name}`);
@@ -75,13 +180,49 @@ export default async function seedDatabase() {
     const existingPlaces = await placeRepository.getRepository().count();
     if (existingPlaces > 0) {
       logger.info(
-        `Database already has ${existingPlaces} places, skipping user/place/review seeding`
+        `Database already has ${existingPlaces} places, skipping seed completely`
       );
       return;
     }
-    const usersData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/users.json"), "utf8"));
-    const placesData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/places.json"), "utf8"));
-    const reviewsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/load/seed_data/reviews.json"), "utf8"));
+
+    // Load all seed data files
+    logger.info("Loading seed data files...");
+    const usersData = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "src/load/seed_data/users.json"),
+        "utf8"
+      )
+    );
+    const placesData = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "src/load/seed_data/places.json"),
+        "utf8"
+      )
+    );
+    const reviewsData = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "src/load/seed_data/reviews.json"),
+        "utf8"
+      )
+    );
+    const listsData = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "src/load/seed_data/lists.json"),
+        "utf8"
+      )
+    );
+    const itinerariesData = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "src/load/seed_data/itineraries.json"),
+        "utf8"
+      )
+    );
+    const questionsData = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "src/load/seed_data/questions.json"),
+        "utf8"
+      )
+    );
 
     // Seed users first
     logger.info(`Found ${usersData.length} users in seed data`);
@@ -95,7 +236,7 @@ export default async function seedDatabase() {
         logger.info(`Password hashed for user: ${userData.email}`);
         const user = await userRepo.create({
           ...userData,
-          password: hashedPassword
+          password: hashedPassword,
         });
         createdUsers.push(user);
         logger.info(`Seeded user: ${user.email} with ID: ${user.id}`);
@@ -107,7 +248,9 @@ export default async function seedDatabase() {
       }
     }
     logger.info(`Total users created: ${createdUsers.length}`);
-    logger.info(`Created users IDs: ${createdUsers.map(u => u.id).join(', ')}`);
+    logger.info(
+      `Created users IDs: ${createdUsers.map((u) => u.id).join(", ")}`
+    );
 
     // Seed places
     const createdPlaces = [];
@@ -127,21 +270,28 @@ export default async function seedDatabase() {
     // Seed reviews and media
     for (const reviewData of reviewsData) {
       try {
-        const { media, placeId: placeIndex, userId: userIndex, ...reviewFields } = reviewData;
+        const {
+          media,
+          placeId: placeIndex,
+          userId: userIndex,
+          ...reviewFields
+        } = reviewData;
 
         // Map indices to actual UUIDs (1-based indices in JSON map to 0-based array indices)
         const placeId = createdPlaces[placeIndex - 1]?.id;
         const userId = createdUsers[userIndex - 1]?.id;
 
         if (!placeId || !userId) {
-          logger.error(`Invalid placeId (${placeIndex}) or userId (${userIndex}) for review - placeId: ${placeId}, userId: ${userId}`);
+          logger.error(
+            `Invalid placeId (${placeIndex}) or userId (${userIndex}) for review - placeId: ${placeId}, userId: ${userId}`
+          );
           continue;
         }
 
         const review = await reviewRepository.create({
           ...reviewFields,
           placeId,
-          userId
+          userId,
         });
         logger.info(`Seeded review for place ${placeId} by user ${userId}`);
 
@@ -158,26 +308,37 @@ export default async function seedDatabase() {
                     fileData = fs.readFileSync(fullPath);
                     logger.info(`Loaded actual file: ${mediaData.filePath}`);
                   } else {
-                    logger.warn(`File not found: ${mediaData.filePath}, using placeholder`);
-                    if (typeof fileData === 'string' && fileData.startsWith('PLACEHOLDER_')) {
-                      fileData = Buffer.from(fileData, 'utf8');
+                    logger.warn(
+                      `File not found: ${mediaData.filePath}, using placeholder`
+                    );
+                    if (
+                      typeof fileData === "string" &&
+                      fileData.startsWith("PLACEHOLDER_")
+                    ) {
+                      fileData = Buffer.from(fileData, "utf8");
                     } else {
-                      fileData = Buffer.from(fileData, 'base64');
+                      fileData = Buffer.from(fileData, "base64");
                     }
                   }
                 } catch (fileError) {
-                  logger.error(`Error reading file ${mediaData.filePath}:`, fileError.message);
-                  if (typeof fileData === 'string' && fileData.startsWith('PLACEHOLDER_')) {
-                    fileData = Buffer.from(fileData, 'utf8');
+                  logger.error(
+                    `Error reading file ${mediaData.filePath}:`,
+                    fileError.message
+                  );
+                  if (
+                    typeof fileData === "string" &&
+                    fileData.startsWith("PLACEHOLDER_")
+                  ) {
+                    fileData = Buffer.from(fileData, "utf8");
                   } else {
-                    fileData = Buffer.from(fileData, 'base64');
+                    fileData = Buffer.from(fileData, "base64");
                   }
                 }
-              } else if (typeof fileData === 'string') {
-                if (fileData.startsWith('PLACEHOLDER_')) {
-                  fileData = Buffer.from(fileData, 'utf8');
+              } else if (typeof fileData === "string") {
+                if (fileData.startsWith("PLACEHOLDER_")) {
+                  fileData = Buffer.from(fileData, "utf8");
                 } else {
-                  fileData = Buffer.from(fileData, 'base64');
+                  fileData = Buffer.from(fileData, "base64");
                 }
               }
 
@@ -188,16 +349,210 @@ export default async function seedDatabase() {
                 fileSize: mediaData.fileSize,
                 mimeType: mediaData.mimeType,
                 fileData: fileData,
-                filePath: null // Don't store filePath in database, only raw binary data
+                filePath: null, // Don't store filePath in database, only raw binary data
               });
-              logger.info(`Seeded media ${mediaRecord.filename} for review ${review.id}`);
+              logger.info(
+                `Seeded media ${mediaRecord.filename} for review ${review.id}`
+              );
             } catch (mediaError) {
-              logger.error(`Failed to seed media for review:`, mediaError.message);
+              logger.error(
+                `Failed to seed media for review:`,
+                mediaError.message
+              );
             }
           }
         }
       } catch (error) {
         logger.error(`Failed to seed review:`, error.message);
+      }
+    }
+
+    // Seed lists
+    logger.info("Seeding lists...");
+    const createdLists = [];
+    for (const listData of listsData) {
+      try {
+        const {
+          places: placeNames,
+          userEmail,
+          name,
+          ...otherFields
+        } = listData;
+        const user = createdUsers.find((u) => u.email === userEmail);
+        const userId = user?.id;
+
+        if (!userId) {
+          logger.error(
+            `Invalid userEmail (${userEmail}) for list - user not found`
+          );
+          continue;
+        }
+
+        const list = await listRepository.create({
+          title: name,
+          ...otherFields,
+          userId,
+        });
+        createdLists.push(list);
+        logger.info(`Seeded list: ${list.title} by user ${userId}`);
+
+        // Add places to the list
+        if (placeNames && placeNames.length > 0) {
+          for (const placeName of placeNames) {
+            const place = createdPlaces.find((p) => p.name === placeName);
+            const placeId = place?.id;
+            if (placeId) {
+              try {
+                await listRepository.addPlace(list.id, placeId);
+                logger.info(`Added place ${placeId} to list ${list.id}`);
+              } catch (error) {
+                logger.error(`Failed to add place to list:`, error.message);
+              }
+            } else {
+              logger.error(`Place not found: ${placeName}`);
+            }
+          }
+        }
+      } catch (error) {
+        logger.error(`Failed to seed list:`, error.message);
+      }
+    }
+    logger.info(`Total lists created: ${createdLists.length}`);
+
+    // Seed itineraries
+    logger.info("Seeding itineraries...");
+    for (const itineraryData of itinerariesData) {
+      try {
+        const {
+          places: itineraryPlaces,
+          userEmail,
+          name,
+          ...otherFields
+        } = itineraryData;
+        const user = createdUsers.find((u) => u.email === userEmail);
+        const userId = user?.id;
+
+        if (!userId) {
+          logger.error(
+            `Invalid userEmail (${userEmail}) for itinerary - user not found`
+          );
+          continue;
+        }
+
+        const itinerary = await itineraryRepository.itineraryRepository.create({
+          name,
+          ...otherFields,
+          userId,
+        });
+        const savedItinerary =
+          await itineraryRepository.itineraryRepository.save(itinerary);
+        logger.info(
+          `Seeded itinerary: ${savedItinerary.name} by user ${userId}`
+        );
+
+        // Add places to the itinerary
+        if (itineraryPlaces && itineraryPlaces.length > 0) {
+          const startDate = new Date(otherFields.startDate);
+          for (const placeData of itineraryPlaces) {
+            const place = createdPlaces.find(
+              (p) => p.name === placeData.placeName
+            );
+            const placeId = place?.id;
+            if (placeId) {
+              try {
+                // Calculate the actual date by adding (day - 1) days to startDate
+                const itemDate = new Date(startDate);
+                itemDate.setDate(startDate.getDate() + (placeData.day - 1));
+
+                const itineraryItem =
+                  itineraryRepository.itineraryItemRepository.create({
+                    itineraryId: savedItinerary.id,
+                    placeId,
+                    date: itemDate,
+                    order: placeData.order,
+                  });
+                await itineraryRepository.itineraryItemRepository.save(
+                  itineraryItem
+                );
+                logger.info(
+                  `Added place ${placeId} to itinerary ${savedItinerary.id} on day ${placeData.day}`
+                );
+              } catch (error) {
+                logger.error(
+                  `Failed to add place to itinerary:`,
+                  error.message
+                );
+              }
+            } else {
+              logger.error(`Place not found: ${placeData.placeName}`);
+            }
+          }
+        }
+      } catch (error) {
+        logger.error(`Failed to seed itinerary:`, error.message);
+      }
+    }
+
+    // Seed questions and answers
+    logger.info("Seeding questions and answers...");
+    const questionRepository = new QuestionRepository();
+    const answerRepository = new AnswerRepository();
+
+    for (const questionData of questionsData) {
+      try {
+        const { question, answers } = questionData;
+        const { placeName, userEmail, title, content, ...otherFields } =
+          question;
+
+        const place = createdPlaces.find((p) => p.name === placeName);
+        const user = createdUsers.find((u) => u.email === userEmail);
+
+        if (!place || !user) {
+          logger.error(
+            `Invalid placeName (${placeName}) or userEmail (${userEmail}) for question`
+          );
+          continue;
+        }
+
+        const createdQuestion = await questionRepository.create({
+          content: title || content, // Map title to content, fallback to content if title not present
+          ...otherFields,
+          placeId: place.id,
+          userId: user.id,
+        });
+        logger.info(
+          `Seeded question: ${createdQuestion.content} for place ${place.name}`
+        );
+
+        // Seed answers for this question
+        if (answers && answers.length > 0) {
+          for (const answerData of answers) {
+            try {
+              const answerUser = createdUsers.find(
+                (u) => u.email === answerData.userEmail
+              );
+              if (!answerUser) {
+                logger.error(
+                  `Invalid userEmail (${answerData.userEmail}) for answer`
+                );
+                continue;
+              }
+
+              const createdAnswer = await answerRepository.create({
+                content: answerData.content,
+                questionId: createdQuestion.id,
+                userId: answerUser.id,
+              });
+              logger.info(
+                `Seeded answer for question ${createdQuestion.id} by user ${answerUser.email}`
+              );
+            } catch (error) {
+              logger.error(`Failed to seed answer:`, error.message);
+            }
+          }
+        }
+      } catch (error) {
+        logger.error(`Failed to seed question:`, error.message);
       }
     }
 

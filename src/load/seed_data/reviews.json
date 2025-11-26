@@ -543,5 +543,257 @@
         "filePath": "src/assets/seed_images/perito_moreno_ice.jpg"
       }
     ]
+  },
+  {
+    "rating": 5,
+    "content": "Cerro Catedral es increíble para esquiar. Las pistas están muy bien mantenidas y las vistas son espectaculares.",
+    "placeId": 19,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Centro Cívico de Bariloche es precioso. Perfecto para comprar chocolates y artesanías.",
+    "placeId": 20,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Aconcagua es impresionante aunque solo lo veas desde lejos. Un sueño para cualquier montañista.",
+    "placeId": 21,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Parque General San Martín es enorme y hermoso. Ideal para pasar el día en familia.",
+    "placeId": 22,
+    "userId": 7,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "La Quebrada de Humahuaca es mágica. Los colores de las montañas son increíbles, especialmente al atardecer.",
+    "placeId": 23,
+    "userId": 8,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Las Salinas Grandes son impresionantes. Un paisaje de otro mundo, totalmente recomendable.",
+    "placeId": 24,
+    "userId": 9,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Ver ballenas en Península Valdés fue una experiencia inolvidable. La naturaleza en estado puro.",
+    "placeId": 25,
+    "userId": 10,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Parque Nacional Talampaya es único. Los cañones rojos son impresionantes y el tour guiado muy interesante.",
+    "placeId": 26,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Tierra del Fuego es el fin del mundo literal. Paisajes únicos y una experiencia que no se olvida.",
+    "placeId": 27,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Faro del Fin del Mundo es icónico. La excursión en barco para verlo es absolutamente recomendable.",
+    "placeId": 28,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "La caminata a la Laguna de los Tres es exigente pero vale cada paso. El Fitz Roy es majestuoso.",
+    "placeId": 29,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Las Cuevas de las Manos son un tesoro arqueológico. Ver arte de hace 9000 años es increíble.",
+    "placeId": 30,
+    "userId": 7,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Parque Nacional Los Alerces es hermoso. Los árboles milenarios son imponentes.",
+    "placeId": 31,
+    "userId": 8,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Cerro de los Siete Colores es más impresionante en persona. Los colores son realmente únicos.",
+    "placeId": 32,
+    "userId": 9,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El Dique Potrerillos es perfecto para deportes acuáticos. Las vistas de la cordillera son increíbles.",
+    "placeId": 33,
+    "userId": 10,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Las Ruinas de Quilmes son fascinantes. La historia de resistencia indígena es muy conmovedora.",
+    "placeId": 34,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Bariloche es un paraíso para los amantes del esquí y la naturaleza. Volveré sin dudas.",
+    "placeId": 19,
+    "userId": 5,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El chocolate de Bariloche es delicioso. Probé en varias tiendas y todas son excelentes.",
+    "placeId": 20,
+    "userId": 6,
+    "media": []
+  },
+  {
+    "rating": 3,
+    "content": "El Aconcagua requiere muy buena preparación física. No es para principiantes en montañismo.",
+    "placeId": 21,
+    "userId": 7,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Mendoza es perfecta para el enoturismo. El Parque San Martín es el pulmón verde de la ciudad.",
+    "placeId": 22,
+    "userId": 8,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "La Quebrada de Humahuaca me dejó sin palabras. Cada pueblo tiene su encanto especial.",
+    "placeId": 23,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Las Salinas Grandes son extensas y hermosas. Llevar lentes de sol es fundamental por el reflejo.",
+    "placeId": 24,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Península Valdés en temporada de ballenas es espectacular. Los lobos marinos también son increíbles.",
+    "placeId": 25,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Talampaya es impresionante. El tour en vehículo 4x4 te lleva a lugares increíbles.",
+    "placeId": 26,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Tierra del Fuego es mágico. El tren del fin del mundo es una experiencia única.",
+    "placeId": 27,
+    "userId": 5,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Ushuaia y el faro son lugares que todos deberían visitar al menos una vez en la vida.",
+    "placeId": 28,
+    "userId": 6,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "El trekking a Laguna de los Tres es duro pero gratificante. Amanecer allí es espectacular.",
+    "placeId": 29,
+    "userId": 7,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Las Cuevas de las Manos son patrimonio de la humanidad. Un lugar único en el mundo.",
+    "placeId": 30,
+    "userId": 8,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Los Alerces milenarios son gigantes. El paseo en barco por los lagos es hermoso.",
+    "placeId": 31,
+    "userId": 9,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "Purmamarca es un pueblo encantador al pie del cerro multicolor. Muy fotogénico.",
+    "placeId": 32,
+    "userId": 10,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Potrerillos es genial para rafting. La adrenalina del río es increíble.",
+    "placeId": 33,
+    "userId": 1,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Las Ruinas de Quilmes muestran la grandeza de la cultura diaguita. Muy educativo.",
+    "placeId": 34,
+    "userId": 2,
+    "media": []
+  },
+  {
+    "rating": 3,
+    "content": "Cerro Catedral puede estar muy concurrido en temporada alta. Mejor ir en días de semana.",
+    "placeId": 19,
+    "userId": 3,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Centro Cívico es el corazón de Bariloche. Arquitectura hermosa estilo alpino.",
+    "placeId": 20,
+    "userId": 4,
+    "media": []
+  },
+  {
+    "rating": 4,
+    "content": "Ver el Aconcagua desde el mirador es impresionante. La montaña más alta de América.",
+    "placeId": 21,
+    "userId": 5,
+    "media": []
+  },
+  {
+    "rating": 5,
+    "content": "El Parque San Martín tiene de todo. Perfecto para correr, andar en bici o simplemente pasear.",
+    "placeId": 22,
+    "userId": 6,
+    "media": []
   }
 ]

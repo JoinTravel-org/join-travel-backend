@@ -12,6 +12,16 @@ const router = Router();
  *     summary: Reset all database tables
  *     description: Completely resets the database by dropping all tables and recreating the schema. This endpoint is for development and testing purposes only.
  *     tags: [Debug]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               apikey:
+ *                 type: string
+ *                 example: "your-danger-api-key-here"
  *     responses:
  *       200:
  *         description: Database reset successfully
@@ -32,6 +42,19 @@ const router = Router();
  *                     message:
  *                       type: string
  *                       example: "All tables dropped and schema recreated"
+ *       401:
+ *         description: Unauthorized - Invalid API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid API key"
  *       500:
  *         description: Internal server error
  *         content:
@@ -50,8 +73,15 @@ const router = Router();
  *                   example: "Detailed error information"
  */
 router.delete("/reset-database", async (req, res, next) => {
-  try {
-    logger.warn("Database reset requested via debug endpoint");
+   try {
+     if (!req.body.apikey || req.body.apikey !== process.env.DANGER_API_KEY) {
+       return res.status(401).json({
+         success: false,
+         message: "Invalid API key"
+       });
+     }
+
+     logger.warn("Database reset requested via debug endpoint");
 
     // Drop all tables
     await AppDataSource.dropDatabase();
@@ -81,6 +111,16 @@ router.delete("/reset-database", async (req, res, next) => {
  *     summary: Seed database with initial data
  *     description: Seeds the database with initial data. This endpoint is for development and testing purposes only.
  *     tags: [Debug]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               apikey:
+ *                 type: string
+ *                 example: "your-danger-api-key-here"
  *     responses:
  *       200:
  *         description: Database seeded successfully
@@ -101,6 +141,19 @@ router.delete("/reset-database", async (req, res, next) => {
  *                     message:
  *                       type: string
  *                       example: "Database seeded with initial data"
+ *       401:
+ *         description: Unauthorized - Invalid API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid API key"
  *       409:
  *         description: Database already contains data
  *         content:
@@ -132,8 +185,15 @@ router.delete("/reset-database", async (req, res, next) => {
  *                   example: "Detailed error information"
  */
 router.post("/seed-database", async (req, res, next) => {
-  try {
-    logger.info("Database seeding requested via debug endpoint");
+   try {
+     if (!req.body.apikey || req.body.apikey !== process.env.DANGER_API_KEY) {
+       return res.status(401).json({
+         success: false,
+         message: "Invalid API key"
+       });
+     }
+
+     logger.info("Database seeding requested via debug endpoint");
 
     // Seed the database
     await seedDatabase();

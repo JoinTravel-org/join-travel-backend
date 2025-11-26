@@ -28,5 +28,25 @@
     "email": "silvia@arnet.com.ar",
     "password": "5f0wTx4hFCm0KotoYeey",
     "isEmailConfirmed": true
+  },
+  {
+    "email": "maria@gmail.com",
+    "password": "Xp9kL2mNvB3qRtYu8Ew1",
+    "isEmailConfirmed": true
+  },
+  {
+    "email": "carlos@hotmail.com",
+    "password": "Zq5wE8rTy2Ui9Op3As7D",
+    "isEmailConfirmed": true
+  },
+  {
+    "email": "laura@yahoo.com",
+    "password": "Mn4bV7cXz1Lk6Jh9Gf2D",
+    "isEmailConfirmed": true
+  },
+  {
+    "email": "diego@outlook.com",
+    "password": "Qs3wE6rTy9Ui2Op5As8D",
+    "isEmailConfirmed": true
   }
 ]
