@@ -69,6 +69,24 @@ class RateLimitService {
 
       // Check daily limit
       if (updatedRateLimit.dailyCount >= RateLimitService.DAILY_LIMIT) {
+        // Calculate when the current daily window expires
+        const windowExpiry = new Date(updatedRateLimit.dailyWindowStart.getTime() + RateLimitService.WINDOW_SIZE_DAILY * 60 * 1000);
+
+        await userRateLimitRepository.update(userId, {
+          blockedUntil: windowExpiry,
+        });
+
+        const remainingTime = Math.ceil((windowExpiry - now) / 1000);
+        return {
+          canSend: false,
+          reason: "daily_limit",
+          blockedUntil: windowExpiry,
+          remainingSeconds: remainingTime,
+          message: `Has alcanzado el límite diario de ${RateLimitService.DAILY_LIMIT} mensajes. Espera ${remainingTime} segundos antes de continuar.`,
+        };
+      }
+      // Check daily limit
+      if (updatedRateLimit.dailyCount >= RateLimitService.DAILY_LIMIT) {
         // Calculate next day reset (midnight UTC-3)
         const nextDay = new Date(now);
         nextDay.setDate(nextDay.getDate() + 1);
