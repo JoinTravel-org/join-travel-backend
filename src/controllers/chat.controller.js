@@ -1,4 +1,5 @@
 import chatService from "../services/chat.service.js";
+import rateLimitService from "../services/rateLimit.service.js";
 import logger from "../config/logger.js";
 
 /**
@@ -28,12 +29,30 @@ export const sendMessage = async (req, res, next) => {
       });
     }
 
+    // Check rate limits before processing message
+    const rateLimitCheck = await rateLimitService.checkLimits(userId);
+    if (!rateLimitCheck.canSend) {
+      logger.warn(`Rate limit exceeded for user ${userId}: ${rateLimitCheck.reason}`);
+      return res.status(429).json({
+        success: false,
+        message: rateLimitCheck.message,
+        rateLimit: {
+          reason: rateLimitCheck.reason,
+          blockedUntil: rateLimitCheck.blockedUntil,
+          remainingSeconds: rateLimitCheck.remainingSeconds,
+        },
+      });
+    }
+
     const result = await chatService.sendMessage({
       userId,
       message: message.trim(),
       conversationId,
       timestamp,
     });
+
+    // Record the message in rate limiting
+    await rateLimitService.recordMessage(userId);
 
     logger.info(`Send message endpoint completed successfully for user: ${userId}`);
     res.status(200).json({
