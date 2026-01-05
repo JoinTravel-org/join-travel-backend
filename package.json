@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.18.3",
+  "packageManager": "pnpm@10.27.0",
   "dependencies": {
     "@langchain/core": "^1.0.5",
     "@langchain/openai": "^1.1.1",
